@@ -38,6 +38,9 @@ services:
     ports:
       - "5432:5432"
     volumes:
+      - ./db:/app/db # Helpful for sql exporting
+      # - ./db:/docker-entrypoint-initdb.d/ # Automatically run this SQL file on initialization
+      - ./db/hall_management.sql:/docker-entrypoint-initdb.d/init.sql # Automatically run this SQL file on initialization
       - pgdata:/var/lib/postgresql/data
     networks:
       - app-network
