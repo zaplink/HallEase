@@ -1,4 +1,4 @@
-# version: "3.8"
+version: "3.8"
 
 services:
   backend:
@@ -13,6 +13,9 @@ services:
       - postgres
     networks:
       - app-network
+    volumes:
+      - ./backend:/app/backend # Map local backend directory to container
+      - /app/backend/node_modules # Persist container node_modules
 
   frontend:
     build:
@@ -22,6 +25,9 @@ services:
       - "5173:5173"
     networks:
       - app-network
+    volumes:
+      - ./frontend:/app/frontend # Map local frontend directory to container
+      - /app/frontend/node_modules # Persist container node_modules
 
   postgres:
     image: postgres:17

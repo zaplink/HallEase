@@ -1,4 +1,4 @@
-# Ignore node_modules for both backend and frontend
+<!-- # Ignore node_modules for both backend and frontend
 **/node_modules
 
 # Ignore environment files for both backend and frontend
@@ -20,4 +20,4 @@
 
 
 # Ignore Dockerfiles (not needed in the container)
-**/Dockerfile
+**/Dockerfile -->
