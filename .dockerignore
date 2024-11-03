@@ -1,0 +1,23 @@
+<!-- # Ignore node_modules for both backend and frontend
+**/node_modules
+
+# Ignore environment files for both backend and frontend
+**/.env
+
+# Ignore tests in both directories
+**/tests/
+
+# Ignore logs
+**/*.log
+
+# Ignore IDE-specific files
+**/.vscode/
+**/.idea/
+**/*.swp
+
+# Ignore documentation if not needed
+**/README.md
+
+
+# Ignore Dockerfiles (not needed in the container)
+**/Dockerfile -->
