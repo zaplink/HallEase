@@ -97,6 +97,8 @@ COPY public.halls (id, name, capacity, location, available, created_at) FROM std
 --
 
 COPY public.users (u_id, email, pwd) FROM stdin;
+1	adminfct@kln.ac.lk	123
+2	userfct@kln.ac.lk	123
 \.
 
 
