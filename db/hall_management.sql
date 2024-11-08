@@ -60,6 +60,19 @@ ALTER SEQUENCE public.halls_id_seq OWNED BY public.halls.id;
 
 
 --
+-- Name: users; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.users (
+    u_id integer NOT NULL,
+    email character varying(50) NOT NULL,
+    pwd character varying(30) NOT NULL
+);
+
+
+ALTER TABLE public.users OWNER TO postgres;
+
+--
 -- Name: halls id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -80,6 +93,14 @@ COPY public.halls (id, name, capacity, location, available, created_at) FROM std
 
 
 --
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.users (u_id, email, pwd) FROM stdin;
+\.
+
+
+--
 -- Name: halls_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -92,6 +113,14 @@ SELECT pg_catalog.setval('public.halls_id_seq', 5, true);
 
 ALTER TABLE ONLY public.halls
     ADD CONSTRAINT halls_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users new_users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT new_users_pkey PRIMARY KEY (u_id);
 
 
 --
