@@ -1,6 +1,6 @@
 // src/App.jsx
 import { Routes, Route } from "react-router-dom";
-import Home from "./Home";
+import Home from "./pages/Home";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
