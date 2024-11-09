@@ -1,6 +1,6 @@
 import React from "react";
 import SidebarLayout from "@/Layouts/SidebarLayout";
-import { BotInput } from "@/components/bot-input";
+import { BotInput } from "@/components/custom/bot-input";
 import "../assets/css/dashboard.css";
 
 const DashboardPage = () => {
