@@ -1,14 +1,13 @@
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
+import React from "react";
+import SidebarLayout from "@/Layouts/SidebarLayout";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+const DashboardPage = () => {
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <main>
-        <SidebarTrigger className="m-4" />
-        {children}
-      </main>
-    </SidebarProvider>
+    <SidebarLayout>
+      <h1 className="text-3xl font-bold">Dashboard</h1>
+      <p>This is your Dashboard.</p>
+    </SidebarLayout>
   );
-}
+};
+
+export default DashboardPage;
