@@ -9,9 +9,9 @@ export default function SidebarLayout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main>
-        <SidebarTrigger className="m-4" />
-        {children}
+      <main className="m-4">
+        <SidebarTrigger />
+        <div className="mt-4">{children}</div>
       </main>
     </SidebarProvider>
   );
