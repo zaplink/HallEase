@@ -1,5 +1,6 @@
 import React from "react";
 import SidebarLayout from "@/Layouts/SidebarLayout";
+import { Input } from "@/components/ui/input";
 
 const HomePage = () => {
   return (
