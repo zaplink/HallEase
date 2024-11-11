@@ -66,7 +66,8 @@ ALTER SEQUENCE public.halls_id_seq OWNED BY public.halls.id;
 CREATE TABLE public.users (
     u_id integer NOT NULL,
     email character varying(50) NOT NULL,
-    pwd character varying(30) NOT NULL
+    pwd character varying(30) NOT NULL,
+    type character varying(20) NOT NULL
 );
 
 
@@ -96,9 +97,9 @@ COPY public.halls (id, name, capacity, location, available, created_at) FROM std
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.users (u_id, email, pwd) FROM stdin;
-1	adminfct@kln.ac.lk	123
-2	userfct@kln.ac.lk	123
+COPY public.users (u_id, email, pwd, type) FROM stdin;
+1	adminfct@kln.ac.lk	123	admin
+2	userfct@kln.ac.lk	123	user
 \.
 
 
