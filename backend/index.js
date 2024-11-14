@@ -39,7 +39,7 @@ app.post("/usr", async (req, res) => {
       // send json data as a response
       res.json({ success: true, userType });
     } else {
-      res.status(401).json({ success: false, message: "Invalid Client" });
+      res.status(401).json({ success: false, message: "Invalid User" });
     }
   } catch (error) {
     console.error("Error receiving data:", error.message);
