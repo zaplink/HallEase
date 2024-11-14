@@ -6,7 +6,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      ##- "3000:3002"
+      - "3002:3002"
     environment:
       - DATABASE_URL=postgresql://postgres:password@postgres:5432/hall_management
     depends_on:
@@ -22,7 +23,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "5173:5173"
+      ##- "5173:5175"
+      - "5175:5175"
     networks:
       - app-network
     volumes:
@@ -36,7 +38,8 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: hall_management
     ports:
-      - "5432:5432"
+      ##- "5432:5432"
+      - "5434:5432"
     volumes:
       - ./db:/app/db # Helpful for sql exporting
       # - ./db:/docker-entrypoint-initdb.d/ # Automatically run this SQL file on initialization
