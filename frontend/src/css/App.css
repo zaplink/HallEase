@@ -1,0 +1,9 @@
+.form-container {
+  width: 25rem;
+  border: 1px solid black;
+  padding: 10% 5%;
+}
+
+.form-container h1 {
+  margin-bottom: 5rem;
+}
