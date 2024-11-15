@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
+const backendPort = 3002;
+
 // Define the form schema with new fields for email and password
 const formSchema = z.object({
   // username: z
@@ -44,7 +46,7 @@ export default function LoginForm() {
     // Add any further submission logic here
     try {
       // waiting for incomming & outgoing responses
-      const response = await fetch("http://localhost:3000/usr", {
+      const response = await fetch(`http://localhost:${backendPort}/usr`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

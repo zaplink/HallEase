@@ -18,8 +18,7 @@ COPY . .
 # RUN npm run build 
 
 # Expose the port the frontend will run on
-##EXPOSE 5173
-EXPOSE 5175
+EXPOSE 5173
 
 # Start the Vite development server
 CMD ["npm", "run", "dev", "--", "--host"]

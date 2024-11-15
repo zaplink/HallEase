@@ -1,11 +1,14 @@
+// ports
+const backendPort = 3002;
+const frontendPort = 5173;
+
 const express = require("express");
 const cors = require("cors");
 const pool = require("./db");
 
 const app = express();
-app.use(cors({ origin: "http://localhost:5173" })); // Enable CORS for React app's origin
+app.use(cors({ origin: `http://localhost:${frontendPort}` })); // Enable CORS for React app's origin
 app.use(express.json()); // Middleware that parses data as JSON objects
-const port = 3000;
 
 // Route to retrieve all users
 app.get("/", async (req, res) => {
@@ -62,6 +65,6 @@ app.post("/usr", async (req, res) => {
 //   }
 // });
 
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+app.listen(backendPort, () => {
+  console.log(`Server is running on http://localhost:${backendPort}`);
 });
