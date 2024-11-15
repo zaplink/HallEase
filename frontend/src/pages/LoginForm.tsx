@@ -16,13 +16,18 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
+const backendPort = 3002;
+
 // Define the form schema with new fields for email and password
 const formSchema = z.object({
   // username: z
   //   .string()
   //   .min(2, { message: "Username must be at least 2 characters." })
   //   .max(20, { message: "Username must be at most 20 characters." }),
-  email: z.string().email({ message: "Please enter a valid email address." }),
+  email: z
+    .string()
+    .email({ message: "Please enter a valid email address." })
+    .transform((value) => value.trim()), // Trim whitespace,
   password: z.string(),
   // .min(8, { message: "Password must be at least 8 characters long." }),
 });
@@ -44,7 +49,7 @@ export default function LoginForm() {
     // Add any further submission logic here
     try {
       // waiting for incomming & outgoing responses
-      const response = await fetch("http://localhost:3000/usr", {
+      const response = await fetch(`http://localhost:${backendPort}/usr`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
