@@ -1,0 +1,45 @@
+name: CI Workflow
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  lint_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          npm install -g pnpm
+          pnpm install
+
+      # Run linting
+      - name: Run ESLint
+        run: pnpm lint
+
+      # Run TypeScript type checking
+      - name: Run TypeScript type-checking
+        run: pnpm type-check
+
+      # Build project if merging to main or production
+      - name: Run Build (Only for main or production branches)
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging'  # Example for main and staging
+        run: pnpm build
