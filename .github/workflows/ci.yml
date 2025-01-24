@@ -19,13 +19,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Set up Node.js environment
+      # Set up Node.js environment with version 18 or higher
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16'
+          node-version: '18'
 
-      # Install dependencies
+      # Install pnpm globally and dependencies
       - name: Install dependencies
         run: |
           npm install -g pnpm
@@ -40,6 +40,6 @@ jobs:
         run: pnpm type-check
 
       # Build project if merging to main or production
-      - name: Run Build (Only for main or production branches)
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging'  # Example for main and staging
+      - name: Run Build (Only for main or dev branches)
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' 
         run: pnpm build
