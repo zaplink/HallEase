@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useState } from 'react';
+import React, { useState } from 'react';
 import '../../app/style.css';
 import './button';
 import { Combobox } from '../combobox';
@@ -13,6 +13,7 @@ import { Button } from './button';
 function Bookingform() {
   // States to store selected values
   const [hall, setHall] = useState('');
+
   const [eventType, setEventType] = useState('');
   const [organizedBy, setOrganizedBy] = useState('');
   const [description, setDescription] = useState('');
@@ -23,7 +24,11 @@ function Bookingform() {
   const [phone, setPhone] = useState('');
   const [specialRequest, setSpecialRequest] = useState('');
   
-  
+  // Test
+  // const [date, setDate] = useState('');
+  // const [timeFrom, setTimeFrom] = useState('');
+  // const [timeTo, setTimeTo] = useState('');
+  // const [reason, setReason] = useState('');
 
   // Options for each field
   const eventtype = [
