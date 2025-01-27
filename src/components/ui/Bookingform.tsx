@@ -1,8 +1,12 @@
 "use client";
 
 
-import '../../app/style.css';
+
+
 import React, { useState } from 'react';
+
+import '../../app/style.css';
+
 
 import { Combobox } from '../combobox';
 import { DatePickerDemo } from './DatePicker';
@@ -13,6 +17,7 @@ import { Button } from './button';
 
 function Bookingform() {
   // States to store selected values
+
   const [eventType, setEventType] = useState('');
 const[hall,setHall] = useState('');
   const [organizedBy, setOrganizedBy] = useState('');
@@ -26,6 +31,11 @@ const [specialRequest, setSpecialRequest] = useState('');
 
   
   
+
+  
+  
+  // const [reason, setReason] = useState('');
+
 
   // Options for each field
   const eventtype = [
