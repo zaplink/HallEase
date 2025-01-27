@@ -16,10 +16,12 @@ import { Button } from './button';
 
 
 function Bookingform() {
-  // States to store selected values
+  
+  const [hall, setHall] = useState('');
+
 
   const [eventType, setEventType] = useState('');
-const[hall,setHall] = useState('');
+
   const [organizedBy, setOrganizedBy] = useState('');
 const [description, setDescription] = useState('');
 const [attendance, setAttendance] = useState('');
@@ -30,14 +32,8 @@ const [phone, setPhone] = useState('');
 const [specialRequest, setSpecialRequest] = useState('');
 
   
-  
 
   
-  
-  // const [reason, setReason] = useState('');
-
-
-  // Options for each field
   const eventtype = [
     { value: 'seminar', label: 'Seminar' },
     { value: 'workshop', label: 'work shop' },
