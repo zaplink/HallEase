@@ -58,7 +58,7 @@ export default function LoginForm() {
 
   // Return the form JSX
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    // <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <Card className="w-full max-w-md shadow-md">
 
         <CardHeader>
@@ -142,16 +142,8 @@ export default function LoginForm() {
         </CardFooter>
 
       </Card>
+
     </div>
-
-
-
-
-
-
-
-
-
 
   );
 }
