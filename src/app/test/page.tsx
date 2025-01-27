@@ -13,7 +13,7 @@ import { Info } from "lucide-react";
 export default function Test() {
     return (
         // Sidebar layout
-        <SidebarLayout side="left">
+        <SidebarLayout>
             <div className="mb-6 flex flex-row">
                 {/* Search halls */}
                 <Input placeholder="Search Halls" />

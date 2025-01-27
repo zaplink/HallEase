@@ -57,11 +57,10 @@ const menuItems = [
 ];
 
 type SidebarLayoutProps = {
-    side: "left" | "right";
     children: React.ReactNode;
 };
 
-export default function SidebarLayout({ side, children }: SidebarLayoutProps) {
+export default function SidebarLayout({ children }: SidebarLayoutProps) {
     // Current path of URL
     const currentPath = usePathname();
 
@@ -76,7 +75,7 @@ export default function SidebarLayout({ side, children }: SidebarLayoutProps) {
         // Sidebar placeholder
         <SidebarProvider>
             {/* Sideabar */}
-            <Sidebar side={side}>
+            <Sidebar side="left">
                 <SidebarHeader>
                     <SidebarMenu>
                         <SidebarMenuItem>
