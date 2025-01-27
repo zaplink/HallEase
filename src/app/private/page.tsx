@@ -1,14 +1,19 @@
-import { redirect } from 'next/navigation'
+import { redirect } from "next/navigation";
 
-import { createClient } from '@/lib/supabaseServer'
+import { createClient } from "@/lib/supabaseServer";
 
 export default async function PrivatePage() {
-  const supabase = await createClient()
+  const supabase = await createClient();
 
-  const { data, error } = await supabase.auth.getUser()
+  const { data, error } = await supabase.auth.getUser();
   if (error || !data?.user) {
-    redirect('/login')
+    redirect("/login");
   }
 
-  return <p>Hello {data.user.email}</p>
-} 
+  return (
+    <>
+      <h1>Customize dashbord here..</h1>
+      <p>Hello {data.user.email}</p>
+    </>
+  );
+}

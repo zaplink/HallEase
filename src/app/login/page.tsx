@@ -18,13 +18,13 @@ import { Input } from "@/components/ui/input";
 
 // for card component
 import {
-    Card,
-    CardContent,
-    //CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-  } from "@/components/ui/card";
+  Card,
+  CardContent,
+  //CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 import { Label } from "@/components/ui/label";
 import { BsFillQuestionCircleFill } from "react-icons/bs";
@@ -39,7 +39,6 @@ const formSchema = z.object({
   password: z.string(),
   // .min(8, { message: "Password must be at least 8 characters long." }),
 });
-
 
 export default function LoginForm() {
   // Initialize the form with react-hook-form and zod
@@ -59,91 +58,81 @@ export default function LoginForm() {
   // Return the form JSX
   return (
     // <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <Card className="w-full max-w-md shadow-md">
+    <Card className="w-full max-w-md shadow-md">
+      <CardHeader>
+        <CardTitle className="text-center">HallEase Login</CardTitle>
+      </CardHeader>
 
-        <CardHeader>
-          <CardTitle className="text-center">HallEase Login</CardTitle>
-        </CardHeader>
-
-        <CardContent>
-
+      <CardContent>
         <Form {...form}>
-        <form 
-        // onSubmit={form.handleSubmit(onSubmit)} 
-        className="space-y-8">
+          <form
+            // onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-8"
+          >
+            {/* Email Field */}
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="Enter your email"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* Email Field */}
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    placeholder="Enter your email"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            {/* Password Field */}
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Enter your password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* Password Field */}
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input
-                    type="password"
-                    placeholder="Enter your password"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-        <Button
-            type="submit"
-            className="w-full mt-10 bg-black text-white hover:bg-gray-800 
+            <Button
+              type="submit"
+              className="w-full mt-10 bg-black text-white hover:bg-gray-800 
             hover:shadow-lg hover:scale-105 transition-all duration-300 flex 
             items-center justify-center space-x-2"
-            formAction={login}>
-        Login
-        </Button>
-        
-        </form>
-      </Form>
+              formAction={login}
+            >
+              Login
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
 
+      <CardFooter className="flex justify-between text-sm text-gray-500">
+        <a href="#" className="hover:underline">
+          Public reservations
+        </a>
 
-        </CardContent>
+        <div className="flex items-center space-x-2">
+          <BsFillQuestionCircleFill />
 
-        <CardFooter className="flex justify-between text-sm text-gray-500">
-     
-            <a href="#" className="hover:underline">
-              Create an account
-            </a>
-   
-          <div className="flex items-center space-x-2">
-            <BsFillQuestionCircleFill />
-
-            <a href="#" className="hover:underline">
+          <a href="#" className="hover:underline">
             Lost Password?
-            </a>
-
-          </div>
-        </CardFooter>
-
-      </Card>
-
-    </div>
-
+          </a>
+        </div>
+      </CardFooter>
+    </Card>
   );
 }
