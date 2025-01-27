@@ -1,12 +1,10 @@
-// lib/supabaseClient.ts
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { createClient } from '@supabase/supabase-js';
-
 // For client-side authenticated actions
-export const supabase = createClientComponentClient();
+import { createBrowserClient } from '@supabase/ssr'
 
-// For server-side admin actions (using service role key)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.NEXT_PUBLIC_SERVICE_ROLE_KEY!;
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
 
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
