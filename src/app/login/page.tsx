@@ -13,7 +13,7 @@ import { BsFillQuestionCircleFill } from "react-icons/bs";
 
 export default function Login() {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    // <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <Card className="w-full max-w-md shadow-md">
         <CardHeader>
           <CardTitle className="text-center">HallEase Login</CardTitle>
@@ -48,6 +48,6 @@ export default function Login() {
           </div>
         </CardFooter>
       </Card>
-    </div>
+    // </div>
   );
 }
