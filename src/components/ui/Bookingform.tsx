@@ -1,8 +1,9 @@
 "use client";
 
-import React, { use, useState } from 'react';
+
 import '../../app/style.css';
-import './button';
+import React, { useState } from 'react';
+
 import { Combobox } from '../combobox';
 import { DatePickerDemo } from './DatePicker';
 import { Button } from './button';
@@ -12,16 +13,17 @@ import { Button } from './button';
 
 function Bookingform() {
   // States to store selected values
-  const [hall, setHall] = useState('');
   const [eventType, setEventType] = useState('');
+const[hall,setHall] = useState('');
   const [organizedBy, setOrganizedBy] = useState('');
-  const [description, setDescription] = useState('');
-  const [attendance, setAttendance] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [specialRequest, setSpecialRequest] = useState('');
+const [description, setDescription] = useState('');
+const [attendance, setAttendance] = useState('');
+const [startTime, setStartTime] = useState('');
+const [endTime, setEndTime] = useState('');
+const [email, setEmail] = useState('');
+const [phone, setPhone] = useState('');
+const [specialRequest, setSpecialRequest] = useState('');
+
   
   
 
@@ -42,6 +44,7 @@ function Bookingform() {
   ];
 
   const clearForm = () => {
+    
     setHall('');
     setEventType('');
     setOrganizedBy('');
@@ -82,19 +85,22 @@ function Bookingform() {
 
         <div className="field-container">
           <label className="bookinglabel">Organized By</label>
-          <input type="text" placeholder= "Innovative Society"className="bookinginput" required/>
+          <input type="text" placeholder= "Innovative Society"className="bookinginput"  value={organizedBy}
+    onChange={(e) => setOrganizedBy(e.target.value)} required/>
           
         </div>
 
         <div className="field-container">
           <label className="bookinglabel">Event Description</label>
-          <input type="text" className='bookinginput2' placeholder='An inspiring event that brings creative minds together.'/>
+          <input type="text" className='bookinginput2' placeholder='An inspiring event that brings creative minds together.' value={description}
+    onChange={(e) => setDescription(e.target.value)}/>
         </div>
 
         
 <div className="field-container">
           <label className="bookinglabel">Number of Attendance</label>
-          <input type="text" placeholder="100" className="bookinginput" required/>
+          <input type="text" placeholder="100" className="bookinginput"value={attendance}
+    onChange={(e) => setAttendance(e.target.value)} required/>
         </div>
 
 
@@ -105,12 +111,14 @@ function Bookingform() {
 
         <div className="field-container">
           <label className="bookinglabel">Start Time</label>
-          <input type="text" placeholder="10.30 am" className="bookinginput" required />
+          <input type="text" placeholder="10.30 am" className="bookinginput"   value={startTime}
+    onChange={(e) => setStartTime(e.target.value)} required />
         </div>
 
         <div className="field-container">
           <label className="bookinglabel">End Time</label>
-          <input type="text" placeholder="1.00pm" className="bookinginput" required/>
+          <input type="text" placeholder="1.00pm" className="bookinginput"   value={endTime}
+    onChange={(e) => setEndTime(e.target.value)}  required/>
         </div>
 
         <div className="field-container">
@@ -125,17 +133,20 @@ function Bookingform() {
 
         <div className="field-container">
           <label className="bookinglabel">Contact Email</label>
-          <input type="email" placeholder="example@domain.com" className="bookinginput" required/>
+          <input type="email" placeholder="example@domain.com" className="bookinginput"  value={email}
+    onChange={(e) => setEmail(e.target.value)}  required/>
         </div>
 
         <div className="field-container">
           <label className="bookinglabel">Contact Phone</label>
-          <input type="phone" placeholder="(123) 456-7890" className="bookinginput" required/>
+          <input type="phone" placeholder="(123) 456-7890" className="bookinginput"  value={phone}
+    onChange={(e) => setPhone(e.target.value)} required/>
         </div>
 
         <div className="field-container">
           <label className="bookinglabel">Special Request</label>
-          <input type="text" className='bookinginput2' placeholder='Please arrange extra chairs.'/>
+          <input type="text" className='bookinginput2' placeholder='Please arrange extra chairs.'  value={specialRequest}
+    onChange={(e) => setSpecialRequest(e.target.value)}/>
         </div>
        
 <div  className="field-container">
