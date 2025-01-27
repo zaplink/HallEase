@@ -18,11 +18,12 @@ import {
     TableCell
 } from "@/components/ui/table";
 import { Info } from "lucide-react";
+import { Input } from "@/components/ui/input"
 
 export default function Test() {
     return(
         <SidebarProvider>
-            <AppSidebar/>
+            <AppSidebar side="left"/>
             <div className="w-full">
                 <div className="w-full py-4 px-2 flex flex-row items-center">
                     <SidebarTrigger />
@@ -39,7 +40,11 @@ export default function Test() {
                         </BreadcrumbList>
                     </Breadcrumb>
                 </div>
-                <div className="p-4">
+                <div className="px-2 flex flex-col h-full">
+                    <div className="mb-6 flex flex-row">
+                        <Input placeholder="Search Halls" />
+                    </div>
+
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -64,7 +69,9 @@ export default function Test() {
                             </TableRow>
                         </TableBody>
                     </Table>
+
                 </div>
+
             </div>
         </SidebarProvider>
     );
