@@ -29,15 +29,12 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.1.1
         version: 1.1.1(@types/react@18.3.18)(react@18.3.1)
-      '@supabase/ssr':
-        specifier: ^0.5.2
-        version: 0.5.2(@supabase/supabase-js@2.48.1)
-      '@supabase/supabase-js':
-        specifier: ^2.48.1
-        version: 2.48.1
       '@radix-ui/react-tooltip':
         specifier: ^1.1.7
         version: 1.1.7(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@supabase/ssr':
+        specifier: ^0.5.2
+        version: 0.5.2(@supabase/supabase-js@2.48.1)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -2532,6 +2529,10 @@ packages:
     resolution: {integrity: sha512-si7QWI6zUMq56bESFvagtmzMdGOtoxfR+Sez11Mobfc7tm+VkUckk9bW2UeffTGVUbOksxmSw0AA2gs8g71NCQ==}
     engines: {node: '>=12'}
 
+  wrap-ansi@9.0.0:
+    resolution: {integrity: sha512-G8ura3S+3Z2G+mkgNRq8dqaFZAuxfsxpBB8OCTGRTCtp+l/v9nbFNmCUP1BZMts3G1142MsZfn6eeUKrr4PD1Q==}
+    engines: {node: '>=18'}
+
   ws@8.18.0:
     resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
     engines: {node: '>=10.0.0'}
@@ -2543,10 +2544,6 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
-        
-  wrap-ansi@9.0.0:
-    resolution: {integrity: sha512-G8ura3S+3Z2G+mkgNRq8dqaFZAuxfsxpBB8OCTGRTCtp+l/v9nbFNmCUP1BZMts3G1142MsZfn6eeUKrr4PD1Q==}
-    engines: {node: '>=18'}
 
   yaml@2.7.0:
     resolution: {integrity: sha512-+hSoy/QHluxmC9kCIJyL/uyFmLmc+e5CFR5Wa+bpIhIj85LVb9ZH2nVnqrHoSvKogwODv0ClqZkmiSSaIH5LTA==}
@@ -5219,13 +5216,13 @@ snapshots:
       string-width: 5.1.2
       strip-ansi: 7.1.0
 
-  ws@8.18.0: {}
-  
   wrap-ansi@9.0.0:
     dependencies:
       ansi-styles: 6.2.1
       string-width: 7.2.0
       strip-ansi: 7.1.0
+
+  ws@8.18.0: {}
 
   yaml@2.7.0: {}
 
