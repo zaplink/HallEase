@@ -1,19 +1,19 @@
 .container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: white;
-  padding: 20px;
-  width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 100vh;
+	background-color: white;
+	padding: 20px;
+	width: 100%;
 }
 
 .bookingform {
   border: 2px solid rgb(7, 7, 7);
   border-radius: 10px;
-  padding: 30px 40px;
+  padding: 5px 40px;
   width: 700px;
- height: 700px;
+ height: 1000px;
   background-color: #ffffff;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -23,50 +23,60 @@
   font-size: 28px;
   font-weight: 700;
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 25px;
+ 
 }
 
 .field-container {
   display: flex; /* Flexbox to align label and input on the same line */
   align-items: center; /* Vertically align label and input */
-  margin-bottom: 40px; /* Space between fields */
+  margin-bottom: 20px; /* Space between fields */
 }
 
 .bookinglabel {
-  font-weight: 600;
-  font-size: 16px;
+  font-weight: 400;
+  font-size: 15px;
   margin-right: 20px; 
-  width: 90px; /* Fixed width for labels to align fields */
-  text-align: right; /* Right-align label text */
+  width: 120px; /* Fixed width for labels to align fields */
+  text-align: left; /* Right-align label text */
 }
 
 .bookinginput {
-  flex: 1; 
-  width: 300px;
-  height: 36px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
- 
-  font-size: 14px;
-  box-sizing: border-box;
-  margin-left: 0px;
+	flex: 1;
+	width: 300px;
+	height: 36px;
+	border-radius: 4px;
+	border: 1px solid #ccc;
+
+	font-size: 14px;
+	box-sizing: border-box;
+	margin-left: 0px;
 }
 
 .bookinginput:focus {
-  border-color: rgb(75, 156, 103);
-  outline: none;
-  box-shadow: 0 0 4px rgba(75, 156, 103, 0.4);
+	border-color: rgb(75, 156, 103);
+	outline: none;
+	box-shadow: 0 0 4px rgba(75, 156, 103, 0.4);
 }
 .bookinginput2 {
-  flex: 1; 
-  width: 300px;
-  height: 70px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  box-sizing: border-box;
-  margin-left: 0px;
+	flex: 1;
+	width: 300px;
+	height: 70px;
+	border-radius: 4px;
+	border: 1px solid #ccc;
+	font-size: 14px;
+	box-sizing: border-box;
+	margin-left: 0px;
 }
+.button {
+	background-color: black;
+	color: white;
+	border-radius: 5px;
+	margin-left: 43%;
+	height: 45px;
+	width: 90px;
+}
+
 .button{
   background-color: black;
   color: white;
@@ -76,3 +86,19 @@
   width: 90px;
 
 }
+.para{
+ margin-bottom: 35px ;
+ margin-left: 45px;
+}
+.clearbut{
+margin-left: 160px;
+width: 150px;
+margin-top: 40px;
+}
+
+.submitbut{
+margin-left: 90px;
+width: 150px;
+margin-top: 40px;
+}
+
