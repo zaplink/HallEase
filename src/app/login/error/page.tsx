@@ -1,5 +1,10 @@
-'use client'
+"use client";
 
 export default function ErrorPage() {
-  return <p>Sorry, something went wrong</p>
+  return (
+    <>
+      <h1>Provide correct credentials</h1>
+      <p>Something went wrong, while login</p>
+    </>
+  );
 }

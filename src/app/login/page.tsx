@@ -60,7 +60,7 @@ export default function LoginForm() {
     // <div className="flex items-center justify-center min-h-screen bg-gray-50">
     <Card className="w-full max-w-md shadow-md">
       <CardHeader>
-        <CardTitle className="text-center">HallEase Login</CardTitle>
+        <CardTitle className="text-center">HallEase FCT</CardTitle>
       </CardHeader>
 
       <CardContent>
