@@ -1,4 +1,5 @@
 'use client';
+// Client side expressions are written in this page: baseUrl
 
 import {
 	LayoutDashboard,
@@ -41,7 +42,7 @@ import React from 'react';
 const menuItems = [
 	{
 		title: 'Dashboard',
-		url: '/',
+		url: '/dashboard',
 		icon: LayoutDashboard,
 	},
 	{
@@ -71,6 +72,10 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 		setIsCalendarVisible((prevState) => !prevState); // Toggle the calendar visibility
 	};
 
+	// Use only in client component
+	const baseUrl = window.location.origin;
+	// console.log(baseUrl);
+
 	return (
 		// Sidebar placeholder
 		<SidebarProvider>
@@ -85,7 +90,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 									<AvatarFallback>JD</AvatarFallback>
 								</Avatar>
 								<a
-									href={'http://localhost:3000/profile'}
+									href={baseUrl + '/profile'}
 									className='flex flex-row justify-left'
 								>
 									<span className='font-bold'>John Doe</span>
@@ -108,7 +113,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 										isActive={currentPath == '/test'}
 									>
 										<a
-											href={'http://localhost:3000/test'}
+											href={baseUrl + '/test'}
 											className='flex flex-row justify-left'
 										>
 											<TestTubeDiagonal
@@ -134,10 +139,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 											isActive={currentPath == item.url}
 										>
 											<a
-												href={
-													'http://localhost:3000' +
-													item.url
-												}
+												href={baseUrl + item.url}
 												className='flex flex-row justify-left'
 											>
 												<item.icon
@@ -161,7 +163,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
 								<a
-									href={'http://localhost:3000/login'}
+									href={baseUrl + '/login'}
 									className='flex flex-row justify-left'
 								>
 									<LogOut
