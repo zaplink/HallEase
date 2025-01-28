@@ -1,42 +1,69 @@
 "use client";
 
+
+
+
 import React, { useState } from 'react';
+
 import '../../app/style.css';
-import './button';
+
+
 import { Combobox } from '../combobox';
+import { DatePickerDemo } from './DatePicker';
+import { Button } from './button';
+
+
 
 
 function Bookingform() {
-  // States to store selected values
+  
   const [hall, setHall] = useState('');
-  const [date, setDate] = useState('');
-  const [timeFrom, setTimeFrom] = useState('');
-  const [timeTo, setTimeTo] = useState('');
-  // const [reason, setReason] = useState('');
 
-  // Options for each field
+
+  const [eventType, setEventType] = useState('');
+
+  const [organizedBy, setOrganizedBy] = useState('');
+const [description, setDescription] = useState('');
+const [attendance, setAttendance] = useState('');
+const [startTime, setStartTime] = useState('');
+const [endTime, setEndTime] = useState('');
+const [email, setEmail] = useState('');
+const [phone, setPhone] = useState('');
+const [specialRequest, setSpecialRequest] = useState('');
+
+  
+
+  
+  const eventtype = [
+    { value: 'seminar', label: 'Seminar' },
+    { value: 'workshop', label: 'work shop' },
+    { value: 'confference', label: 'confference' },
+    { value: 'prizegiving', label: 'prize giving' },
+    { value: 'consert', label: 'consert' },
+  ];
+
   const hallOptions = [
-    { value: 'hall01', label: 'Hall 01' },
-    { value: 'hall02', label: 'Hall 02' },
-    { value: 'hall03', label: 'Hall 03' },
-    { value: 'hall04', label: 'Hall 04' },
-    { value: 'hall05', label: 'Hall 05' },
+    { value: 'ABH1', label: 'ABH1' },
+    { value: 'ABH2', label: 'ABH2' },
+    { value: 'ABH3', label: 'ABH3' },
+    { value: 'ABH4', label: 'ABH4' },
   ];
 
-  const dateOptions = [
-    { value: '2025-01-25', label: '2025-01-25' },
-    { value: '2025-01-26', label: '2025-01-26' },
-    { value: '2025-01-27', label: '2025-01-27' },
-    { value: '2025-01-28', label: '2025-01-28' },
-  ];
-
-  const timeOptions = [
-    { value: '09:00', label: '09:00 AM' },
-    { value: '10:00', label: '10:00 AM' },
-    { value: '11:00', label: '11:00 AM' },
-    { value: '12:00', label: '12:00 PM' },
-    { value: '01:00', label: '01:00 PM' },
-  ];
+  const clearForm = () => {
+    
+    setHall('');
+    setEventType('');
+    setOrganizedBy('');
+    setDescription('');
+    setAttendance('');
+    setStartTime('');
+    setEndTime('');
+    setEmail('');
+    setPhone('');
+    setSpecialRequest('');
+  };
+  
+ 
 
   
 
@@ -44,58 +71,97 @@ function Bookingform() {
     <div className="container">
       <form className="bookingform">
         <h1 className="bookingtitle">Hall Booking Form</h1>
+ <p className='para'>Submit key details for your event to complete your booking efficiently.</p>
+       
 
         <div className="field-container">
           <label className="bookinglabel">Name</label>
-          <input type="text" placeholder="Name" className="bookinginput" />
+          <input type="text" placeholder="Dream Big 2025 Conference" className="bookinginput" required />
         </div>
 
         <div className="field-container">
-          <label className="bookinglabel">Hall</label>
+          <label className="bookinglabel">Event Type</label>
+          <Combobox
+            options={eventtype}
+            placeholder="Choose from Seminar, Workshop, Conference..."
+            value={eventType}
+            onChange={setEventType}
+          />
+        </div>
+
+        <div className="field-container">
+          <label className="bookinglabel">Organized By</label>
+          <input type="text" placeholder= "Innovative Society"className="bookinginput"  value={organizedBy}
+    onChange={(e) => setOrganizedBy(e.target.value)} required/>
+          
+        </div>
+
+        <div className="field-container">
+          <label className="bookinglabel">Event Description</label>
+          <input type="text" className='bookinginput2' placeholder='An inspiring event that brings creative minds together.' value={description}
+    onChange={(e) => setDescription(e.target.value)}/>
+        </div>
+
+        
+<div className="field-container">
+          <label className="bookinglabel">Number of Attendance</label>
+          <input type="text" placeholder="100" className="bookinginput"value={attendance}
+    onChange={(e) => setAttendance(e.target.value)} required/>
+        </div>
+
+
+        <div className="field-container">
+          <label className="bookinglabel">Date</label>
+        <DatePickerDemo />
+        </div>
+
+        <div className="field-container">
+          <label className="bookinglabel">Start Time</label>
+          <input type="text" placeholder="10.30 am" className="bookinginput"   value={startTime}
+    onChange={(e) => setStartTime(e.target.value)} required />
+        </div>
+
+        <div className="field-container">
+          <label className="bookinglabel">End Time</label>
+          <input type="text" placeholder="1.00pm" className="bookinginput"   value={endTime}
+    onChange={(e) => setEndTime(e.target.value)}  required/>
+        </div>
+
+        <div className="field-container">
+          <label className="bookinglabel">Hall/Location</label>
           <Combobox
             options={hallOptions}
-            placeholder="Select Hall"
+            placeholder="AB-LCH-01"
             value={hall}
             onChange={setHall}
           />
         </div>
 
         <div className="field-container">
-          <label className="bookinglabel">Date</label>
-          <Combobox
-            options={dateOptions}
-            placeholder="Select Date"
-            value={date}
-            onChange={setDate}
-          />
+          <label className="bookinglabel">Contact Email</label>
+          <input type="email" placeholder="example@domain.com" className="bookinginput"  value={email}
+    onChange={(e) => setEmail(e.target.value)}  required/>
         </div>
 
         <div className="field-container">
-          <label className="bookinglabel">Time From</label>
-          <Combobox
-            options={timeOptions}
-            placeholder="Select Time"
-            value={timeFrom}
-            onChange={setTimeFrom}
-          />
+          <label className="bookinglabel">Contact Phone</label>
+          <input type="phone" placeholder="(123) 456-7890" className="bookinginput"  value={phone}
+    onChange={(e) => setPhone(e.target.value)} required/>
         </div>
 
         <div className="field-container">
-          <label className="bookinglabel">Time To</label>
-          <Combobox
-            options={timeOptions}
-            placeholder="Select Time"
-            value={timeTo}
-            onChange={setTimeTo}
-          />
+          <label className="bookinglabel">Special Request</label>
+          <input type="text" className='bookinginput2' placeholder='Please arrange extra chairs.'  value={specialRequest}
+    onChange={(e) => setSpecialRequest(e.target.value)}/>
         </div>
+       
+<div  className="field-container">
+<Button className='clearbut'onClick={clearForm} >Clear Form</Button>
+<Button className='submitbut'>Submit Booking</Button>
+</div>
+      
 
-        <div className="field-container">
-          <label className="bookinglabel">Reason</label>
-          <input type="text" className='bookinginput2' placeholder='Enter the reason'/>
-        </div>
-
-        <button className="button">Submit</button>
+       
       </form>
     </div>
   );

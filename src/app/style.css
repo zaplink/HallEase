@@ -9,35 +9,36 @@
 }
 
 .bookingform {
-	border: 2px solid rgb(7, 7, 7);
-	border-radius: 10px;
-	padding: 30px 40px;
-	width: 700px;
-	height: 700px;
-	background-color: #ffffff;
-	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgb(7, 7, 7);
+  border-radius: 10px;
+  padding: 5px 40px;
+  width: 700px;
+ height: 1000px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .bookingtitle {
-	color: rgb(51, 51, 150);
-	font-size: 28px;
-	font-weight: 700;
-	text-align: center;
-	margin-bottom: 40px;
+  color: rgb(51, 51, 150);
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 25px;
+ 
 }
 
 .field-container {
-	display: flex; /* Flexbox to align label and input on the same line */
-	align-items: center; /* Vertically align label and input */
-	margin-bottom: 40px; /* Space between fields */
+  display: flex; /* Flexbox to align label and input on the same line */
+  align-items: center; /* Vertically align label and input */
+  margin-bottom: 20px; /* Space between fields */
 }
 
 .bookinglabel {
-	font-weight: 600;
-	font-size: 16px;
-	margin-right: 20px;
-	width: 90px; /* Fixed width for labels to align fields */
-	text-align: right; /* Right-align label text */
+  font-weight: 400;
+  font-size: 15px;
+  margin-right: 20px; 
+  width: 120px; /* Fixed width for labels to align fields */
+  text-align: left; /* Right-align label text */
 }
 
 .bookinginput {
@@ -75,3 +76,29 @@
 	height: 45px;
 	width: 90px;
 }
+
+.button{
+  background-color: black;
+  color: white;
+  border-radius: 5px;
+  margin-left: 43%;
+  height: 45px;
+  width: 90px;
+
+}
+.para{
+ margin-bottom: 35px ;
+ margin-left: 45px;
+}
+.clearbut{
+margin-left: 160px;
+width: 150px;
+margin-top: 40px;
+}
+
+.submitbut{
+margin-left: 90px;
+width: 150px;
+margin-top: 40px;
+}
+

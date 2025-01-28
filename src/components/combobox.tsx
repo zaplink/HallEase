@@ -17,7 +17,7 @@ export function Combobox({ options, placeholder, value, onChange }: ComboboxProp
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" role="combobox" aria-expanded={open} className="w-[505px] justify-between">
+        <Button variant="outline" role="combobox" aria-expanded={open} className="w-[500px] justify-between ">
           {value ? options.find((option) => option.value === value)?.label : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
