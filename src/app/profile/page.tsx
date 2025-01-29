@@ -9,11 +9,6 @@ export default function Profile() {
 	return (
 		// Sidebar layout
 		<SidebarLayout>
-			<div className='mb-6 flex flex-row'>
-				{/* Search halls */}
-				<Input placeholder='Search Halls' />
-			</div>
-
 			<div
 				style={{
 					justifyContent: 'space-between',
