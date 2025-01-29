@@ -12,7 +12,7 @@ export default async function Dashboard() {
 
 	const { data, error } = await supabase.auth.getUser();
 	if (error || !data?.user) {
-		redirect('/login');
+		redirect('/');
 	}
 	return (
 		<>
@@ -34,7 +34,7 @@ export default async function Dashboard() {
 					</div>
 				</div>
 
-				<div className='flex flex-row mt-20  h-screen'>
+				<div className='flex flex-row mt-20 px-20 h-screen '>
 					<div className='basis-64 '></div>
 					<div className='basis-128 w-full'>
 						<h1>Annual Reservation Report</h1>

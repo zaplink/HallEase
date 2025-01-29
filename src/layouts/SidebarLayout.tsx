@@ -36,6 +36,7 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import React from 'react';
+import { logout } from '@/app/login/logoutAction';
 
 // Sidebar menu items
 const menuItems = [
@@ -160,16 +161,19 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton asChild>
-								<a
-									href={'http://localhost:3000/login'}
-									className='flex flex-row justify-left'
+								{/* logout button  */}
+								<button
+									onClick={async () => {
+										await logout(); // Trigger the logoutAction
+									}}
+									className='flex flex-row justify-left items-center'
 								>
 									<LogOut
 										size={20}
 										className='mr-5 text-red-500'
 									/>
 									<span className='text-red-500'>Logout</span>
-								</a>
+								</button>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					</SidebarMenu>
