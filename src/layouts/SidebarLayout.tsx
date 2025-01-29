@@ -49,6 +49,7 @@ import {
 	CollapsibleTrigger,
 	CollapsibleContent,
 } from '@/components/ui/collapsible';
+import Link from 'next/link';
 
 // Sidebar menu items: Application
 const menuItemsApp = [
@@ -124,18 +125,19 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 				<SidebarHeader className='p-1'>
 					<SidebarMenu>
 						<SidebarMenuItem>
-							<SidebarMenuButton className='h-auto'>
-								<Avatar className='mr-5'>
-									<AvatarImage src='https://github.com/shadcn.png' />
-									<AvatarFallback>JD</AvatarFallback>
-								</Avatar>
-								<a
-									href={baseUrl + '/profile'}
-									className='flex flex-row justify-left'
-								>
+							<Link
+								href={baseUrl + '/profile'}
+								className='flex flex-row justify-left'
+							>
+								<SidebarMenuButton className='h-auto p-0 m-2'>
+									<Avatar className='mr-5'>
+										<AvatarImage src='https://github.com/shadcn.png' />
+										<AvatarFallback>JD</AvatarFallback>
+									</Avatar>
+
 									<span className='font-bold'>John Doe</span>
-								</a>
-							</SidebarMenuButton>
+								</SidebarMenuButton>
+							</Link>
 						</SidebarMenuItem>
 					</SidebarMenu>
 				</SidebarHeader>
