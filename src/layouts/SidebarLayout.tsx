@@ -78,7 +78,7 @@ const menuItemsConf = [
 		subMenu: [
 			{
 				title: 'Roles & Permissions',
-				url: '/abc',
+				url: '/roles-permissions',
 				icon: Shield,
 			},
 		],
@@ -108,17 +108,12 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 	const baseUrl = getBaseUrl();
 	// console.log(baseUrl);
 
-	// State for open/close of submenus
-	const [openSubMenus, setOpenSubMenus] = useState<{
-		[key: string]: boolean;
-	}>({});
+	// State to track the currently open submenu
+	const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
 
 	// Toggle submenu state
 	const toggleSubMenu = (menuTitle: string) => {
-		setOpenSubMenus((prevState) => ({
-			...prevState,
-			[menuTitle]: !prevState[menuTitle], // Toggle the current submenu state
-		}));
+		setOpenSubMenu((prev) => (prev === menuTitle ? null : menuTitle));
 	};
 
 	return (
@@ -185,18 +180,18 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 							<SidebarMenu>
 								{menuItemsConf.map((item) => {
 									if (item.subMenu) {
-										const isOpen = openSubMenus[item.title];
+										const isOpen =
+											openSubMenu === item.title;
 										return (
 											<Collapsible
 												className='group/collapsible'
 												key={item.title}
+												open={isOpen}
 											>
 												<SidebarMenuItem
 													key={item.title}
 												>
 													<CollapsibleTrigger asChild>
-														{/* <SidebarMenuButton /> */}
-														{/* Main menu item */}
 														<SidebarMenuButton
 															isActive={
 																currentPath ==
@@ -206,7 +201,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 																toggleSubMenu(
 																	item.title
 																)
-															}
+															} // Toggle between open/close
 														>
 															<item.icon
 																size={20}
@@ -230,8 +225,6 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 													</CollapsibleTrigger>
 													<CollapsibleContent>
 														<SidebarMenuSub>
-															{/* <SidebarMenuSubItem /> */}
-															{/* Sub menu items */}
 															{item.subMenu.map(
 																(subItem) => (
 																	<SidebarMenuSubItem
