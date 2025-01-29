@@ -16,15 +16,15 @@ export default function Profile() {
 
 			<div
 				style={{
-					justifyContent: 'center',
-					alignItems: 'center',
-					height: '100vh',
+					justifyContent: 'space-between',
+					alignItems: 'flex-start',
+
 					padding: '20px',
-					width: '100vw',
+					width: '80vw',
 					display: 'flex',
 				}}
 			>
-				<div style={{ width: '50vw' }}>
+				<div style={{ width: '50vw', marginRight: '10px' }}>
 					<Table
 						style={{ borderCollapse: 'collapse', fontSize: '15px' }}
 					>
