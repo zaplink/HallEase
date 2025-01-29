@@ -1,13 +1,7 @@
 'use client';
 // Client side expressions are written in this page: baseUrl
 
-import {
-	LayoutDashboard,
-	Building2,
-	Airplay,
-	LogOut,
-	TestTubeDiagonal,
-} from 'lucide-react';
+import { LayoutDashboard, Building2, Airplay, LogOut } from 'lucide-react';
 import {
 	Sidebar,
 	SidebarContent,
@@ -103,31 +97,6 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 				<Separator />
 
 				<SidebarContent>
-					<SidebarGroup>
-						<SidebarGroupLabel>Testing</SidebarGroupLabel>
-						<SidebarGroupContent>
-							<SidebarMenu>
-								<SidebarMenuItem key='test'>
-									<SidebarMenuButton
-										asChild
-										isActive={currentPath == '/test'}
-									>
-										<a
-											href={baseUrl + '/test'}
-											className='flex flex-row justify-left'
-										>
-											<TestTubeDiagonal
-												size={20}
-												className='mr-5'
-											/>
-											<span>Testing Page</span>
-										</a>
-									</SidebarMenuButton>
-								</SidebarMenuItem>
-							</SidebarMenu>
-						</SidebarGroupContent>
-					</SidebarGroup>
-
 					<SidebarGroup>
 						<SidebarGroupLabel>Application</SidebarGroupLabel>
 						<SidebarGroupContent>
