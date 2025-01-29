@@ -329,7 +329,8 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
 			{/* Page */}
 			<div className='w-full'>
-				<div className='w-full pt-3 pb-4 px-2 flex flex-row items- justify-between'>
+				{/* Header navigation bar */}
+				<div className='w-full pt-3 pb-4 px-4 flex flex-row items- justify-between'>
 					<div className='flex flex-row items-center'>
 						{/* Sidebar button */}
 						<SidebarTrigger />
@@ -356,7 +357,11 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
 					{/* Calender button */}
 					<div>
-						<Button onClick={toggleCalendar} variant='secondary'>
+						<Button
+							onClick={toggleCalendar}
+							variant='ghost'
+							className='p-2'
+						>
 							<CalendarIcon size={20} />
 						</Button>
 					</div>
