@@ -32,7 +32,10 @@ const chartConfig = {
 
 export default function BarChartComponet() {
 	return (
-		<ChartContainer config={chartConfig} className='min-h-[200px] w-full'>
+		<ChartContainer
+			config={chartConfig}
+			className='min-h-[200px] w-full box-border border-4'
+		>
 			<BarChart accessibilityLayer data={chartData}>
 				<CartesianGrid vertical={false} />
 				<XAxis
