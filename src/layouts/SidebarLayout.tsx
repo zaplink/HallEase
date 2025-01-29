@@ -1,12 +1,6 @@
 'use client';
 
-import {
-	LayoutDashboard,
-	Building2,
-	Airplay,
-	LogOut,
-	TestTubeDiagonal,
-} from 'lucide-react';
+import { LayoutDashboard, Building2, Airplay, LogOut } from 'lucide-react';
 import {
 	Sidebar,
 	SidebarContent,
@@ -36,13 +30,14 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import React from 'react';
+import { getBaseUrl } from '@/utils/getBaseUrl';
 import { logout } from '@/app/login/logoutAction';
 
 // Sidebar menu items
 const menuItems = [
 	{
 		title: 'Dashboard',
-		url: '/',
+		url: '/dashboard',
 		icon: LayoutDashboard,
 	},
 	{
@@ -72,6 +67,9 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 		setIsCalendarVisible((prevState) => !prevState); // Toggle the calendar visibility
 	};
 
+	const baseUrl = getBaseUrl();
+	// console.log(baseUrl);
+
 	return (
 		// Sidebar placeholder
 		<SidebarProvider>
@@ -86,7 +84,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 									<AvatarFallback>JD</AvatarFallback>
 								</Avatar>
 								<a
-									href={'http://localhost:3000/profile'}
+									href={baseUrl + '/profile'}
 									className='flex flex-row justify-left'
 								>
 									<span className='font-bold'>John Doe</span>
@@ -100,31 +98,6 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
 				<SidebarContent>
 					<SidebarGroup>
-						<SidebarGroupLabel>Testing</SidebarGroupLabel>
-						<SidebarGroupContent>
-							<SidebarMenu>
-								<SidebarMenuItem key='test'>
-									<SidebarMenuButton
-										asChild
-										isActive={currentPath == '/test'}
-									>
-										<a
-											href={'http://localhost:3000/test'}
-											className='flex flex-row justify-left'
-										>
-											<TestTubeDiagonal
-												size={20}
-												className='mr-5'
-											/>
-											<span>Testing Page</span>
-										</a>
-									</SidebarMenuButton>
-								</SidebarMenuItem>
-							</SidebarMenu>
-						</SidebarGroupContent>
-					</SidebarGroup>
-
-					<SidebarGroup>
 						<SidebarGroupLabel>Application</SidebarGroupLabel>
 						<SidebarGroupContent>
 							<SidebarMenu>
@@ -135,10 +108,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 											isActive={currentPath == item.url}
 										>
 											<a
-												href={
-													'http://localhost:3000' +
-													item.url
-												}
+												href={baseUrl + item.url}
 												className='flex flex-row justify-left'
 											>
 												<item.icon
