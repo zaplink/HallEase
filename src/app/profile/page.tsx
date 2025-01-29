@@ -3,7 +3,6 @@ import SidebarLayout from '@/layouts/SidebarLayout';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 
 import ChangePasswordForm from '@/components/ui/ChangePasswordForm';
-import { Input } from '@/components/ui/input';
 
 export default function Profile() {
 	return (
