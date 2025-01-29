@@ -1,5 +1,4 @@
 'use client';
-// Client side expressions are written in this page: baseUrl
 
 import { LayoutDashboard, Building2, Airplay, LogOut } from 'lucide-react';
 import {
@@ -31,6 +30,7 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import React from 'react';
+import { getBaseUrl } from '@/utils/getBaseUrl';
 
 // Sidebar menu items
 const menuItems = [
@@ -66,8 +66,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 		setIsCalendarVisible((prevState) => !prevState); // Toggle the calendar visibility
 	};
 
-	// Use only in client component
-	const baseUrl = window.location.origin;
+	const baseUrl = getBaseUrl();
 	// console.log(baseUrl);
 
 	return (
