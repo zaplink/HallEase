@@ -93,7 +93,7 @@ const sidebarMenu = [
 		sectionMenu: [
 			{
 				itemTitle: 'Book a Hall',
-				itemUrl: '/hall',
+				itemUrl: '/booking',
 				itemIcon: FilePlus2,
 			},
 			{
