@@ -2,14 +2,25 @@
 
 import {
 	LayoutDashboard,
-	Building2,
-	Airplay,
 	LogOut,
 	ChevronDown,
 	ChevronRight,
-	UserRoundCog,
+	CalendarClock,
+	Building2,
+	CircleCheckBig,
+	CircleX,
+	CirclePause,
+	FilePlus2,
+	Airplay,
+	BookOpen,
+	Megaphone,
+	Mails,
 	Settings,
-	Shield,
+	UserCog,
+	CircleHelp,
+	Flag,
+	ChartNoAxesCombined,
+	FileChartColumn,
 } from 'lucide-react';
 import {
 	Sidebar,
@@ -51,43 +62,128 @@ import {
 } from '@/components/ui/collapsible';
 import Link from 'next/link';
 
-// Sidebar menu items: Application
-const menuItemsApp = [
+const sidebarMenu = [
 	{
-		title: 'Dashboard',
-		url: '/dashboard',
-		icon: LayoutDashboard,
-	},
-	{
-		title: 'Hall Management',
-		url: '/hall',
-		icon: Building2,
-	},
-	{
-		title: 'Event Management',
-		url: '/event',
-		icon: Airplay,
-	},
-];
-
-// Sidebar menu items: Settings & Configuration
-const menuItemsConf = [
-	{
-		title: 'User Settings',
-		url: '/user-settings',
-		icon: UserRoundCog,
-		subMenu: [
+		sectionTitle: 'Dashboard & Overview',
+		sectionMenu: [
 			{
-				title: 'Roles & Permissions',
-				url: '/roles-permissions',
-				icon: Shield,
+				itemTitle: 'Dashboard',
+				itemUrl: '/dashboard',
+				itemIcon: LayoutDashboard,
+			},
+			{
+				itemTitle: 'Calender View',
+				itemUrl: '/calender-view',
+				itemIcon: CalendarClock,
 			},
 		],
 	},
 	{
-		title: 'System Settings',
-		url: '/system-settings',
-		icon: Settings,
+		sectionTitle: 'Event Management',
+		sectionMenu: [
+			{
+				itemTitle: 'View Events',
+				itemUrl: '/event',
+				itemIcon: Airplay,
+			},
+		],
+	},
+	{
+		sectionTitle: 'Hall & Booking Management',
+		sectionMenu: [
+			{
+				itemTitle: 'Book a Hall',
+				itemUrl: '/hall',
+				itemIcon: FilePlus2,
+			},
+			{
+				itemTitle: 'Booking Requests',
+				itemUrl: '/requests',
+				itemIcon: BookOpen,
+				subMenu: [
+					{
+						subTitle: 'Pending',
+						subUrl: '/pending',
+						subIcon: CirclePause,
+					},
+					{
+						subTitle: 'Approved',
+						subUrl: '/approved',
+						subIcon: CircleCheckBig,
+					},
+					{
+						subTitle: 'Rejected',
+						subUrl: '/rejected',
+						subIcon: CircleX,
+					},
+				],
+			},
+			{
+				itemTitle: 'Hall Facilities',
+				itemUrl: '/hall',
+				itemIcon: Building2,
+			},
+		],
+	},
+	{
+		sectionTitle: 'Notifications & Communication',
+		sectionMenu: [
+			{
+				itemTitle: 'Announcements',
+				itemUrl: '/announcments',
+				itemIcon: Megaphone,
+			},
+			{
+				itemTitle: 'Email & SMS Reminders',
+				itemUrl: '/remainders',
+				itemIcon: Mails,
+			},
+		],
+	},
+	{
+		sectionTitle: 'Reports & Analytics',
+		sectionMenu: [
+			{
+				itemTitle: 'Reports',
+				itemUrl: '/reports',
+				itemIcon: FileChartColumn,
+			},
+			{
+				itemTitle: 'Analytics',
+				itemUrl: '/analytics',
+				itemIcon: ChartNoAxesCombined,
+			},
+		],
+	},
+	{
+		sectionTitle: 'Settings & Configurations',
+		sectionMenu: [
+			{
+				itemTitle: 'System Preferences',
+				itemUrl: '/system-preferences',
+				itemIcon: Settings,
+			},
+			{
+				itemTitle: 'Access Control',
+				itemUrl: '/access-control',
+				itemIcon: UserCog,
+			},
+		],
+	},
+	{
+		sectionTitle: 'Help & Support',
+		sectionMenu: [
+			{
+				itemTitle: 'FAQs & Documentation',
+				itemUrl: '/documentation',
+				itemIcon: CircleHelp,
+			},
+			{
+				itemTitle: 'Report an Issue',
+				itemUrl: '/report-issue',
+				itemIcon: Flag,
+			},
+		],
 	},
 ];
 
@@ -144,162 +240,149 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
 				<Separator />
 
-				{/* Application */}
 				<SidebarContent>
-					<SidebarGroup>
-						<SidebarGroupLabel>Application</SidebarGroupLabel>
-						<SidebarGroupContent>
-							<SidebarMenu>
-								{menuItemsApp.map((item) => (
-									<SidebarMenuItem key={item.title}>
-										<SidebarMenuButton
-											asChild
-											isActive={currentPath == item.url}
-										>
-											<a
-												href={baseUrl + item.url}
-												className='flex flex-row justify-left'
-											>
-												<item.icon
-													size={20}
-													className='mr-5'
-												/>
-												<span>{item.title}</span>
-											</a>
-										</SidebarMenuButton>
-									</SidebarMenuItem>
-								))}
-							</SidebarMenu>
-						</SidebarGroupContent>
-					</SidebarGroup>
-
-					{/* Settings & Configuration */}
-					<SidebarGroup>
-						<SidebarGroupLabel>
-							Settings & Configuration
-						</SidebarGroupLabel>
-						<SidebarGroupContent>
-							<SidebarMenu>
-								{menuItemsConf.map((item) => {
-									if (item.subMenu) {
-										const isOpen =
-											openSubMenu === item.title;
-										return (
-											<Collapsible
-												className='group/collapsible'
-												key={item.title}
-												open={isOpen}
-											>
-												<SidebarMenuItem
-													key={item.title}
+					{sidebarMenu.map((section) => (
+						<SidebarGroup key={section.sectionTitle}>
+							<SidebarGroupLabel>
+								{section.sectionTitle}
+							</SidebarGroupLabel>
+							<SidebarGroupContent>
+								<SidebarMenu>
+									{section.sectionMenu.map((item) => {
+										if (item.subMenu) {
+											const isOpen =
+												openSubMenu === item.itemTitle;
+											return (
+												<Collapsible
+													className='group/collapsible'
+													key={item.itemTitle}
+													open={isOpen}
 												>
-													<CollapsibleTrigger asChild>
-														<SidebarMenuButton
-															isActive={
-																currentPath ==
-																item.url
-															}
-															onClick={() =>
-																toggleSubMenu(
-																	item.title
-																)
-															} // Toggle between open/close
+													<SidebarMenuItem
+														key={item.itemTitle}
+													>
+														<CollapsibleTrigger
+															asChild
 														>
-															<item.icon
+															<SidebarMenuButton
+																isActive={
+																	currentPath ==
+																	item.itemUrl
+																}
+																onClick={() =>
+																	toggleSubMenu(
+																		item.itemTitle
+																	)
+																} // Toggle between open/close
+															>
+																<item.itemIcon
+																	size={20}
+																	className='mr-5'
+																/>
+																<span>
+																	{
+																		item.itemTitle
+																	}
+																</span>
+																{isOpen ? (
+																	<ChevronDown
+																		className='ml-auto'
+																		size={
+																			16
+																		}
+																	/>
+																) : (
+																	<ChevronRight
+																		className='ml-auto'
+																		size={
+																			16
+																		}
+																	/>
+																)}
+															</SidebarMenuButton>
+														</CollapsibleTrigger>
+														<CollapsibleContent>
+															<SidebarMenuSub>
+																{item.subMenu.map(
+																	(
+																		subItem
+																	) => (
+																		<SidebarMenuSubItem
+																			key={
+																				subItem.subTitle
+																			}
+																		>
+																			<SidebarMenuButton
+																				asChild
+																				isActive={
+																					currentPath ==
+																					subItem.subUrl
+																				}
+																			>
+																				<a
+																					href={
+																						baseUrl +
+																						subItem.subUrl
+																					}
+																					className='flex flex-row justify-left'
+																				>
+																					<subItem.subIcon
+																						size={
+																							20
+																						}
+																						className='mr-5'
+																					/>
+																					<span>
+																						{
+																							subItem.subTitle
+																						}
+																					</span>
+																				</a>
+																			</SidebarMenuButton>
+																		</SidebarMenuSubItem>
+																	)
+																)}
+															</SidebarMenuSub>
+														</CollapsibleContent>
+													</SidebarMenuItem>
+												</Collapsible>
+											);
+										} else {
+											return (
+												<SidebarMenuItem
+													key={item.itemTitle}
+												>
+													<SidebarMenuButton
+														asChild
+														isActive={
+															currentPath ==
+															item.itemUrl
+														}
+													>
+														<a
+															href={
+																baseUrl +
+																item.itemUrl
+															}
+															className='flex flex-row justify-left'
+														>
+															<item.itemIcon
 																size={20}
 																className='mr-5'
 															/>
 															<span>
-																{item.title}
+																{item.itemTitle}
 															</span>
-															{isOpen ? (
-																<ChevronDown
-																	className='ml-auto'
-																	size={16}
-																/>
-															) : (
-																<ChevronRight
-																	className='ml-auto'
-																	size={16}
-																/>
-															)}
-														</SidebarMenuButton>
-													</CollapsibleTrigger>
-													<CollapsibleContent>
-														<SidebarMenuSub>
-															{item.subMenu.map(
-																(subItem) => (
-																	<SidebarMenuSubItem
-																		key={
-																			subItem.title
-																		}
-																	>
-																		<SidebarMenuButton
-																			asChild
-																			isActive={
-																				currentPath ==
-																				subItem.url
-																			}
-																		>
-																			<a
-																				href={
-																					baseUrl +
-																					subItem.url
-																				}
-																				className='flex flex-row justify-left'
-																			>
-																				<subItem.icon
-																					size={
-																						20
-																					}
-																					className='mr-5'
-																				/>
-																				<span>
-																					{
-																						subItem.title
-																					}
-																				</span>
-																			</a>
-																		</SidebarMenuButton>
-																	</SidebarMenuSubItem>
-																)
-															)}
-														</SidebarMenuSub>
-													</CollapsibleContent>
+														</a>
+													</SidebarMenuButton>
 												</SidebarMenuItem>
-											</Collapsible>
-										);
-									} else {
-										return (
-											<SidebarMenuItem key={item.title}>
-												<SidebarMenuButton
-													asChild
-													isActive={
-														currentPath == item.url
-													}
-												>
-													<a
-														href={
-															baseUrl + item.url
-														}
-														className='flex flex-row justify-left'
-													>
-														<item.icon
-															size={20}
-															className='mr-5'
-														/>
-														<span>
-															{item.title}
-														</span>
-													</a>
-												</SidebarMenuButton>
-											</SidebarMenuItem>
-										);
-									}
-								})}
-							</SidebarMenu>
-						</SidebarGroupContent>
-					</SidebarGroup>
+											);
+										}
+									})}
+								</SidebarMenu>
+							</SidebarGroupContent>
+						</SidebarGroup>
+					))}
 				</SidebarContent>
 
 				<Separator />
