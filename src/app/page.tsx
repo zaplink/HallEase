@@ -59,8 +59,8 @@ export default function Home() {
 							Contact Us...
 						</h2>
 						<p className='text-sm text-white w-full max-w-[750px]'>
-							Have questions or need assistance? We're here to
-							help! Feel free to reach out to us for any
+							Have questions or need assistance? We &apos;re here
+							to help! Feel free to reach out to us for any
 							inquiries, feedback, or support. Our team is always
 							ready to assist you with the best solutions. Simply
 							fill out the form below or connect with us on social
