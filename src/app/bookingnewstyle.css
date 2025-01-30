@@ -1,0 +1,48 @@
+.title {
+	color: rgb(37, 19, 238);
+	font-size: 28px;
+	font-weight: 700;
+	text-align: center;
+	margin-bottom: 25px;
+}
+.para {
+	margin-bottom: 35px;
+	margin-left: 20px;
+}
+Form {
+	border: 2px solid rgb(7, 7, 7);
+	border-radius: 10px;
+	padding: 5px 40px;
+	width: 900px;
+	height: 800px;
+	background-color: #ffffff;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	margin-left: 180px;
+}
+.input {
+	width: 500px;
+	height: 36px;
+	border-radius: 4px;
+	border: 1px solid #ccc;
+
+	font-size: 14px;
+	box-sizing: border-box;
+	margin-left: 10px;
+}
+.form-item {
+	display: flex;
+	align-items: center; /* Aligns items vertically in the center */
+	gap: 10px; /* Space between label and input */
+}
+
+.form-item label {
+	min-width: 150px; /* Adjust width for consistent alignment */
+}
+.but {
+	width: 200px;
+	margin-left: 90px;
+}
+.reset {
+	width: 200px;
+	margin-left: 150px;
+}
