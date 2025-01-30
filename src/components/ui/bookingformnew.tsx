@@ -33,6 +33,14 @@ function BookingFormNew() {
 		defaultValues: {
 			name: '',
 			email: '',
+			eventtype: '',
+			organizedby: '',
+			eventdescription: '',
+			attendance: '',
+			date: undefined,
+			starttime: '',
+			endtime: '',
+			halllocation: '',
 		},
 	});
 
@@ -111,7 +119,7 @@ function BookingFormNew() {
 				<FormField
 					control={form.control}
 					name='organizedby'
-					rules={{ required: 'Please Enter your Organization Name' }}
+					rules={{ required: 'Please Enter  Organization ' }}
 					render={({ field }) => (
 						<FormItem className='form-item'>
 							<FormLabel>Organized By</FormLabel>
@@ -130,7 +138,7 @@ function BookingFormNew() {
 				<FormField
 					control={form.control}
 					name='eventdescription'
-					rules={{ required: 'Please Enter your event Description' }}
+					rules={{ required: 'Please Enter  event Description' }}
 					render={({ field }) => (
 						<FormItem className='form-item'>
 							<FormLabel>Event Description</FormLabel>
@@ -169,12 +177,16 @@ function BookingFormNew() {
 					control={form.control}
 					name='date'
 					rules={{ required: 'please select the date' }}
-					render={({}) => (
+					render={({ field }) => (
 						<FormItem className='form-item'>
 							<FormLabel>Date</FormLabel>
 							<FormControl>
-								<DatePickerDemo />
+								<DatePickerDemo
+									value={field.value}
+									onChange={(date) => field.onChange(date)}
+								/>
 							</FormControl>
+
 							<FormMessage />
 						</FormItem>
 					)}
@@ -272,7 +284,11 @@ function BookingFormNew() {
 						Submit
 					</Button>
 
-					<Button type='reset' className='reset'>
+					<Button
+						type='button'
+						className='reset'
+						onClick={() => form.reset()}
+					>
 						Reset
 					</Button>
 				</div>
