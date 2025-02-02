@@ -11,25 +11,25 @@ const LoginPage = () => {
 					backgroundSize: 'cover',
 					backgroundPosition: 'center',
 					height: '100vh',
-					position: 'absolute',
-					top: 728,
-					left: 0,
+					// position: 'absolute',
+					// top: 728,
+					// left: 0,
 					width: '100%',
 					zIndex: -1,
 				}}
-			></section>
-
-			{/* Encapsulate login into a flex box */}
-			<div
-				style={{
-					display: 'flex',
-					alignItems: 'center',
-					justifyContent: 'center',
-					height: '100%',
-				}}
 			>
-				<Login />
-			</div>
+				{/* Encapsulate login into a flex box */}
+				<div
+					style={{
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						height: '100%',
+					}}
+				>
+					<Login />
+				</div>
+			</section>
 		</>
 	);
 };
