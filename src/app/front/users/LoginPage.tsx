@@ -12,7 +12,7 @@ const LoginPage = () => {
 					backgroundPosition: 'center',
 					height: '100vh',
 					position: 'absolute',
-					top: 0,
+					top: 728,
 					left: 0,
 					width: '100%',
 					zIndex: -1,

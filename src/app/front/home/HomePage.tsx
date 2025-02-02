@@ -42,11 +42,10 @@ const HomePage = () => {
 				className='relative bg-gray-100 py-16 px-4 flex flex-col items-center justify-center'
 				style={{ minHeight: '100vh', paddingTop: '60px' }}
 			>
-				{/* Background Image Container for HomePage */}
 				<div className='absolute inset-0'>
 					<div className='relative w-full h-full'>
 						<Image
-							src='/fct2.jpg' // Make sure the path to this image is correct
+							src='/fctN.jpg'
 							alt='Background image'
 							layout='fill'
 							objectFit='cover'
