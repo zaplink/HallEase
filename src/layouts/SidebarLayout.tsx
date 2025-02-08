@@ -1,6 +1,27 @@
 'use client';
 
-import { LayoutDashboard, Building2, Airplay, LogOut } from 'lucide-react';
+import {
+	LayoutDashboard,
+	LogOut,
+	ChevronDown,
+	ChevronRight,
+	CalendarClock,
+	Building2,
+	CircleCheckBig,
+	CircleX,
+	CirclePause,
+	FilePlus2,
+	Airplay,
+	BookOpen,
+	Megaphone,
+	Mails,
+	Settings,
+	UserCog,
+	CircleHelp,
+	Flag,
+	ChartNoAxesCombined,
+	FileChartColumn,
+} from 'lucide-react';
 import {
 	Sidebar,
 	SidebarContent,
@@ -14,6 +35,8 @@ import {
 	SidebarGroupContent,
 	SidebarProvider,
 	SidebarTrigger,
+	SidebarMenuSub,
+	SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
 import { usePathname } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -32,23 +55,135 @@ import { Calendar } from '@/components/ui/calendar';
 import React from 'react';
 import { getBaseUrl } from '@/utils/getBaseUrl';
 import { logout } from '@/app/login/logoutAction';
+import {
+	Collapsible,
+	CollapsibleTrigger,
+	CollapsibleContent,
+} from '@/components/ui/collapsible';
+import Link from 'next/link';
 
-// Sidebar menu items
-const menuItems = [
+const sidebarMenu = [
 	{
-		title: 'Dashboard',
-		url: '/dashboard',
-		icon: LayoutDashboard,
+		sectionTitle: 'Dashboard & Overview',
+		sectionMenu: [
+			{
+				itemTitle: 'Dashboard',
+				itemUrl: '/dashboard',
+				itemIcon: LayoutDashboard,
+			},
+			{
+				itemTitle: 'Calender View',
+				itemUrl: '/calender-view',
+				itemIcon: CalendarClock,
+			},
+		],
 	},
 	{
-		title: 'Hall Manage',
-		url: '/hall',
-		icon: Building2,
+		sectionTitle: 'Event Management',
+		sectionMenu: [
+			{
+				itemTitle: 'View Events',
+				itemUrl: '/event',
+				itemIcon: Airplay,
+			},
+		],
 	},
 	{
-		title: 'Event Manage',
-		url: '/event',
-		icon: Airplay,
+		sectionTitle: 'Hall & Booking Management',
+		sectionMenu: [
+			{
+				itemTitle: 'Book a Hall',
+				itemUrl: '/booking',
+				itemIcon: FilePlus2,
+			},
+			{
+				itemTitle: 'Booking Requests',
+				itemUrl: '/requests',
+				itemIcon: BookOpen,
+				subMenu: [
+					{
+						subTitle: 'Pending',
+						subUrl: '/pending',
+						subIcon: CirclePause,
+					},
+					{
+						subTitle: 'Approved',
+						subUrl: '/approved',
+						subIcon: CircleCheckBig,
+					},
+					{
+						subTitle: 'Rejected',
+						subUrl: '/rejected',
+						subIcon: CircleX,
+					},
+				],
+			},
+			{
+				itemTitle: 'Hall Facilities',
+				itemUrl: '/hall',
+				itemIcon: Building2,
+			},
+		],
+	},
+	{
+		sectionTitle: 'Notifications & Communication',
+		sectionMenu: [
+			{
+				itemTitle: 'Announcements',
+				itemUrl: '/announcments',
+				itemIcon: Megaphone,
+			},
+			{
+				itemTitle: 'Email & SMS Reminders',
+				itemUrl: '/remainders',
+				itemIcon: Mails,
+			},
+		],
+	},
+	{
+		sectionTitle: 'Reports & Analytics',
+		sectionMenu: [
+			{
+				itemTitle: 'Reports',
+				itemUrl: '/reports',
+				itemIcon: FileChartColumn,
+			},
+			{
+				itemTitle: 'Analytics',
+				itemUrl: '/analytics',
+				itemIcon: ChartNoAxesCombined,
+			},
+		],
+	},
+	{
+		sectionTitle: 'Settings & Configurations',
+		sectionMenu: [
+			{
+				itemTitle: 'System Preferences',
+				itemUrl: '/system-preferences',
+				itemIcon: Settings,
+			},
+			{
+				itemTitle: 'Access Control',
+				itemUrl: '/access-control',
+				itemIcon: UserCog,
+			},
+		],
+	},
+	{
+		sectionTitle: 'Help & Support',
+		sectionMenu: [
+			{
+				itemTitle: 'FAQs & Documentation',
+				itemUrl: '/documentation',
+				itemIcon: CircleHelp,
+			},
+			{
+				itemTitle: 'Report an Issue',
+				itemUrl: '/report-issue',
+				itemIcon: Flag,
+			},
+		],
 	},
 ];
 
@@ -70,6 +205,14 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 	const baseUrl = getBaseUrl();
 	// console.log(baseUrl);
 
+	// State to track the currently open submenu
+	const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
+
+	// Toggle submenu state
+	const toggleSubMenu = (menuTitle: string) => {
+		setOpenSubMenu((prev) => (prev === menuTitle ? null : menuTitle));
+	};
+
 	return (
 		// Sidebar placeholder
 		<SidebarProvider>
@@ -78,18 +221,19 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 				<SidebarHeader className='p-1'>
 					<SidebarMenu>
 						<SidebarMenuItem>
-							<SidebarMenuButton className='h-auto'>
-								<Avatar className='mr-5'>
-									<AvatarImage src='https://github.com/shadcn.png' />
-									<AvatarFallback>JD</AvatarFallback>
-								</Avatar>
-								<a
-									href={baseUrl + '/profile'}
-									className='flex flex-row justify-left'
-								>
+							<Link
+								href={baseUrl + '/profile'}
+								className='flex flex-row justify-left'
+							>
+								<SidebarMenuButton className='h-auto p-0 m-2'>
+									<Avatar className='mr-5'>
+										<AvatarImage src='https://github.com/shadcn.png' />
+										<AvatarFallback>JD</AvatarFallback>
+									</Avatar>
+
 									<span className='font-bold'>John Doe</span>
-								</a>
-							</SidebarMenuButton>
+								</SidebarMenuButton>
+							</Link>
 						</SidebarMenuItem>
 					</SidebarMenu>
 				</SidebarHeader>
@@ -97,32 +241,148 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 				<Separator />
 
 				<SidebarContent>
-					<SidebarGroup>
-						<SidebarGroupLabel>Application</SidebarGroupLabel>
-						<SidebarGroupContent>
-							<SidebarMenu>
-								{menuItems.map((item) => (
-									<SidebarMenuItem key={item.title}>
-										<SidebarMenuButton
-											asChild
-											isActive={currentPath == item.url}
-										>
-											<a
-												href={baseUrl + item.url}
-												className='flex flex-row justify-left'
-											>
-												<item.icon
-													size={20}
-													className='mr-5'
-												/>
-												<span>{item.title}</span>
-											</a>
-										</SidebarMenuButton>
-									</SidebarMenuItem>
-								))}
-							</SidebarMenu>
-						</SidebarGroupContent>
-					</SidebarGroup>
+					{sidebarMenu.map((section) => (
+						<SidebarGroup key={section.sectionTitle}>
+							<SidebarGroupLabel>
+								{section.sectionTitle}
+							</SidebarGroupLabel>
+							<SidebarGroupContent>
+								<SidebarMenu>
+									{section.sectionMenu.map((item) => {
+										if (item.subMenu) {
+											const isOpen =
+												openSubMenu === item.itemTitle;
+											return (
+												<Collapsible
+													className='group/collapsible'
+													key={item.itemTitle}
+													open={isOpen}
+												>
+													<SidebarMenuItem
+														key={item.itemTitle}
+													>
+														<CollapsibleTrigger
+															asChild
+														>
+															<SidebarMenuButton
+																isActive={
+																	currentPath ==
+																	item.itemUrl
+																}
+																onClick={() =>
+																	toggleSubMenu(
+																		item.itemTitle
+																	)
+																} // Toggle between open/close
+															>
+																<item.itemIcon
+																	size={20}
+																	className='mr-5'
+																/>
+																<span>
+																	{
+																		item.itemTitle
+																	}
+																</span>
+																{isOpen ? (
+																	<ChevronDown
+																		className='ml-auto'
+																		size={
+																			16
+																		}
+																	/>
+																) : (
+																	<ChevronRight
+																		className='ml-auto'
+																		size={
+																			16
+																		}
+																	/>
+																)}
+															</SidebarMenuButton>
+														</CollapsibleTrigger>
+														<CollapsibleContent>
+															<SidebarMenuSub>
+																{item.subMenu.map(
+																	(
+																		subItem
+																	) => (
+																		<SidebarMenuSubItem
+																			key={
+																				subItem.subTitle
+																			}
+																		>
+																			<SidebarMenuButton
+																				asChild
+																				isActive={
+																					currentPath ==
+																					subItem.subUrl
+																				}
+																			>
+																				<a
+																					href={
+																						baseUrl +
+																						subItem.subUrl
+																					}
+																					className='flex flex-row justify-left'
+																				>
+																					<subItem.subIcon
+																						size={
+																							20
+																						}
+																						className='mr-5'
+																					/>
+																					<span>
+																						{
+																							subItem.subTitle
+																						}
+																					</span>
+																				</a>
+																			</SidebarMenuButton>
+																		</SidebarMenuSubItem>
+																	)
+																)}
+															</SidebarMenuSub>
+														</CollapsibleContent>
+													</SidebarMenuItem>
+												</Collapsible>
+											);
+										} else {
+											return (
+												<SidebarMenuItem
+													key={item.itemTitle}
+												>
+													<SidebarMenuButton
+														asChild
+														isActive={
+															currentPath ==
+															item.itemUrl
+														}
+													>
+														<a
+															href={
+																baseUrl +
+																item.itemUrl
+															}
+															className='flex flex-row justify-left'
+														>
+															<item.itemIcon
+																size={20}
+																className='mr-5'
+															/>
+															<span>
+																{item.itemTitle}
+															</span>
+														</a>
+													</SidebarMenuButton>
+												</SidebarMenuItem>
+											);
+										}
+									})}
+								</SidebarMenu>
+							</SidebarGroupContent>
+						</SidebarGroup>
+					))}
 				</SidebarContent>
 
 				<Separator />
@@ -152,7 +412,8 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
 			{/* Page */}
 			<div className='w-full'>
-				<div className='w-full pt-3 pb-4 px-2 flex flex-row items- justify-between'>
+				{/* Header navigation bar */}
+				<div className='w-full pt-3 pb-4 px-4 flex flex-row items- justify-between'>
 					<div className='flex flex-row items-center'>
 						{/* Sidebar button */}
 						<SidebarTrigger />
@@ -179,7 +440,11 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
 					{/* Calender button */}
 					<div>
-						<Button onClick={toggleCalendar} variant='secondary'>
+						<Button
+							onClick={toggleCalendar}
+							variant='ghost'
+							className='p-2'
+						>
 							<CalendarIcon size={20} />
 						</Button>
 					</div>

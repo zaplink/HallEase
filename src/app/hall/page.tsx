@@ -8,7 +8,6 @@ import {
 	TableRow,
 	TableCell,
 } from '@/components/ui/table';
-import { Info } from 'lucide-react';
 
 export default function Hall() {
 	return (
@@ -24,27 +23,37 @@ export default function Hall() {
 				<TableHeader>
 					<TableRow>
 						<TableHead>Hall ID</TableHead>
+						<TableHead>Type</TableHead>
 						<TableHead>Capacity</TableHead>
-						<TableHead>Status</TableHead>
-						<TableHead>Actions</TableHead>
+						<TableHead>Availability</TableHead>
+						<TableHead>Recent Activity</TableHead>
+						<TableHead>Recent Activity Type</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
 					<TableRow>
 						<TableCell>AB-LCH-01</TableCell>
+						<TableCell>Lecture Hall</TableCell>
 						<TableCell>100</TableCell>
-						<TableCell>Available</TableCell>
-						<TableCell>
-							<Info size={20} />
-						</TableCell>
+						<TableCell>Unvailable</TableCell>
+						<TableCell>Tomorrow</TableCell>
+						<TableCell>Lecture</TableCell>
 					</TableRow>
 					<TableRow>
 						<TableCell>AB-LCH-02</TableCell>
+						<TableCell>Lecture Hall</TableCell>
 						<TableCell>50</TableCell>
-						<TableCell>Booked</TableCell>
-						<TableCell>
-							<Info size={20} />
-						</TableCell>
+						<TableCell>Available</TableCell>
+						<TableCell>Jan 31, 2025</TableCell>
+						<TableCell>Event</TableCell>
+					</TableRow>
+					<TableRow>
+						<TableCell>LAB-03</TableCell>
+						<TableCell>Lab</TableCell>
+						<TableCell>75</TableCell>
+						<TableCell>Available</TableCell>
+						<TableCell>In 7 days</TableCell>
+						<TableCell>Session</TableCell>
 					</TableRow>
 				</TableBody>
 			</Table>
