@@ -103,17 +103,17 @@ const sidebarMenu = [
 				subMenu: [
 					{
 						subTitle: 'Pending',
-						subUrl: '/pending',
+						subUrl: '/requests/pending',
 						subIcon: CirclePause,
 					},
 					{
 						subTitle: 'Approved',
-						subUrl: '/approved',
+						subUrl: '/requests/approved',
 						subIcon: CircleCheckBig,
 					},
 					{
 						subTitle: 'Rejected',
-						subUrl: '/rejected',
+						subUrl: '/requests/rejected',
 						subIcon: CircleX,
 					},
 				],
