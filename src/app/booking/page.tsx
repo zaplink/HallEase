@@ -1,10 +1,11 @@
-import Bookingform from "@/components/ui/Bookingform";
-import Requestpage from "@/components/ui/Requestpage";
-export default function Boking() {
-  return (
-    <>
-      <Bookingform />
-      <Requestpage />
-    </>
-  );
+import React from 'react';
+import Bookingformnew from '@/components/ui/bookingformnew';
+function page() {
+	return (
+		<>
+			<Bookingformnew />
+		</>
+	);
 }
+
+export default page;
