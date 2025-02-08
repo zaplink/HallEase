@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HallEase - Event and Hall Management System
 
-## Getting Started
+The **HallEase Event and Hall Management System** is a tailored solution for university administrators to efficiently manage the scheduling and booking of halls, classrooms, and event spaces. It streamlines academic and extracurricular event planning, ensuring optimal resource utilization and smooth communication across departments.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev 
-```
+### User Authentication & Role-Based Access
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Secure login using Supabase authentication.
+- Role-based access control:
+    - **Internals & Externals**: Book halls for events.
+    - **Admins**: Approve/reject bookings, manage halls, and oversee the system.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Hall Booking & Event Management
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- View hall details.
+- Online booking system using a booking form.
+- Modify or cancel reservations.
+- Admin approval system for event verification.
 
-## Learn More
+### Real-Time Hall Availability Calendar
 
-To learn more about Next.js, take a look at the following resources:
+- Color-coded status.
+- Filters (date, hall, event type).
+- Interactive calendar view for easy booking.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Email & SMS Notifications
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Booking confirmations sent via email/SMS.
+- Reminders for upcoming events.
+- Cancellation alerts.
 
-## Deploy on Vercel
+### Admin Dashboard & Management
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Approve/reject bookings.
+- Manage hall availability and user access.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### AI/ML-Powered Features
+
+- Predictive analytics for peak booking times.
+- Smart recommendations for the most efficient and suitable hall based on event type.
+- Chatbot for easy and smart predictions, assisting users in hall selection.
