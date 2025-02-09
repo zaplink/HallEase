@@ -32,7 +32,7 @@ const HomePage = () => {
 						: 'bg-transparent'
 				}`}
 			>
-				<div className='container mx-auto px-6 flex justify-center items-center space-x-20'>
+				<div className='container mx-auto px-6 flex justify-center items-center md:gap-20 sm:gap-10'>
 					<Button
 						variant='outline'
 						className='rounded-full px-6 py-5 text-xl font-bold border-2 text-blue-500 hover:bg-blue-500 hover:text-white active:bg-blue-600 active:text-white transition duration-300'
@@ -76,20 +76,22 @@ const HomePage = () => {
 				</div>
 
 				{/* empty section  */}
-				<div className='w-full h-[45vh]'></div>
+				<div className='w-full h-[40vh] md:h-[45vh]'></div>
 
 				{/* content section  */}
-				<div className='flex flex-col flex-grow relative z-10 text-left bg-slate-400/50  py-12 md:px-24 w-full h-full shadow-lg'>
-					<h1 className='text-white text-6xl font-bold'>
+				<div className='flex flex-col flex-grow relative z-10 text-left bg-slate-600/50 px-6 md:px-20 py-10 w-full min-h-[50vh] shadow-lg'>
+					<h1 className='text-white text-4xl md:text-6xl sm:text-4xl sm:py-5 font-bold'>
 						Welcome to <br />
-						<span className='text-white-400 text-9xl'>
-							HallEase{' '}
+						<span className='text-white text-6xl md:text-9xl sm:text-7xl'>
+							HallEase
 						</span>
-						<span className='text-orange-400 text-9xl'> FCT</span>
+						<span className='text-orange-400 text-6xl md:text-9xl sm:text-7xl'>
+							{' '}
+							FCT
+						</span>
 					</h1>
-					<br />
-					<p className='text-white text-2xl mt-4'>
-						<span className='font-bold my-10'>
+					<p className='text-white text-lg md:text-2xl mt-4 leading-relaxed'>
+						<span className='font-bold'>
 							Seamlessly manage faculty halls with ease.
 						</span>
 						<br />
