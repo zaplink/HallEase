@@ -61,6 +61,7 @@ import {
 	CollapsibleContent,
 } from '@/components/ui/collapsible';
 import Link from 'next/link';
+import useUserProfile from '@/hooks/useUserProfile';
 
 const sidebarMenu = [
 	{
@@ -213,6 +214,8 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 		setOpenSubMenu((prev) => (prev === menuTitle ? null : menuTitle));
 	};
 
+	const profile = useUserProfile();
+
 	return (
 		// Sidebar placeholder
 		<SidebarProvider>
@@ -227,11 +230,24 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 							>
 								<SidebarMenuButton className='h-auto p-0 m-2'>
 									<Avatar className='mr-5'>
-										<AvatarImage src='https://github.com/shadcn.png' />
-										<AvatarFallback>JD</AvatarFallback>
+										{/* <AvatarImage src='https://github.com/shadcn.png' /> */}
+
+										{profile?.pro_pic ? (
+											<AvatarImage
+												src={profile.pro_pic}
+											/>
+										) : (
+											// Placeholder
+											<AvatarImage src='https://github.com/shadcn.png' />
+										)}
+										<AvatarFallback>User</AvatarFallback>
 									</Avatar>
 
-									<span className='font-bold'>John Doe</span>
+									{/* <span className='font-bold'>John Doe</span> */}
+
+									<span className='font-bold'>
+										{profile?.full_name || 'Loading...'}
+									</span>
 								</SidebarMenuButton>
 							</Link>
 						</SidebarMenuItem>
