@@ -5,71 +5,62 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const HomePage = () => {
 	return (
-		<div className='min-h-screen bg-gray-50 flex flex-col'>
-			<nav className='bg-gradient-to-r from-gray-500 to-white shadow-lg fixed top-0 right-0 w-full z-20'>
-				<div className='container mx-auto px-6 py-4 flex justify-end items-center'>
-					{/* Navigation Links */}
-					<div className='flex space-x-8'>
-						<Button
-							variant='link'
-							className='text-black hover:text-gray-300 text-lg px-4 py-2 italic transition duration-300'
-						>
-							Home
-						</Button>
-						<Button
-							variant='link'
-							className='text-black hover:text-gray-300 text-lg px-4 py-2 italic transition duration-300'
-						>
-							Users
-						</Button>
-						<Button
-							variant='link'
-							className='text-black hover:text-gray-300 text-lg px-4 py-2 italic transition duration-300'
-						>
-							Public
-						</Button>
-						<Button
-							variant='link'
-							className='text-black hover:text-gray-300 text-lg px-4 py-2 italic transition duration-300'
-						>
-							Contacts
-						</Button>
-					</div>
+		<div className='min-h-screen flex flex-col'>
+			<nav className='fixed top-0 w-full z-20 py-5'>
+				<div className='container mx-auto px-6 flex justify-center items-center space-x-20'>
+					<Button
+						variant='outline'
+						className='rounded-full px-6 py-2 text-lg font-bold border-2 text-blue-500 hover:bg-blue-500 hover:text-white active:bg-blue-600 active:text-white transition duration-300'
+					>
+						Home
+					</Button>
+
+					<Button
+						variant='outline'
+						className='rounded-full px-6 py-2 text-lg font-bold border-2 text-blue-500 hover:bg-blue-500 hover:text-white active:bg-blue-600 active:text-white transition duration-300'
+					>
+						Users
+					</Button>
+
+					<Button
+						variant='outline'
+						className='rounded-full px-6 py-2 text-lg font-bold border-2 text-blue-500 hover:bg-blue-500 hover:text-white active:bg-blue-600 active:text-white transition duration-300'
+					>
+						Public
+					</Button>
+
+					<Button
+						variant='outline'
+						className='rounded-full px-6 py-2 text-lg font-bold border-2 text-blue-500 hover:bg-blue-500 hover:text-white active:bg-blue-600 active:text-white transition duration-300'
+					>
+						Contacts
+					</Button>
 				</div>
 			</nav>
 
-			<section
-				className='relative bg-gray-100 py-16 px-4 flex flex-col items-center justify-center'
-				style={{ minHeight: '100vh', paddingTop: '60px' }}
-			>
+			<section className='relative flex flex-col items-center justify-center min-h-screen text-center'>
 				<div className='absolute inset-0'>
-					<div className='relative w-full h-full'>
-						<Image
-							src='/fctN.jpg'
-							alt='Background image'
-							layout='fill'
-							objectFit='cover'
-							priority={true}
-						/>
-					</div>
+					<Image
+						src='/fct1.jpg'
+						alt='University Hall'
+						layout='fill'
+						objectFit='cover'
+						priority
+					/>
 				</div>
-
-				{/* Content Section */}
-				<div className='relative z-10 text-center'>
-					<Card className='bg-white/75 max-w-3xl mx-auto p-8 rounded-lg shadow-lg border border-gray-200'>
+				<div className='relative z-10 w-full px-4'>
+					<Card className='bg-white/80 max-w-2xl mx-auto p-8 rounded-2xl shadow-lg'>
 						<CardHeader>
-							<CardTitle className='text-4xl font-semibold text-black mb-6 italic underline'>
-								About the Faculty
+							<CardTitle className='text-5xl font-bold text-gray-900'>
+								HallEase{' '}
+								<span className='text-orange-500'>FCT</span>
 							</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<p className='text-lg text-gray-700 leading-relaxed'>
-								A realm where imagination meets innovation, and
-								possibilities stretch beyond the horizon. Since
-								our inception in 2016, we&apos;ve been pioneers
-								of technological advancement in Sri Lanka,
-								cultivating brilliance and fostering a community
-								dedicated to sculpting a sustainable future.
+							<p className='text-lg text-gray-700'>
+								Seamlessly manage university halls with ease.
+								Simplifying hall management for admins and
+								students.
 							</p>
 						</CardContent>
 					</Card>
