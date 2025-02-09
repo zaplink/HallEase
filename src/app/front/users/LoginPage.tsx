@@ -6,8 +6,9 @@ const LoginPage = () => {
 		<>
 			{/* Background Section */}
 			<section
+				id='users'
 				style={{
-					backgroundImage: "url('/fct1.jpg')",
+					backgroundImage: "url('/fct8.jpg')",
 					backgroundSize: 'cover',
 					backgroundPosition: 'center',
 					height: '100vh',

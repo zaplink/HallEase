@@ -5,7 +5,7 @@ import Navbar from './NavBar';
 
 const HomePage = () => {
 	return (
-		<div className='min-h-screen flex flex-col'>
+		<div id='home' className='min-h-screen flex flex-col'>
 			<header>
 				<Navbar />
 			</header>
@@ -26,7 +26,7 @@ const HomePage = () => {
 				<div className='w-full h-[40vh] md:h-[45vh]'></div>
 
 				{/* content section  */}
-				<div className='flex flex-col flex-grow relative z-10 text-left bg-slate-600/50 px-6 md:px-20 py-10 w-full min-h-[50vh] shadow-lg'>
+				<div className='flex flex-col flex-grow relative z-10 text-left bg-slate-500/40 px-6 md:px-20 py-10 w-full min-h-[50vh] shadow-lg'>
 					<h1 className='text-white text-4xl md:text-6xl sm:text-4xl sm:py-5 font-bold'>
 						Welcome to <br />
 						<span className='text-white text-6xl md:text-9xl sm:text-7xl'>
@@ -42,7 +42,7 @@ const HomePage = () => {
 							Seamlessly manage faculty halls with ease.
 						</span>
 						<br />
-						From room allocations to user access, HallEase
+						From hall allocations to user access, HallEase
 						simplifies the process, <br />
 						ensuring efficiency and convenience for administrators
 						and students alike.
