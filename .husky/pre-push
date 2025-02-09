@@ -1,0 +1,47 @@
+#!/bin/sh
+
+echo "────────────────────────────────────────────"
+echo "[INFO] Running 'git fetch --prune' before pushing..."
+
+# Run git fetch --prune and catch errors
+if ! git fetch --prune; then
+    echo "[ERROR] Failed to fetch from remote. Continuing..."
+fi
+
+echo "[DETAILS] This command:"
+echo "  - Fetches the latest changes from the remote repository."
+echo "  - Removes references to remote branches that no longer exist."
+echo "  - Does NOT delete your local branches automatically."
+echo "--------------------------------------------"
+
+# Get the current branch
+CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
+
+if [ -z "$CURRENT_BRANCH" ]; then
+    echo "[WARNING] Could not determine current branch. You might be in a detached HEAD state."
+fi
+
+# Find orphaned branches (branches with deleted upstreams)
+GONE_BRANCHES=$(git branch --format "%(refname:short) %(upstream:track)" 2>/dev/null | grep '\[gone\]' | awk '{print $1}' | grep -v "^$CURRENT_BRANCH$" || echo "")
+
+# If there are stale branches, warn the user
+if [ -n "$GONE_BRANCHES" ]; then
+    echo "[WARNING] The following local branches have no remote and might be deleted:"
+    echo ""
+
+    for BRANCH in $GONE_BRANCHES; do
+        # Get last commit message or show "Unknown" if error occurs
+        LAST_COMMIT=$(git log -1 --pretty=format:"%h - %s" "$BRANCH" 2>/dev/null || echo "Unknown")
+        echo "    -> [STALE] $BRANCH (Last commit: $LAST_COMMIT)"
+    done
+    
+    echo "--------------------------------------------"
+    echo "[TIP] Run 'git branch -D <branch>' to remove an orphaned branch manually."
+else
+    echo "[SUCCESS] No orphaned local branches found."
+fi
+
+echo "────────────────────────────────────────────"
+
+# Ensure the hook does NOT block git push
+exit 0
