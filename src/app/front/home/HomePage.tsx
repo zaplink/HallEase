@@ -1,13 +1,13 @@
 'use client';
 
 import Image from 'next/image';
-import Navbar from './NavBar';
+import NavBar from './NavBar';
 
 const HomePage = () => {
 	return (
 		<div id='home' className='min-h-screen flex flex-col'>
 			<header>
-				<Navbar />
+				<NavBar />
 			</header>
 
 			<section className='relative flex flex-col items-center justify-center min-h-screen text-center'>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 
-const Navbar = () => {
+const NavBar = () => {
 	const [isScrolled, setIsScrolled] = useState(false);
 
 	// Function to track scroll position
@@ -55,4 +55,4 @@ const Navbar = () => {
 	);
 };
 
-export default Navbar;
+export default NavBar;
