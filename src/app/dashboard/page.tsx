@@ -4,7 +4,16 @@ import { createClient } from '@/lib/supabaseServer';
 import { redirect } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import BarChartComponet from './component';
+import BarChartComponet from '@/app/dashboard/component';
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from '@/components/ui/card';
+import { MoreHorizontal, ChevronRight } from 'lucide-react';
 
 export default async function Dashboard() {
 	// navigate back to login if user not logged
@@ -16,31 +25,87 @@ export default async function Dashboard() {
 	}
 	return (
 		<SidebarLayout>
-			<div className='mt-5 mb-6 flex flex-row '>
-				<div className='basis-16'></div>
-				<div className='basis-64 pl-5 pt-1 w-full'>
+			{/* Grid Layout */}
+			<div className='grid grid-cols-3 gap-x-4 gap-y-6'>
+				{/* Row-1 */}
+				<div className='flex justify-center items-center'>
 					<Label htmlFor='email'>How can I help you today?</Label>
 				</div>
-				<div className='basis-16'></div>
-				<div className='basis-128 grow'>
-					<Input
-						placeholder='Message to HallEase bot'
-						className='w-full'
-					/>
+				<div className='col-span-2 w-full'>
+					<div className='flex flex-row gap-2'>
+						<Input
+							placeholder='Message to HallEase bot'
+							className='w-full'
+						/>
+						<Button>Go</Button>
+					</div>
 				</div>
-				<div className='basis-32 pl-3'>
-					<Button>Go</Button>
+				{/* Row-2 */}
+				<div className='flex justify-center w-full items-start'>
+					<Card className='w-full'>
+						<CardHeader>
+							<CardTitle>Recent Bookings</CardTitle>
+							<CardDescription>
+								5 pending approvals
+							</CardDescription>
+						</CardHeader>
+						<CardContent className='grid gap-4'>
+							<div className=' flex items-center space-x-4 rounded-md border p-4'>
+								<div className='flex-1 space-y-1'>
+									<p className='text-sm font-medium leading-none'>
+										Annual General Meeting
+									</p>
+									<p className='text-sm text-muted-foreground'>
+										Tomorrow
+									</p>
+								</div>
+								<Button variant='ghost'>
+									<MoreHorizontal />
+								</Button>
+							</div>
+							<div className=' flex items-center space-x-4 rounded-md border p-4'>
+								<div className='flex-1 space-y-1'>
+									<p className='text-sm font-medium leading-none'>
+										Business Conference
+									</p>
+									<p className='text-sm text-muted-foreground'>
+										Next Friday
+									</p>
+								</div>
+								<Button variant='ghost'>
+									<MoreHorizontal />
+								</Button>
+							</div>
+							<div className=' flex items-center space-x-4 rounded-md border p-4'>
+								<div className='flex-1 space-y-1'>
+									<p className='text-sm font-medium leading-none'>
+										Networking Event
+									</p>
+									<p className='text-sm text-muted-foreground'>
+										February 20
+									</p>
+								</div>
+								<Button variant='ghost'>
+									<MoreHorizontal />
+								</Button>
+							</div>
+						</CardContent>
+						<CardFooter>
+							<Button variant='outline'>
+								<span>See All</span>
+								<ChevronRight />
+							</Button>
+						</CardFooter>
+					</Card>
 				</div>
-			</div>
 
-			<div className='flex flex-row mt-20 px-20 h-screen '>
-				<div className='basis-64 '></div>
-				<div className='basis-128 w-full'>
+				<div className=''>
 					<h1>Annual Reservation Report</h1>
 					<BarChartComponet />
 				</div>
-				<div className='basis-64 '></div>
 			</div>
+
+			{/* Row-3 */}
 		</SidebarLayout>
 	);
 }

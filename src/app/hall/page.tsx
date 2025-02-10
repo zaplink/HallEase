@@ -26,7 +26,9 @@ export default function Hall() {
 	if (error)
 		return (
 			<SidebarLayout>
-				<p className='text-center text-red-500'>Error: {error}</p>
+				<p className='text-center text-red-500 mt-[120px]'>
+					Error: {error}
+				</p>
 			</SidebarLayout>
 		);
 	return (

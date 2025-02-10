@@ -231,7 +231,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 															>
 																<item.itemIcon
 																	size={20}
-																	className='mr-5'
+																	className='mr-1'
 																/>
 																<span>
 																	{
@@ -284,7 +284,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 																						size={
 																							20
 																						}
-																						className='mr-5'
+																						className='mr-1'
 																					/>
 																					<span>
 																						{
@@ -322,7 +322,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 														>
 															<item.itemIcon
 																size={20}
-																className='mr-5'
+																className='mr-1'
 															/>
 															<span>
 																{item.itemTitle}
@@ -354,7 +354,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 								>
 									<LogOut
 										size={20}
-										className='mr-5 text-red-500'
+										className='mr-1 text-red-500'
 									/>
 									<span className='text-red-500'>Logout</span>
 								</button>
