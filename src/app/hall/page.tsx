@@ -1,3 +1,5 @@
+'use client';
+
 import SidebarLayout from '@/layouts/SidebarLayout';
 import { Input } from '@/components/ui/input';
 import {
@@ -8,8 +10,14 @@ import {
 	TableRow,
 	TableCell,
 } from '@/components/ui/table';
+import useHalls from '@/hooks/useHalls';
 
 export default function Hall() {
+	const { halls, loading, error } = useHalls();
+
+	if (loading) return <p className='text-center text-gray-500'>Loading...</p>;
+	if (error)
+		return <p className='text-center text-red-500'>Error: {error}</p>;
 	return (
 		// Sidebar layout
 		<SidebarLayout>
@@ -31,30 +39,25 @@ export default function Hall() {
 					</TableRow>
 				</TableHeader>
 				<TableBody>
-					<TableRow>
-						<TableCell>AB-LCH-01</TableCell>
-						<TableCell>Lecture Hall</TableCell>
-						<TableCell>100</TableCell>
-						<TableCell>Unvailable</TableCell>
-						<TableCell>Tomorrow</TableCell>
-						<TableCell>Lecture</TableCell>
-					</TableRow>
-					<TableRow>
-						<TableCell>AB-LCH-02</TableCell>
-						<TableCell>Lecture Hall</TableCell>
-						<TableCell>50</TableCell>
-						<TableCell>Available</TableCell>
-						<TableCell>Jan 31, 2025</TableCell>
-						<TableCell>Event</TableCell>
-					</TableRow>
-					<TableRow>
+					{halls.map((hall) => (
+						<TableRow key={hall.id}>
+							<TableCell>{hall.room}</TableCell>
+							<TableCell>{hall.type}</TableCell>
+							<TableCell>{hall.capacity}</TableCell>
+							<TableCell>Testing</TableCell>
+							<TableCell>Testing</TableCell>
+							<TableCell>Testing</TableCell>
+						</TableRow>
+					))}
+
+					{/* <TableRow>
 						<TableCell>LAB-03</TableCell>
 						<TableCell>Lab</TableCell>
 						<TableCell>75</TableCell>
 						<TableCell>Available</TableCell>
 						<TableCell>In 7 days</TableCell>
 						<TableCell>Session</TableCell>
-					</TableRow>
+					</TableRow> */}
 				</TableBody>
 			</Table>
 		</SidebarLayout>
