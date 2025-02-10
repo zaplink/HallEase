@@ -15,9 +15,20 @@ import useHalls from '@/hooks/useHalls';
 export default function Hall() {
 	const { halls, loading, error } = useHalls();
 
-	if (loading) return <p className='text-center text-gray-500'>Loading...</p>;
+	if (loading)
+		return (
+			<SidebarLayout>
+				<p className='text-center text-gray-500 mt-[120px]'>
+					Loading Halls...
+				</p>
+			</SidebarLayout>
+		);
 	if (error)
-		return <p className='text-center text-red-500'>Error: {error}</p>;
+		return (
+			<SidebarLayout>
+				<p className='text-center text-red-500'>Error: {error}</p>
+			</SidebarLayout>
+		);
 	return (
 		// Sidebar layout
 		<SidebarLayout>
