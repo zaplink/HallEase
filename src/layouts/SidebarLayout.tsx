@@ -216,6 +216,47 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
 	const { profile, loading } = useProfile();
 
+	const findBreadcrumb = (path: string) => {
+		for (const section of sidebarMenu) {
+			for (const item of section.sectionMenu) {
+				// Check if it's a main menu item
+				if (item.itemUrl === path) {
+					return [{ title: item.itemTitle, url: item.itemUrl }];
+				}
+
+				// Check if it's inside a submenu
+				if (item.subMenu) {
+					const subItem = item.subMenu.find(
+						(sub) => sub.subUrl === path
+					);
+					if (subItem) {
+						return [
+							{ title: item.itemTitle, url: item.itemUrl },
+							{ title: subItem.subTitle, url: subItem.subUrl },
+						];
+					}
+				}
+			}
+		}
+		// Default if no match is found
+		return [{ title: 'Dashboard', url: '/dashboard' }];
+	};
+
+	const generateBreadcrumbs = () => {
+		const breadcrumbs = findBreadcrumb(currentPath);
+
+		return breadcrumbs.map((breadcrumb, index) => (
+			<React.Fragment key={breadcrumb.url}>
+				{index !== 0 && <BreadcrumbSeparator />}
+				<BreadcrumbItem>
+					<Link href={breadcrumb.url}>
+						<BreadcrumbPage>{breadcrumb.title}</BreadcrumbPage>
+					</Link>
+				</BreadcrumbItem>
+			</React.Fragment>
+		));
+	};
+
 	return (
 		// Sidebar placeholder
 		<SidebarProvider>
@@ -454,13 +495,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 						{/* Beadcrumb */}
 						<Breadcrumb>
 							<BreadcrumbList>
-								<BreadcrumbItem>
-									<BreadcrumbPage>System</BreadcrumbPage>
-								</BreadcrumbItem>
-								<BreadcrumbSeparator />
-								<BreadcrumbItem>
-									<BreadcrumbPage>Test</BreadcrumbPage>
-								</BreadcrumbItem>
+								{generateBreadcrumbs()}
 							</BreadcrumbList>
 						</Breadcrumb>
 					</div>
