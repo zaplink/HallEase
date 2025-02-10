@@ -61,6 +61,7 @@ import {
 	CollapsibleContent,
 } from '@/components/ui/collapsible';
 import Link from 'next/link';
+import { useProfile } from '@/hooks/useProfile';
 
 const sidebarMenu = [
 	{
@@ -213,6 +214,66 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 		setOpenSubMenu((prev) => (prev === menuTitle ? null : menuTitle));
 	};
 
+	const { profile, loading } = useProfile();
+
+	const findBreadcrumb = (path: string) => {
+		const breadcrumbs: { title: string; url: string }[] = [];
+
+		for (const section of sidebarMenu) {
+			for (const item of section.sectionMenu) {
+				// If it's a main menu item
+				if (item.itemUrl === path) {
+					breadcrumbs.push({
+						title: item.itemTitle,
+						url: item.itemUrl,
+					});
+					return breadcrumbs;
+				}
+
+				// If it's inside a submenu
+				if (item.subMenu) {
+					const subItem = item.subMenu.find(
+						(sub) => sub.subUrl === path
+					);
+					if (subItem) {
+						breadcrumbs.push(
+							{ title: item.itemTitle, url: item.itemUrl }, // Parent
+							{ title: subItem.subTitle, url: subItem.subUrl } // Sub-item
+						);
+						return breadcrumbs;
+					}
+				}
+			}
+		}
+
+		// If path isn't found in sidebarMenu, use the last segment as the title
+		const pathSegments = path.split('/').filter(Boolean);
+		if (pathSegments.length > 0) {
+			const formattedTitle = pathSegments[pathSegments.length - 1]
+				.replace(/-/g, ' ')
+				.replace(/\b\w/g, (char) => char.toUpperCase());
+
+			breadcrumbs.push({ title: formattedTitle, url: path });
+		}
+
+		return breadcrumbs;
+	};
+
+	const generateBreadcrumbs = () => {
+		const breadcrumbs = findBreadcrumb(currentPath);
+
+		return breadcrumbs.map((breadcrumb, index) => (
+			<React.Fragment key={breadcrumb.url}>
+				{index !== 0 && <BreadcrumbSeparator />}
+				<BreadcrumbItem>
+					<Link href={breadcrumb.url}>
+						<BreadcrumbPage>{breadcrumb.title}</BreadcrumbPage>
+					</Link>
+				</BreadcrumbItem>
+			</React.Fragment>
+		));
+	};
+
 	return (
 		// Sidebar placeholder
 		<SidebarProvider>
@@ -227,11 +288,35 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 							>
 								<SidebarMenuButton className='h-auto p-0 m-2'>
 									<Avatar className='mr-5'>
-										<AvatarImage src='https://github.com/shadcn.png' />
-										<AvatarFallback>JD</AvatarFallback>
+										{/* <AvatarImage src='https://github.com/shadcn.png' /> */}
+
+										{loading ? (
+											<AvatarImage src='https://github.com/shadcn.png' />
+										) : profile ? (
+											<AvatarImage
+												src={profile.pro_pic}
+											/>
+										) : (
+											<AvatarImage src='https://github.com/shadcn.png' />
+										)}
+										<AvatarFallback>User</AvatarFallback>
 									</Avatar>
 
-									<span className='font-bold'>John Doe</span>
+									{/* <span className='font-bold'>John Doe</span> */}
+
+									{loading ? (
+										<span className='font-bold'>
+											Loading...
+										</span>
+									) : profile ? (
+										<span className='font-bold'>
+											{profile?.full_name}
+										</span>
+									) : (
+										<span className='font-bold'>
+											User not found
+										</span>
+									)}
 								</SidebarMenuButton>
 							</Link>
 						</SidebarMenuItem>
@@ -427,13 +512,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 						{/* Beadcrumb */}
 						<Breadcrumb>
 							<BreadcrumbList>
-								<BreadcrumbItem>
-									<BreadcrumbPage>System</BreadcrumbPage>
-								</BreadcrumbItem>
-								<BreadcrumbSeparator />
-								<BreadcrumbItem>
-									<BreadcrumbPage>Test</BreadcrumbPage>
-								</BreadcrumbItem>
+								{generateBreadcrumbs()}
 							</BreadcrumbList>
 						</Breadcrumb>
 					</div>

@@ -8,6 +8,7 @@ import { FaTwitter } from 'react-icons/fa';
 const ContactUs = () => {
 	return (
 		<div
+			id='contacts'
 			style={{
 				backgroundImage: "url('/fct3.jpg')",
 				backgroundSize: 'cover',
