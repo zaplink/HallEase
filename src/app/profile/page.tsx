@@ -1,10 +1,12 @@
+'use client';
+
 import SidebarLayout from '@/layouts/SidebarLayout';
-
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
-
 import ChangePasswordForm from '@/components/ui/ChangePasswordForm';
+import { useProfile } from '@/hooks/useProfile';
 
 export default function Profile() {
+	const { profile, loading } = useProfile();
 	return (
 		// Sidebar layout
 		<SidebarLayout>
@@ -36,7 +38,11 @@ export default function Profile() {
 									User Name
 								</TableCell>
 								<TableCell className='text-left'>
-									John Doe
+									{loading
+										? loading
+										: profile
+											? profile.full_name
+											: 'User not found'}
 								</TableCell>
 							</TableRow>
 							<TableRow>
