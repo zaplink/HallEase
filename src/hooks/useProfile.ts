@@ -1,29 +1,30 @@
-'use client';
+import { useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabaseClient';
 
-import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabaseClient'; // Import client-side Supabase instance
+const supabase = createClient();
 
-const supabase = createClient(); // Use client-side auth
-
-export default function useUserProfile() {
+export function useProfile() {
 	const [profile, setProfile] = useState<{
 		full_name: string;
 		pro_pic: string;
+		email: string;
 	} | null>(null);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		const fetchProfile = async () => {
-			// ✅ Fetch authenticated user (client-side)
+			setLoading(true);
+
+			// ✅ Get authenticated user
 			const {
 				data: { user },
 				error: userError,
 			} = await supabase.auth.getUser();
 			if (userError || !user) {
 				console.error('User fetch error:', userError);
+				setLoading(false);
 				return;
 			}
-
-			console.log('Authenticated User ID:', user.id);
 
 			// ✅ Fetch user profile from 'profiles' table
 			const { data, error } = await supabase
@@ -35,13 +36,13 @@ export default function useUserProfile() {
 			if (error) {
 				console.error('Profile Fetch Error:', error);
 			} else {
-				console.log('Fetched Profile Data:', data);
-				setProfile(data);
+				setProfile({ ...data, email: user.email ?? '' });
 			}
+			setLoading(false);
 		};
 
 		fetchProfile();
 	}, []);
 
-	return profile;
+	return { profile, loading };
 }

@@ -61,7 +61,7 @@ import {
 	CollapsibleContent,
 } from '@/components/ui/collapsible';
 import Link from 'next/link';
-import useUserProfile from '@/hooks/useUserProfile';
+import { useProfile } from '@/hooks/useProfile';
 
 const sidebarMenu = [
 	{
@@ -214,7 +214,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 		setOpenSubMenu((prev) => (prev === menuTitle ? null : menuTitle));
 	};
 
-	const profile = useUserProfile();
+	const { profile, loading } = useProfile();
 
 	return (
 		// Sidebar placeholder
@@ -232,12 +232,13 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 									<Avatar className='mr-5'>
 										{/* <AvatarImage src='https://github.com/shadcn.png' /> */}
 
-										{profile?.pro_pic ? (
+										{loading ? (
+											<AvatarImage src='https://github.com/shadcn.png' />
+										) : profile ? (
 											<AvatarImage
 												src={profile.pro_pic}
 											/>
 										) : (
-											// Placeholder
 											<AvatarImage src='https://github.com/shadcn.png' />
 										)}
 										<AvatarFallback>User</AvatarFallback>
@@ -245,9 +246,19 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
 									{/* <span className='font-bold'>John Doe</span> */}
 
-									<span className='font-bold'>
-										{profile?.full_name || 'Loading...'}
-									</span>
+									{loading ? (
+										<span className='font-bold'>
+											Loading...
+										</span>
+									) : profile ? (
+										<span className='font-bold'>
+											{profile?.full_name}
+										</span>
+									) : (
+										<span className='font-bold'>
+											User not found
+										</span>
+									)}
 								</SidebarMenuButton>
 							</Link>
 						</SidebarMenuItem>
