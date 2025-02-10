@@ -14,6 +14,8 @@ import {
 	CardTitle,
 } from '@/components/ui/card';
 import { MoreHorizontal, ChevronRight } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+// import React from 'react';
 
 export default async function Dashboard() {
 	// navigate back to login if user not logged
@@ -23,6 +25,8 @@ export default async function Dashboard() {
 	if (error || !data?.user) {
 		redirect('/');
 	}
+
+	// const [date, setDate] = React.useState<Date | undefined>(new Date());
 	return (
 		<SidebarLayout>
 			{/* Grid Layout */}
@@ -49,7 +53,7 @@ export default async function Dashboard() {
 								</CardDescription>
 							</CardHeader>
 							<CardContent className='grid gap-4'>
-								<div className=' flex items-center space-x-4 rounded-md border p-4'>
+								<div className='flex items-center space-x-4 rounded-md border p-4'>
 									<div className='flex-1 space-y-1'>
 										<p className='text-sm font-medium leading-none'>
 											Annual General Meeting
@@ -106,7 +110,16 @@ export default async function Dashboard() {
 				</div>
 
 				{/* Column-3 */}
-				<div className=''></div>
+				<div className=''>
+					<div className='flex items-center justify-center space-x-4'>
+						<Calendar
+							mode='single'
+							// selected={date}
+							// onSelect={setDate}
+							className='rounded-md border bg-white'
+						/>
+					</div>
+				</div>
 			</div>
 		</SidebarLayout>
 	);
