@@ -21,6 +21,7 @@ import {
 	Flag,
 	ChartNoAxesCombined,
 	FileChartColumn,
+	BotMessageSquare,
 } from 'lucide-react';
 import {
 	Sidebar,
@@ -62,6 +63,18 @@ import {
 } from '@/components/ui/collapsible';
 import Link from 'next/link';
 import { useProfile } from '@/hooks/useProfile';
+import {
+	Drawer,
+	// DrawerClose,
+	DrawerContent,
+	DrawerDescription,
+	// DrawerFooter,
+	DrawerHeader,
+	DrawerTitle,
+	DrawerTrigger,
+} from '@/components/ui/drawer';
+// import { ResponsiveContainer } from 'recharts';
+import { format } from 'date-fns';
 
 const sidebarMenu = [
 	{
@@ -198,10 +211,12 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
 	// Calender state
 	const [date, setDate] = React.useState<Date | undefined>(new Date());
-	const [isCalendarVisible, setIsCalendarVisible] = useState(false);
-	const toggleCalendar = () => {
-		setIsCalendarVisible((prevState) => !prevState); // Toggle the calendar visibility
-	};
+	// const [isCalendarVisible, setIsCalendarVisible] = useState(false);
+	// const toggleCalendar = () => {
+	// 	setIsCalendarVisible((prevState) => !prevState); // Toggle the calendar visibility
+	// };
+
+	const formattedDate = date ? format(date, 'dd MMMM yyyy') : '';
 
 	const baseUrl = getBaseUrl();
 	// console.log(baseUrl);
@@ -517,31 +532,52 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 						</Breadcrumb>
 					</div>
 
-					{/* Calender button */}
-					<div>
+					<div className='flex flex-row gap-1'>
+						{/* Bot button */}
 						<Button
-							onClick={toggleCalendar}
+							// onClick={toggleCalendar}
 							variant='ghost'
 							className='p-2'
 						>
-							<CalendarIcon size={20} />
+							<BotMessageSquare size={20} />
 						</Button>
+
+						{/* Calender */}
+						<Drawer>
+							<DrawerTrigger asChild>
+								<Button
+									// onClick={toggleCalendar}
+									variant='ghost'
+									className='p-2'
+								>
+									<CalendarIcon size={20} />
+								</Button>
+							</DrawerTrigger>
+							<DrawerContent>
+								<div className='mx-auto w-full max-w-sm'>
+									<DrawerHeader>
+										<DrawerTitle>
+											{formattedDate}
+										</DrawerTitle>
+										<DrawerDescription>
+											Have a Good Day
+										</DrawerDescription>
+									</DrawerHeader>
+									<div className='flex'>
+										<Calendar
+											mode='single'
+											selected={date}
+											onSelect={setDate}
+											className='rounded-md border bg-white'
+										/>
+									</div>
+								</div>
+							</DrawerContent>
+						</Drawer>
 					</div>
 				</div>
 
 				<Separator />
-
-				{/* Calender */}
-				<div className='relative w-full'>
-					{isCalendarVisible && (
-						<Calendar
-							mode='single'
-							selected={date}
-							onSelect={setDate}
-							className='rounded-md border absolute bg-white z-10 top-0 right-2'
-						/>
-					)}
-				</div>
 
 				{/* Put page content here*/}
 				<div className='px-2 pt-2 flex flex-col h-full'>{children}</div>
