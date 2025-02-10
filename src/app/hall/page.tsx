@@ -1,6 +1,6 @@
 'use client';
 
-import SidebarLayout from '@/layouts/SidebarLayout';
+import SidebarLayout from '@/layouts/Sidebar/Layout';
 import { Input } from '@/components/ui/input';
 import {
 	Table,

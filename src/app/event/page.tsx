@@ -1,4 +1,4 @@
-import SidebarLayout from '@/layouts/SidebarLayout';
+import SidebarLayout from '@/layouts/Sidebar/Layout';
 import {
 	Table,
 	TableBody,

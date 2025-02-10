@@ -1,6 +1,6 @@
 'use client';
 
-import SidebarLayout from '@/layouts/SidebarLayout';
+import SidebarLayout from '@/layouts/Sidebar/Layout';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import ChangePasswordForm from '@/components/ui/ChangePasswordForm';
 import { useProfile } from '@/hooks/useProfile';

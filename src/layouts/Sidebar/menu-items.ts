@@ -1,8 +1,5 @@
 import {
 	LayoutDashboard,
-	LogOut,
-	ChevronDown,
-	ChevronRight,
 	CalendarClock,
 	Building2,
 	CircleCheckBig,
@@ -19,7 +16,6 @@ import {
 	Flag,
 	ChartNoAxesCombined,
 	FileChartColumn,
-	BotMessageSquare,
 } from 'lucide-react';
 
 export interface SubMenuItem {
