@@ -14,8 +14,9 @@ import {
 	CardTitle,
 } from '@/components/ui/card';
 import { MoreHorizontal, ChevronRight } from 'lucide-react';
-import { Calendar } from '@/components/ui/calendar';
+// import { Calendar } from '@/components/ui/calendar';
 // import React from 'react';
+import PieChart from './pie-chart';
 
 export default async function Dashboard() {
 	// navigate back to login if user not logged
@@ -104,20 +105,81 @@ export default async function Dashboard() {
 
 					{/* Chart */}
 					<div className=''>
-						<h1>Annual Reservation Report</h1>
-						<BarChartComponet />
+						<PieChart />
 					</div>
 				</div>
 
 				{/* Column-3 */}
-				<div className=''>
-					<div className='flex items-center justify-center space-x-4'>
-						<Calendar
-							mode='single'
-							// selected={date}
-							// onSelect={setDate}
-							className='rounded-md border bg-white'
-						/>
+				<div>
+					<div className='flex items-center justify-center flex-col gap-4'>
+						<div className='flex flex-row gap-1 w-full'>
+							<Card className='w-1/2'>
+								<CardHeader className='pb-1 pt-3 px-4'>
+									<CardTitle className='font-thin'>
+										Total Bookings
+									</CardTitle>
+									<CardDescription>
+										+10% last week
+									</CardDescription>
+								</CardHeader>
+								<CardContent className='pb-2 px-4'>
+									<span className='font-extrabold text-2xl'>
+										+20
+									</span>
+								</CardContent>
+							</Card>
+							<Card className='w-1/2'>
+								<CardHeader className='pb-1 pt-3 px-4'>
+									<CardTitle className='font-thin'>
+										Upcoming Events
+									</CardTitle>
+									<CardDescription>
+										-5% last week
+									</CardDescription>
+								</CardHeader>
+								<CardContent className='pb-2 px-4'>
+									<span className='font-extrabold text-2xl'>
+										+5
+									</span>
+								</CardContent>
+							</Card>
+						</div>
+						<div className='flex flex-row gap-1 w-full'>
+							<Card className='w-1/2'>
+								<CardHeader className='pb-1 pt-3 px-4'>
+									<CardTitle className='font-thin'>
+										Occupied Now
+									</CardTitle>
+									<CardDescription>
+										-50% last hour
+									</CardDescription>
+								</CardHeader>
+								<CardContent className='pb-2 px-4'>
+									<span className='font-extrabold text-2xl'>
+										+10
+									</span>
+								</CardContent>
+							</Card>
+							<Card className='w-1/2'>
+								<CardHeader className='pb-1 pt-3 px-4'>
+									<CardTitle className='font-thin'>
+										Cancellations
+									</CardTitle>
+									<CardDescription>
+										-90% fewer
+									</CardDescription>
+								</CardHeader>
+								<CardContent className='pb-2 px-4'>
+									<span className='font-extrabold text-2xl'>
+										+3
+									</span>
+								</CardContent>
+							</Card>
+						</div>
+
+						<div className='w-full'>
+							<BarChartComponet />
+						</div>
 					</div>
 				</div>
 			</div>
