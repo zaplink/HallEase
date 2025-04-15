@@ -74,7 +74,7 @@ function BookingFormNew() {
 					render={({ field }) => (
 						<FormItem className='form-item mb-6'>
 							<FormLabel className='font-semibold'>
-								Name
+								Event Name
 							</FormLabel>
 							<FormControl>
 								<Input
@@ -114,7 +114,7 @@ function BookingFormNew() {
 					)}
 				/>
 
-				<FormField
+				{/* <FormField
 					control={form.control}
 					name='organizedby'
 					rules={{ required: 'Please Enter  Organization ' }}
@@ -133,7 +133,7 @@ function BookingFormNew() {
 							<FormMessage />
 						</FormItem>
 					)}
-				/>
+				/> */}
 
 				<FormField
 					control={form.control}
@@ -265,7 +265,7 @@ function BookingFormNew() {
 				/>
 
 				{/* Email Field */}
-				<FormField
+				{/* <FormField
 					control={form.control}
 					name='email'
 					rules={{
@@ -291,7 +291,7 @@ function BookingFormNew() {
 							<FormMessage />
 						</FormItem>
 					)}
-				/>
+				/> */}
 
 				{/* Submit Button */}
 				<div className='flex flex-row gap-4'>
