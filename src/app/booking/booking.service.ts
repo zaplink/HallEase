@@ -26,3 +26,27 @@ function mapBookingDataToApi(data: BookingFormData) {
 		hall: data.hall,
 	};
 }
+
+// Realtime notifications
+// Subscribe to real-time updates from the 'bookings' table
+
+// Subscribe to real-time updates from the 'bookings' table
+export function subscribeToNewBookings(
+	callback: (newBooking: BookingFormData) => void
+) {
+	const channel = supabase
+		.channel('booking-channel') // Channel name
+		.on(
+			'postgres_changes',
+			{ event: 'INSERT', schema: 'public', table: 'bookings' },
+			(payload) => {
+				// The callback that will be triggered when a new booking is inserted
+				if (payload.new) {
+					callback(payload.new as BookingFormData); // Pass the new booking data
+				}
+			}
+		)
+		.subscribe();
+
+	return channel;
+}

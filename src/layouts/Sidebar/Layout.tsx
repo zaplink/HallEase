@@ -5,6 +5,7 @@ import {
 	ChevronRight,
 	BotMessageSquare,
 	Calendar as CalendarIcon,
+	Asterisk,
 } from 'lucide-react';
 import {
 	Sidebar,
@@ -63,11 +64,34 @@ import { Toaster } from '@/components/ui/sonner';
 
 import ProfileWidget from './ProfileWidget';
 
+import { subscribeToNewBookings } from '@/app/booking/booking.service';
+
+import { useEffect } from 'react';
+
 type SidebarLayoutProps = Readonly<{
 	children: React.ReactNode;
 }>;
 
 export default function SidebarLayout({ children }: SidebarLayoutProps) {
+	const [notification, setNotification] = useState<string | null>(null);
+	// Use below for show notificaitons on booking data submission
+	// {notification && (
+	// 	<div className='notification'>{notification}</div>
+	// )}
+
+	// Subscribe to new bookings on component mount
+	useEffect(() => {
+		const channel = subscribeToNewBookings((newBooking) => {
+			console.log('Booking received:', newBooking);
+			setNotification(`New booking received: ${newBooking.name}`);
+		});
+
+		// Cleanup on unmount
+		return () => {
+			channel.unsubscribe();
+		};
+	}, []);
+
 	// Current path of URL
 	const currentPath = usePathname();
 
@@ -322,6 +346,10 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 																		item.itemTitle
 																	}
 																</span>
+																{notification && (
+																	<Asterisk />
+																)}
+
 																{isOpen ? (
 																	<ChevronDown
 																		className='ml-auto'
