@@ -8,4 +8,5 @@ export function createClient() {
 	);
 }
 
+// Use 'supabase' instead of 'createClient()' as a standard.
 export const supabase = createClient();
