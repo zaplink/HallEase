@@ -1,34 +1,26 @@
 import { supabase } from '@/lib/supabaseClient';
-import { BookingFormData } from './booking.types';
+import { BookingFormData, mapBookingDataToApi } from './booking.data';
 
 // Use to submit booking form details
-export async function submitBooking(formData: BookingFormData) {
+export async function submitBooking(
+	formData: BookingFormData,
+	status: 'pending' | 'draft'
+) {
 	const mappedFormData = mapBookingDataToApi(formData);
+
+	const enrichedData = {
+		...mappedFormData,
+		status,
+	};
+
 	const { data, error } = await supabase
 		.from('bookings')
-		.insert([mappedFormData]);
+		.insert([enrichedData]);
 
 	if (error) throw new Error(error.message);
 
 	return data;
 }
-
-// Mapper function to convert form data from camelCase to snake_case
-function mapBookingDataToApi(data: BookingFormData) {
-	return {
-		name: data.name,
-		type: data.type,
-		description: data.description,
-		attendee_count: data.attendeeCount,
-		date: data.date,
-		start_time: data.startTime,
-		end_time: data.endTime,
-		hall: data.hall,
-	};
-}
-
-// Realtime notifications
-// Subscribe to real-time updates from the 'bookings' table
 
 // Subscribe to real-time updates from the 'bookings' table
 export function subscribeToNewBookings(

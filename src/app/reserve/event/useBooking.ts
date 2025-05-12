@@ -1,19 +1,22 @@
 import { useState } from 'react';
 import { submitBooking } from './booking.service';
-import { BookingFormData } from './booking.types';
+import { BookingFormData } from './booking.data';
 
 export function useBooking() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<boolean>(false);
 
-	const handleSubmit = async (formData: BookingFormData) => {
+	const handleSubmit = async (
+		formData: BookingFormData,
+		status: 'pending' | 'draft'
+	) => {
 		setIsLoading(true);
 		setError(null);
 		setSuccess(false);
 
 		try {
-			const result = await submitBooking(formData);
+			const result = await submitBooking(formData, status);
 			setSuccess(true);
 			return result;
 		} catch (err: unknown) {
