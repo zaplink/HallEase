@@ -21,6 +21,7 @@ import {
 	Lock,
 	PencilRuler,
 	Cast,
+	Library,
 } from 'lucide-react';
 
 export interface SubMenuItem {
@@ -74,6 +75,12 @@ const sidebarMenu = [
 		sectionTitle: 'Hall & Booking Management',
 		sectionMenu: [
 			{
+				itemTitle: 'My Reservations',
+				itemUrl: '/my-reservations',
+				itemIcon: Library,
+				roleSlugs: [],
+			},
+			{
 				itemTitle: 'Reserve a Hall',
 				itemUrl: '/reserve',
 				itemIcon: FilePlus2,
@@ -92,7 +99,7 @@ const sidebarMenu = [
 				],
 			},
 			{
-				itemTitle: 'Booking Requests',
+				itemTitle: 'Reservation Requests',
 				itemUrl: '/requests',
 				itemIcon: BookOpen,
 				roleSlugs: ['MBR'],
