@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabaseClient';
-import { BookingFormData, mapBookingDataToApi } from './booking.data';
+import { BookingFormData, mapBookingDataToApi } from './reserve.event.data';
 
 // Use to submit booking form details
 export async function submitBooking(

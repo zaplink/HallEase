@@ -1,8 +1,8 @@
 'use client';
 
 import { useForm } from 'react-hook-form';
-import { BookingFormData, defaultBookingFormData } from '../booking.data';
-import { useBooking } from '@/app/reserve/event/useBooking';
+import { BookingFormData, defaultBookingFormData } from '../reserve.event.data';
+import { useBooking } from '@/app/reserve/event/useReserveEvent';
 import { Combobox } from '@/components/combobox';
 import { DatePickerDemo } from '@/components/ui/DatePicker';
 import {
@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import EquipmentSelector from '../../components/EquipmentSelector';
-import { eventTypeOptions, SubmissionType } from '../booking.data';
+import { eventTypeOptions, SubmissionType } from '../reserve.event.data';
 import { useWatch } from 'react-hook-form';
 import { useRef } from 'react';
 

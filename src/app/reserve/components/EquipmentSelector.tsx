@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/form';
 import { Combobox } from '@/components/combobox';
 import { X } from 'lucide-react';
-import { equipmentOptions } from '../event/booking.data';
+import { equipmentOptions } from '../event/reserve.event.data';
 
 type EquipmentItem = {
 	equipment: string;
