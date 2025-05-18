@@ -5,6 +5,17 @@ import {
 } from './reserve.event.data';
 import { pick } from 'lodash';
 
+const {
+	data: { user },
+	error: userError,
+} = await supabase.auth.getUser();
+
+if (userError) {
+	throw new Error(userError.message);
+}
+
+const profileId = user?.id;
+
 // Use to submit booking form details
 export async function submitReserveEvent(
 	formData: ReserveEventFormData,
@@ -29,6 +40,7 @@ export async function submitReserveEvent(
 		]),
 		status,
 		type: 'event',
+		profile_id: profileId,
 	};
 
 	const { data: reserveDataResult, error: reserveDataError } = await supabase
