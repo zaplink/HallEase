@@ -1,7 +1,7 @@
 'use client';
 
 import { useForm } from 'react-hook-form';
-import { useBooking } from '@/app/reserve/lecture/useBooking';
+import { useBooking } from '@/app/reserve/lecture/useReserveLecture';
 import { Combobox } from '@/components/combobox';
 import { DatePickerDemo } from '@/components/ui/DatePicker';
 import {
@@ -26,6 +26,9 @@ import {
 	SubmissionType,
 } from '@/app/reserve/lecture/reserve.lecture.data';
 import EquipmentSelector from '@/app/reserve/components/EquipmentSelector';
+
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function ReserveLectureForm() {
 	const { handleSubmit, isLoading, error, success } = useBooking();
@@ -62,13 +65,41 @@ export default function ReserveLectureForm() {
 		{ value: 'LCH-AB-02', label: 'LCH-AB-02' },
 	];
 
-	const courseCodeOptions = [
-		{ label: 'CSCI 22012 - Advanced Operating System', value: 'csci22012' },
-		{
-			label: 'CSCI 22022 - Object Oriented Programming',
-			value: 'csci22022',
-		},
-	];
+	// const courseCodeOptions = [
+	// 	{ label: 'CSCI 22012 - Advanced Operating System', value: 'csci22012' },
+	// 	{
+	// 		label: 'CSCI 22022 - Object Oriented Programming',
+	// 		value: 'csci22022',
+	// 	},
+	// ];
+
+	const [courseCodeOptions, setCourseCodeOptions] = useState<
+		{ label: string; value: string }[]
+	>([]);
+
+	useEffect(() => {
+		const fetchCourses = async () => {
+			const { data, error } = await supabase
+				.from('course')
+				.select('id, char, digit, name');
+
+			if (error) {
+				console.error('Error fetching courses:', error);
+				return;
+			}
+
+			if (data) {
+				const options = data.map((course) => ({
+					label: `${course.char} ${course.digit} - ${course.name}`,
+					value: course.id, // Use `id` as value for submission
+				}));
+				setCourseCodeOptions(options);
+				console.log('Fetched course options:', options);
+			}
+		};
+
+		fetchCourses();
+	}, []);
 
 	return (
 		<Form {...form}>
@@ -97,7 +128,13 @@ export default function ReserveLectureForm() {
 												onChange={(val) =>
 													field.onChange(val)
 												}
-												placeholder='Select Course Code'
+												// placeholder='Select Course Code'
+												placeholder={
+													courseCodeOptions.length ===
+													0
+														? 'Loading courses...'
+														: 'Select Course Code'
+												}
 											/>
 										</FormControl>
 										<FormMessage />

@@ -3,6 +3,7 @@ import {
 	ReserveLectureFormData,
 	mapBookingDataToApi,
 } from './reserve.lecture.data';
+import { pick } from 'lodash';
 
 // Use to submit booking form details
 export async function submitBooking(
@@ -11,18 +12,55 @@ export async function submitBooking(
 ) {
 	const mappedFormData = mapBookingDataToApi(formData);
 
-	const enrichedData = {
-		...mappedFormData,
+	// const enrichedData = {
+	// 	...mappedFormData,
+	// 	status,
+	// };
+
+	const reserveData = {
+		...pick(mappedFormData, [
+			'date',
+			'start_hour',
+			'start_minute',
+			'end_hour',
+			'end_minute',
+			'hall_option',
+			'description',
+		]),
 		status,
+		type: 'lecture',
 	};
 
-	const { data, error } = await supabase
-		.from('bookings')
-		.insert([enrichedData]);
+	const { data: reserveDataResult, error: reserveDataError } = await supabase
+		.from('reserve')
+		.insert([reserveData])
+		.select('id');
 
-	if (error) throw new Error(error.message);
+	if (reserveDataError) {
+		console.log(reserveDataError);
+		throw new Error(reserveDataError.message);
+	}
+	const reserveId = reserveDataResult?.[0]?.id;
 
-	return data;
+	const lectureData = {
+		...pick(mappedFormData, ['type']),
+		status,
+		reserve_id: reserveId,
+		course_id: mappedFormData.course,
+	};
+
+	const { data: lectureDataResult, error: lectureDataError } = await supabase
+		.from('extra_lecture')
+		.insert([lectureData])
+		.select('id');
+
+	if (lectureDataError) throw new Error(lectureDataError.message);
+	const lectureId = lectureDataResult?.[0]?.id;
+
+	return {
+		reserveId,
+		lectureId,
+	};
 }
 
 // Subscribe to real-time updates from the 'bookings' table
