@@ -1,40 +1,109 @@
 import { supabase } from '@/lib/supabaseClient';
-import { BookingFormData, mapBookingDataToApi } from './reserve.event.data';
+import {
+	ReserveEventFormData,
+	mapBookingDataToApi,
+} from './reserve.event.data';
+import { pick } from 'lodash';
 
 // Use to submit booking form details
-export async function submitBooking(
-	formData: BookingFormData,
+export async function submitReserveEvent(
+	formData: ReserveEventFormData,
 	status: 'pending' | 'draft'
 ) {
 	const mappedFormData = mapBookingDataToApi(formData);
 
-	const enrichedData = {
-		...mappedFormData,
+	// const enrichedData = {
+	// 	...mappedFormData,
+	// 	status,
+	// };
+
+	const reserveData = {
+		...pick(mappedFormData, [
+			'date',
+			'start_hour',
+			'start_minute',
+			'end_hour',
+			'end_minute',
+			'hall_option',
+			'description',
+		]),
 		status,
+		type: 'event',
 	};
 
-	const { data, error } = await supabase
-		.from('bookings')
-		.insert([enrichedData]);
+	const { data: reserveDataResult, error: reserveDataError } = await supabase
+		.from('reserve')
+		.insert([reserveData])
+		.select('id');
 
-	if (error) throw new Error(error.message);
+	if (reserveDataError) {
+		console.log(reserveDataError);
+		throw new Error(reserveDataError.message);
+	}
+	const reserveId = reserveDataResult?.[0]?.id;
 
-	return data;
+	const eventData = {
+		...pick(mappedFormData, [
+			'name',
+			'type',
+			'organizer',
+			'attendee_count',
+		]),
+		status,
+		reserve_id: reserveId,
+	};
+
+	const { data: eventDataResult, error: eventDataError } = await supabase
+		.from('event')
+		.insert([eventData])
+		.select('id');
+
+	if (eventDataError) throw new Error(eventDataError.message);
+	const eventId = eventDataResult?.[0]?.id;
+
+	// const { error: reserveEventsError } = await supabase
+	// 	.from('reserve')
+	// 	.update({ event_id: eventId })
+	// 	.eq('id', reserveId);
+	// if (reserveEventsError) throw new Error(reserveEventsError.message);
+
+	// const { error: reserveEventsError } = await supabase
+	// 	.from('event')
+	// 	.update({ reserve_id: reserveId })
+	// 	.eq('id', eventId);
+	// if (reserveEventsError) throw new Error(reserveEventsError.message);
+
+	// const { error: joinReserveEventsError } = await supabase
+	// 	.from('reserve_events')
+	// 	.insert([
+	// 		{
+	// 			reserve_id: reserveId,
+	// 			event_id: eventId,
+	// 		},
+	// 	]);
+	// if (joinReserveEventsError) throw new Error(joinReserveEventsError.message);
+
+	return {
+		reserveId,
+		eventId,
+	};
+
+	// return { reserveData: reserveDataResult, eventData: eventDataResult };
 }
 
 // Subscribe to real-time updates from the 'bookings' table
 export function subscribeToNewBookings(
-	callback: (newBooking: BookingFormData) => void
+	callback: (newReserveEvent: ReserveEventFormData) => void
 ) {
 	const channel = supabase
-		.channel('booking-channel') // Channel name
+		.channel('reserve-event-channel') // Channel name
 		.on(
 			'postgres_changes',
-			{ event: 'INSERT', schema: 'public', table: 'bookings' },
+			{ event: 'INSERT', schema: 'public', table: 'event' },
 			(payload) => {
 				// The callback that will be triggered when a new booking is inserted
 				if (payload.new) {
-					callback(payload.new as BookingFormData); // Pass the new booking data
+					callback(payload.new as ReserveEventFormData); // Pass the new booking data
 				}
 			}
 		)

@@ -1,4 +1,4 @@
-export interface BookingFormData {
+export interface ReserveEventFormData {
 	name: string;
 	description: string | null;
 	type: EventType | null;
@@ -16,7 +16,7 @@ export interface BookingFormData {
 	additionalNotes: string | null;
 }
 
-export const defaultBookingFormData: BookingFormData = {
+export const defaultReserveEventFormData: ReserveEventFormData = {
 	name: '',
 	description: null,
 	type: null,
@@ -35,7 +35,7 @@ export const defaultBookingFormData: BookingFormData = {
 };
 
 // Mapper function to convert form data from camelCase to snake_case
-export function mapBookingDataToApi(data: BookingFormData) {
+export function mapBookingDataToApi(data: ReserveEventFormData) {
 	return {
 		name: data.name,
 		description: data.description,
@@ -50,7 +50,7 @@ export function mapBookingDataToApi(data: BookingFormData) {
 		// attendee_list: data.attendeeList,
 		hall_option: data.hallOpt,
 		// hall: data.hall,
-		additional_notes: data.additionalNotes,
+		// additional_notes: data.additionalNotes,
 	};
 }
 

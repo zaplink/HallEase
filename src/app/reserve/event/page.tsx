@@ -1,5 +1,5 @@
 import React from 'react';
-import BookingForm from './comp/BookingForm';
+import ReserveEventForm from './comp/ReserveEventForm';
 import SidebarLayout from '@/layouts/Sidebar/Layout';
 import PageHeader from '@/components/custom/PageHeader';
 
@@ -20,7 +20,7 @@ async function page() {
 					'Provide the required details to proceed with your booking',
 				]}
 			/>
-			<BookingForm />
+			<ReserveEventForm />
 		</SidebarLayout>
 	);
 }

@@ -1,7 +1,10 @@
 'use client';
 
 import { useForm } from 'react-hook-form';
-import { BookingFormData, defaultBookingFormData } from '../reserve.event.data';
+import {
+	ReserveEventFormData,
+	defaultReserveEventFormData,
+} from '../reserve.event.data';
 import { useBooking } from '@/app/reserve/event/useReserveEvent';
 import { Combobox } from '@/components/combobox';
 import { DatePickerDemo } from '@/components/ui/DatePicker';
@@ -21,15 +24,15 @@ import { eventTypeOptions, SubmissionType } from '../reserve.event.data';
 import { useWatch } from 'react-hook-form';
 import { useRef } from 'react';
 
-function BookingForm() {
+export default function ReserveEventForm() {
 	// const { handleSubmit, isLoading, error, success, reset } = useBooking();
 	const { handleSubmit, isLoading, error, success } = useBooking();
 
-	const form = useForm<BookingFormData>({
-		defaultValues: defaultBookingFormData,
+	const form = useForm<ReserveEventFormData>({
+		defaultValues: defaultReserveEventFormData,
 	});
 
-	const onSubmit = (formData: BookingFormData) => {
+	const onSubmit = (formData: ReserveEventFormData) => {
 		const status = submissionType.current === 'draft' ? 'draft' : 'pending';
 
 		if (status === 'draft' && !formData.name?.trim()) {
@@ -536,5 +539,3 @@ function BookingForm() {
 		</Form>
 	);
 }
-
-export default BookingForm;

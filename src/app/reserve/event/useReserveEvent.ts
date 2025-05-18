@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { submitBooking } from './reserve.event.service';
-import { BookingFormData } from './reserve.event.data';
+import { submitReserveEvent } from './reserve.event.service';
+import { ReserveEventFormData } from './reserve.event.data';
 
 export function useBooking() {
 	const [isLoading, setIsLoading] = useState(false);
@@ -8,7 +8,7 @@ export function useBooking() {
 	const [success, setSuccess] = useState<boolean>(false);
 
 	const handleSubmit = async (
-		formData: BookingFormData,
+		formData: ReserveEventFormData,
 		status: 'pending' | 'draft'
 	) => {
 		setIsLoading(true);
@@ -16,7 +16,7 @@ export function useBooking() {
 		setSuccess(false);
 
 		try {
-			const result = await submitBooking(formData, status);
+			const result = await submitReserveEvent(formData, status);
 			setSuccess(true);
 			return result;
 		} catch (err: unknown) {
