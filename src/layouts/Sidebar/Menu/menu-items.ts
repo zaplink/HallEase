@@ -22,6 +22,7 @@ import {
 	PencilRuler,
 	Cast,
 	Library,
+	SquareLibrary,
 } from 'lucide-react';
 
 export interface SubMenuItem {
@@ -74,6 +75,12 @@ const sidebarMenu = [
 	{
 		sectionTitle: 'Hall & Booking Management',
 		sectionMenu: [
+			{
+				itemTitle: 'All Reservations',
+				itemUrl: '/all-reservations',
+				itemIcon: SquareLibrary,
+				roleSlugs: [],
+			},
 			{
 				itemTitle: 'My Reservations',
 				itemUrl: '/my-reservations',
