@@ -211,7 +211,7 @@ const sidebarMenu = [
 		sectionMenu: [
 			{
 				itemTitle: 'FAQs & Documentation',
-				itemUrl: '/documentation',
+				itemUrl: '/faq',
 				itemIcon: CircleHelp,
 				roleSlugs: [],
 			},
