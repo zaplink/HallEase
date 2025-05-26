@@ -1,5 +1,16 @@
 import React from 'react';
 import SidebarLayout from '@/layouts/Sidebar/Layout';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 function ReportIssuePage() {
 	return (
@@ -15,49 +26,54 @@ function ReportIssuePage() {
 					</p>
 					<form className='space-y-5'>
 						<div>
-							<label className='block text-sm font-medium text-gray-700'>
+							<Label htmlFor='issueType'>
 								What seems to be the issue?
-							</label>
-							<select
-								name='issueType'
-								className='w-full mt-1 p-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500'
-							>
-								<option>Booking Problem</option>
-								<option>Technical Issue</option>
-								<option>Other</option>
-							</select>
+							</Label>
+							<Select>
+								<SelectTrigger className='mt-1'>
+									<SelectValue placeholder='Select an issue' />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value='booking'>
+										Booking Problem
+									</SelectItem>
+									<SelectItem value='technical'>
+										Technical Issue
+									</SelectItem>
+									<SelectItem value='other'>Other</SelectItem>
+								</SelectContent>
+							</Select>
 						</div>
 
 						<div>
-							<label className='block text-sm font-medium text-gray-700'>
+							<Label htmlFor='description'>
 								Can you tell us more?
-							</label>
-							<textarea
+							</Label>
+							<Textarea
+								id='description'
 								name='description'
-								rows={4}
 								placeholder="Describe the problem you're facing so we can assist you better."
-								className='w-full mt-1 p-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500'
-							></textarea>
-						</div>
-
-						<div>
-							<label className='block text-sm font-medium text-gray-700'>
-								Add a screenshot (if you have one)
-							</label>
-							<input
-								type='file'
-								name='screenshot'
-								accept='image/*'
-								className='mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100'
+								rows={4}
+								className='mt-1'
 							/>
 						</div>
 
-						<button
-							type='submit'
-							className='w-full bg-blue-600 text-white py-2 font-semibold rounded-xl hover:bg-blue-700 transition'
-						>
+						<div>
+							<Label htmlFor='screenshot'>
+								Add a screenshot (if you have one)
+							</Label>
+							<Input
+								id='screenshot'
+								name='screenshot'
+								type='file'
+								accept='image/*'
+								className='mt-1'
+							/>
+						</div>
+
+						<Button type='submit' className='w-full'>
 							Submit Report
-						</button>
+						</Button>
 					</form>
 				</div>
 			</div>
