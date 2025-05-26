@@ -1,40 +1,45 @@
 import React from 'react';
 import SidebarLayout from '@/layouts/Sidebar/Layout';
-import * as Accordion from '@radix-ui/react-accordion';
+import {
+	Accordion,
+	AccordionItem,
+	AccordionTrigger,
+	AccordionContent,
+} from '@/components/ui/accordion';
 import { ChevronDown } from 'lucide-react';
 
 const faqs = [
 	{
 		question: 'How do I book a hall for my event?',
-		answer: "Log in to your dashboard, go to 'Reserve a Hall', Then click the purpose(event,lecture).Then proceed the process. That’s it—you’re good to go!",
+		answer: "It's pretty simple! Just log in to your dashboard, click on 'Reserve a Hall', choose the purpose (like event or lecture), follow the steps, and you're all set!",
 	},
 	{
 		question: 'Can I edit or cancel a booking after submission?',
-		answer: "Yep! If your event is more than 24 hours away, just head to 'My Bookings' and hit edit or cancel—super easy.",
+		answer: "No worries! If your event is more than 24 hours away, just go to 'My Bookings' and you can easily edit or cancel your booking.",
 	},
 	{
 		question: 'What types of events are allowed?',
-		answer: 'We’re cool with most things—workshops, club meetings, study groups, parties, you name it. Just check each hall’s rules first.',
+		answer: "We’re pretty flexible! Workshops, club meetings, study groups, parties—you name it. Just make sure to check each hall's specific rules before you book.",
 	},
 	{
 		question: 'How can I check hall availability?',
-		answer: "Click on 'Check Availability' to see a calendar that shows when each hall is booked or free. No guessing!",
+		answer: "Just click on 'Check Availability' to see a handy calendar showing when halls are free or booked. No more guessing games!",
 	},
 	{
 		question: 'Is there a fee for booking?',
-		answer: 'No fees included in booking halls.',
+		answer: 'Good news—booking halls doesn’t cost you anything. It’s totally free!',
 	},
 	{
 		question: 'What happens if I face a technical issue?',
-		answer: "Ran into a bug? Go to 'Report an Issue' under Help, write a quick note (screenshots help!), and we’ll sort it out ASAP.",
+		answer: "Uh-oh! If something’s not working right, head over to 'Report an Issue' under Help, jot down what happened (screenshots really help!), and we’ll get it sorted out as soon as possible.",
 	},
 	{
 		question: 'Can I upload documents or images with my booking?',
-		answer: "Absolutely! You can add things like PDFs, Word docs, or images in the 'Attachments' section during booking.",
+		answer: "Yep! Feel free to add PDFs, Word documents, images, or anything else in the 'Attachments' section when you’re booking.",
 	},
 	{
 		question: 'Who should I contact for emergency changes?',
-		answer: "If it’s urgent, use the contact info under 'Support Contacts'. We’ll jump in quickly.",
+		answer: "If it’s urgent, check out the contact info under 'Support Contacts'—we’re ready to jump in and help quickly!",
 	},
 ];
 
@@ -46,31 +51,25 @@ export default function FAQPage() {
 					FAQ - Frequently Asked Questions
 				</h1>
 				<div className='w-full max-w-4xl'>
-					<Accordion.Root
-						type='single'
-						collapsible
-						className='space-y-4'
-					>
+					<Accordion type='single' collapsible className='space-y-4'>
 						{faqs.map((faq, index) => (
-							<Accordion.Item
+							<AccordionItem
 								key={index}
 								value={`faq-${index}`}
 								className='border border-gray-200 rounded-xl px-6 py-4 shadow-md'
 							>
-								<Accordion.Header>
-									<Accordion.Trigger className='flex justify-between items-center w-full text-left cursor-pointer'>
-										<span className='text-lg font-medium'>
-											{faq.question}
-										</span>
-										<ChevronDown className='w-5 h-5' />
-									</Accordion.Trigger>
-								</Accordion.Header>
-								<Accordion.Content className='mt-2 text-gray-600'>
+								<AccordionTrigger className='flex justify-between items-center w-full text-left cursor-pointer'>
+									<span className='text-lg font-medium'>
+										{faq.question}
+									</span>
+									<ChevronDown className='w-5 h-5' />
+								</AccordionTrigger>
+								<AccordionContent className='mt-2 text-gray-600'>
 									{faq.answer}
-								</Accordion.Content>
-							</Accordion.Item>
+								</AccordionContent>
+							</AccordionItem>
 						))}
-					</Accordion.Root>
+					</Accordion>
 				</div>
 			</div>
 		</SidebarLayout>
