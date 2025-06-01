@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import SidebarLayout from '@/layouts/Sidebar/Layout';
-import { Hall as HallType } from '@/types/hall';
+import { Hall as HallType } from '@/app/halls/hall';
 import { getHall } from '@/lib/getHall';
 
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
