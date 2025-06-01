@@ -74,9 +74,9 @@ const hallTypeMap: Record<string, string> = {
 
 export const columns: ColumnDef<HallType>[] = [
 	{
-		accessorKey: 'code', // This is the column name you want
-		header: 'Code',
-		cell: ({ row }) => row.original.code, // Use the real property name here
+		accessorKey: 'id', // This is the column name you want
+		header: 'ID',
+		cell: ({ row }) => row.original.id, // Use the real property name here
 	},
 	{
 		accessorKey: 'location',

@@ -1,6 +1,6 @@
 export type Hall = {
+	uuid: string;
 	id: string;
-	code: string;
 	type: string;
 	building: string;
 	capacity: number;

@@ -71,12 +71,12 @@ export function DataTable<TData, TValue>({
 				<Input
 					placeholder='Filter Halls...'
 					value={
-						(table.getColumn('code')?.getFilterValue() as string) ??
+						(table.getColumn('id')?.getFilterValue() as string) ??
 						''
 					}
 					onChange={(event) =>
 						table
-							.getColumn('code')
+							.getColumn('id')
 							?.setFilterValue(event.target.value)
 					}
 					className='max-w-sm'
