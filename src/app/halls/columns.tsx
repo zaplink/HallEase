@@ -91,7 +91,7 @@ export const columns: ColumnDef<HallType>[] = [
 			const hall = row.original;
 			const buildingFull =
 				buildingNameMap[hall.building] || hall.building;
-			return `${buildingFull} Build. - Fl. ${hall.floor}`;
+			return `${buildingFull} -  ${hall.floor == 0 ? 'G' : hall.floor}`;
 		},
 	},
 	{ accessorKey: 'capacity', header: 'Capacity' },
