@@ -45,7 +45,7 @@ export interface SidebarSection {
 
 const sidebarMenu = [
 	{
-		sectionTitle: 'Dashboard & Overview',
+		sectionTitle: 'Overview',
 		sectionMenu: [
 			{
 				itemTitle: 'Dashboard',
@@ -62,7 +62,7 @@ const sidebarMenu = [
 		],
 	},
 	{
-		sectionTitle: 'Event Management',
+		sectionTitle: 'Events',
 		sectionMenu: [
 			{
 				itemTitle: 'View Events',
@@ -73,7 +73,7 @@ const sidebarMenu = [
 		],
 	},
 	{
-		sectionTitle: 'Hall & Booking Management',
+		sectionTitle: 'Reservations',
 		sectionMenu: [
 			{
 				itemTitle: 'All Reservations',
@@ -128,6 +128,11 @@ const sidebarMenu = [
 					},
 				],
 			},
+		],
+	},
+	{
+		sectionTitle: 'Spaces',
+		sectionMenu: [
 			{
 				itemTitle: 'Hall Facilities',
 				itemUrl: '/halls',
@@ -137,7 +142,7 @@ const sidebarMenu = [
 		],
 	},
 	{
-		sectionTitle: 'Notifications & Communication',
+		sectionTitle: 'Notifications',
 		sectionMenu: [
 			{
 				itemTitle: 'Announcements',
@@ -154,7 +159,7 @@ const sidebarMenu = [
 		],
 	},
 	{
-		sectionTitle: 'Reports & Analytics',
+		sectionTitle: 'Insights',
 		sectionMenu: [
 			{
 				itemTitle: 'Reports',
@@ -171,7 +176,7 @@ const sidebarMenu = [
 		],
 	},
 	{
-		sectionTitle: 'Settings & Configurations',
+		sectionTitle: 'Preferences',
 		sectionMenu: [
 			{
 				itemTitle: 'System Preferences',
@@ -207,7 +212,7 @@ const sidebarMenu = [
 		],
 	},
 	{
-		sectionTitle: 'Help & Support',
+		sectionTitle: 'Assistance',
 		sectionMenu: [
 			{
 				itemTitle: 'FAQs & Documentation',
