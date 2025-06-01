@@ -33,6 +33,7 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align='end'>
 				<DropdownMenuLabel>Actions</DropdownMenuLabel>
+				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					onClick={() => {
 						navigator.clipboard.writeText(hall.id);
@@ -53,6 +54,11 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
 					onClick={() => router.push(`/hall/${hall.id}`)}
 				>
 					View Hall
+				</DropdownMenuItem>
+				<DropdownMenuItem
+					onClick={() => router.push(`/hall/${hall.id}/edit`)}
+				>
+					Edit Hall
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
