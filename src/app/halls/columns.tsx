@@ -36,7 +36,13 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
 				<DropdownMenuItem
 					onClick={() => {
 						navigator.clipboard.writeText(hall.id);
-						toast('Hall ID Copied!');
+						toast('Hall ID Copied!', {
+							description: `${hall.id}`,
+							action: {
+								label: 'View Hall',
+								onClick: () => router.push(`/hall/${hall.id}`),
+							},
+						});
 					}}
 				>
 					Copy Hall ID
