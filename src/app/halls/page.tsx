@@ -2,11 +2,10 @@
 
 import SidebarLayout from '@/layouts/Sidebar/Layout';
 import ProtectedPage from '../../layouts/ProtectedPage';
-
-import { Hall as HallType } from '@/types/hall';
+import { Hall as HallType } from './hall';
 import { columns } from './columns';
 import { DataTable } from './data-table';
-import { getHalls } from '@/lib/getHalls';
+import { getHalls } from './getHalls';
 import { useEffect, useState } from 'react';
 // import ProtectedComponent from './ProtectedComponent';
 // import { fetchProfile } from '@/lib/fetchProfile';

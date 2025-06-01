@@ -1,7 +1,10 @@
 export type Hall = {
 	id: string;
 	code: string;
-	capacity: number;
 	type: string;
+	building: string;
+	capacity: number;
+	floor: number;
+	description: string;
 	status: string;
 };
