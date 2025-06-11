@@ -74,6 +74,12 @@ export default function Hall() {
 									<TableBody>
 										<TableRow>
 											<TableCell className='font-medium'>
+												Status
+											</TableCell>
+											<TableCell>{hall.status}</TableCell>
+										</TableRow>
+										<TableRow>
+											<TableCell className='font-medium'>
 												Capacity
 											</TableCell>
 											<TableCell>
@@ -82,9 +88,21 @@ export default function Hall() {
 										</TableRow>
 										<TableRow>
 											<TableCell className='font-medium'>
-												Status
+												Air Conditioning
 											</TableCell>
-											<TableCell>{hall.status}</TableCell>
+											<TableCell>Yes</TableCell>
+										</TableRow>
+										<TableRow>
+											<TableCell className='font-medium'>
+												Stage Availability
+											</TableCell>
+											<TableCell>No</TableCell>
+										</TableRow>
+										<TableRow>
+											<TableCell className='font-medium'>
+												Wifi Availability
+											</TableCell>
+											<TableCell>Yes</TableCell>
 										</TableRow>
 									</TableBody>
 								</Table>
@@ -94,15 +112,15 @@ export default function Hall() {
 									<TableBody>
 										<TableRow>
 											<TableCell className='font-medium'>
-												Energy Consumption
+												Total Reservations
 											</TableCell>
-											<TableCell>5.5</TableCell>
+											<TableCell>N/A</TableCell>
 										</TableRow>
 										<TableRow>
 											<TableCell className='font-medium'>
 												Usage
 											</TableCell>
-											<TableCell>80%</TableCell>
+											<TableCell>N/A</TableCell>
 										</TableRow>
 									</TableBody>
 								</Table>
