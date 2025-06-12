@@ -64,6 +64,7 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
 		</DropdownMenu>
 	);
 };
+
 const buildingNameMap: Record<string, string> = {
 	ACD: 'Academic',
 	LAB: 'Lab',

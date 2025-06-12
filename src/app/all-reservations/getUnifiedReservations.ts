@@ -12,6 +12,7 @@ interface EventWithReserve {
 	attendee_count: number;
 	status: string;
 	reserve?: {
+		id: string;
 		date: string;
 		start_hour: string;
 		start_minute: string;
@@ -23,6 +24,7 @@ interface EventWithReserve {
 interface LectureWithReserve {
 	status: string;
 	reserve?: {
+		id: string;
 		date: string;
 		start_hour: string;
 		start_minute: string;
@@ -48,6 +50,7 @@ export async function getUnifiedReservations(): Promise<
         attendee_count,
         status,
         reserve:reserve_id (
+		  id,
           date,
           start_hour,
           start_minute,
@@ -58,7 +61,8 @@ export async function getUnifiedReservations(): Promise<
 		// supabase.from('reserve').select('*').eq('type', 'lecture'),
 		supabase.from('extra_lecture').select(`
 			status,
-			reserve:reserve_id (
+			reserve:reserve_id(
+				id,
 				date,
 				start_hour,
 				start_minute,
@@ -130,6 +134,7 @@ export async function getUnifiedReservations(): Promise<
 		...eventData.map((event) => {
 			const reserve = event.reserve;
 			return {
+				id: reserve?.id ?? '',
 				name: event.name ?? 'Unnamed Event',
 				date: reserve?.date ?? '',
 				startTime: `${reserve?.start_hour ?? '00'}:${reserve?.start_minute ?? '00'}`,
@@ -143,6 +148,7 @@ export async function getUnifiedReservations(): Promise<
 			const reserve = lecture.reserve;
 			const course = lecture.course;
 			return {
+				id: reserve?.id ?? '',
 				name: `${course?.char} ${course?.digit} - ${course?.name}`,
 				date: reserve?.date ?? '',
 				startTime: `${reserve?.start_hour ?? '00'}:${reserve?.start_minute ?? '00'}`,
