@@ -78,13 +78,13 @@ const sidebarMenu = [
 			{
 				itemTitle: 'All Reservations',
 				itemUrl: '/all-reservations',
-				itemIcon: SquareLibrary,
+				itemIcon: Library,
 				roleSlugs: [],
 			},
 			{
 				itemTitle: 'My Reservations',
 				itemUrl: '/my-reservations',
-				itemIcon: Library,
+				itemIcon: SquareLibrary,
 				roleSlugs: [],
 			},
 			{
