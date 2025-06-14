@@ -8,7 +8,7 @@ export default function NotificationsPage() {
 			<div className='grid w-full items-start gap-2'>
 				<Alert className='flex flex-row gap-x-2'>
 					<div>
-						<CheckCircle2Icon width={20} />
+						<CheckCircle2Icon width={18} />
 					</div>
 					<div className='flex flex-col'>
 						<AlertTitle>
@@ -21,7 +21,7 @@ export default function NotificationsPage() {
 				</Alert>
 				<Alert className='flex flex-row gap-x-2'>
 					<div>
-						<PopcornIcon width={20} />
+						<PopcornIcon width={18} />
 					</div>
 					<div className='flex flex-col'>
 						<AlertTitle>
@@ -31,7 +31,7 @@ export default function NotificationsPage() {
 				</Alert>
 				<Alert variant='destructive' className='flex flex-row gap-x-2'>
 					<div>
-						<AlertCircleIcon width={20} />
+						<AlertCircleIcon width={18} />
 					</div>
 					<div className='flex flex-col'>
 						<AlertTitle>Unable to process your payment.</AlertTitle>
