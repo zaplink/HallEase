@@ -23,6 +23,7 @@ import {
 	Cast,
 	Library,
 	SquareLibrary,
+	CircleDot,
 } from 'lucide-react';
 
 export interface SubMenuItem {
@@ -125,6 +126,11 @@ const sidebarMenu = [
 						subTitle: 'Rejected',
 						subUrl: '/requests/rejected',
 						subIcon: CircleX,
+					},
+					{
+						subTitle: 'All',
+						subUrl: '/requests/all',
+						subIcon: CircleDot,
 					},
 				],
 			},
