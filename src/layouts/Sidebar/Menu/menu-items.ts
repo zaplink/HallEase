@@ -55,8 +55,8 @@ const sidebarMenu = [
 				roleSlugs: [],
 			},
 			{
-				itemTitle: 'Calender View',
-				itemUrl: '/calender-view',
+				itemTitle: 'Timeline',
+				itemUrl: '/timeline',
 				itemIcon: CalendarClock,
 				roleSlugs: [],
 			},
@@ -67,7 +67,7 @@ const sidebarMenu = [
 		sectionMenu: [
 			{
 				itemTitle: 'View Events',
-				itemUrl: '/event',
+				itemUrl: '/events',
 				itemIcon: Airplay,
 				roleSlugs: [],
 			},
