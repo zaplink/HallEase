@@ -30,7 +30,7 @@ export default function PageHeader() {
 				<div className='flex flex-row gap-1'>
 					{/* Bot button */}
 					<Button
-						// onClick={toggleCalendar}
+						onClick={() => router.push(`/chatbot`)}
 						variant='ghost'
 						className='p-2'
 					>
