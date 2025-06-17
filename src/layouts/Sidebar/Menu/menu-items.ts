@@ -19,8 +19,6 @@ import {
 	UserPlus,
 	ContactRound,
 	Lock,
-	PencilRuler,
-	Cast,
 	Library,
 	SquareLibrary,
 	CircleDot,

@@ -16,11 +16,14 @@ import Loading from '@/components/custom/Loading';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+import { useRouter } from 'next/navigation';
 export default function Hall() {
 	const { id } = useParams<{ id: string }>();
 
 	const [hall, setHall] = useState<HallType | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
+
+	const router = useRouter();
 
 	useEffect(() => {
 		if (!id) return;
@@ -56,7 +59,11 @@ export default function Hall() {
 				extra={
 					<div className='gap-4 flex flex-row'>
 						<Button className='bg-slate-700 px-6'>Edit</Button>
-						<Button>Reserve</Button>
+						<Button
+							onClick={() => router.push(`/reserve/${hall.id}`)}
+						>
+							Reserve
+						</Button>
 					</div>
 				}
 			></PageHeader>

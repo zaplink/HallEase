@@ -49,7 +49,11 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
 					Copy Hall ID
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem>Book Hall</DropdownMenuItem>
+				<DropdownMenuItem
+					onClick={() => router.push(`/reserve/${hall.id}`)}
+				>
+					Book Hall
+				</DropdownMenuItem>
 				<DropdownMenuItem
 					onClick={() => router.push(`/hall/${hall.id}`)}
 				>
