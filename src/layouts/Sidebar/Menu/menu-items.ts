@@ -93,18 +93,6 @@ const sidebarMenu = [
 				itemUrl: '/reserve',
 				itemIcon: FilePlus2,
 				roleSlugs: [],
-				subMenu: [
-					{
-						subTitle: 'Event',
-						subUrl: '/reserve/event',
-						subIcon: Cast,
-					},
-					{
-						subTitle: 'Lecture',
-						subUrl: '/reserve/lecture',
-						subIcon: PencilRuler,
-					},
-				],
 			},
 			{
 				itemTitle: 'Reservation Requests',
