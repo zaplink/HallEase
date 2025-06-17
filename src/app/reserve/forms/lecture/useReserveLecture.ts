@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { submitBooking } from '@/app/reserve/lecture/reserve.lecture.service';
-import { ReserveLectureFormData } from '@/app/reserve/lecture/reserve.lecture.data';
+import { submitBooking } from './reserve.lecture.service';
+import { ReserveLectureFormData } from './reserve.lecture.data';
 
 export function useBooking() {
 	const [isLoading, setIsLoading] = useState(false);

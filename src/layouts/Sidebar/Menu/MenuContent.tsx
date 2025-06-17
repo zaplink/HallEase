@@ -18,7 +18,7 @@ import {
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import React, { useState } from 'react';
-import { subscribeToNewBookings } from '@/app/reserve/event/reserve.event.service';
+import { subscribeToNewBookings } from '@/app/reserve/forms/event/reserve.event.service';
 
 import { useEffect } from 'react';
 

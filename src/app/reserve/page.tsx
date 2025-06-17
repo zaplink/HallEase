@@ -10,6 +10,8 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { useState } from 'react';
+import ReserveEventForm from './forms/event/ReserveEventForm';
+import ReserveLectureForm from './forms/lecture/ReserveLectureForm';
 
 export default function ReservePage() {
 	const [purpose, setPurpose] = useState<string | undefined>(undefined);
@@ -27,21 +29,18 @@ export default function ReservePage() {
 						<SelectContent>
 							<SelectItem value='event'>Event</SelectItem>
 							<SelectItem value='lecture'>Lecture</SelectItem>
-							<SelectItem value='meeting'>Meeting</SelectItem>
 						</SelectContent>
 					</Select>
 				}
 			/>
 
-			<div>
-				{!purpose && (
-					<div className='mt-[140px] text-sm text-muted-foreground text-center'>
-						Please select a purpose to continue!
-					</div>
-				)}
-				{purpose === 'event' && <span>Event selected</span>}
-				{purpose === 'lecture' && <span>Lecture selected</span>}
-			</div>
+			{!purpose && (
+				<div className='mt-[140px] text-sm text-muted-foreground text-center'>
+					Please select a purpose to continue!
+				</div>
+			)}
+			{purpose === 'event' && <ReserveEventForm />}
+			{purpose === 'lecture' && <ReserveLectureForm />}
 		</SidebarLayout>
 	);
 }

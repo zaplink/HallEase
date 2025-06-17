@@ -1,7 +1,11 @@
 'use client';
 
 import { useForm } from 'react-hook-form';
-import { useBooking } from '@/app/reserve/lecture/useReserveLecture';
+import {
+	ReserveEventFormData,
+	defaultReserveEventFormData,
+} from './reserve.event.data';
+import { useBooking } from './useReserveEvent';
 import { Combobox } from '@/components/combobox';
 import { DatePickerDemo } from '@/components/ui/DatePicker';
 import {
@@ -15,39 +19,28 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import EquipmentSelector from '../../components/EquipmentSelector';
+import { eventTypeOptions, SubmissionType } from './reserve.event.data';
 import { useWatch } from 'react-hook-form';
 import { useRef } from 'react';
-import {
-	ReserveLectureFormData,
-	defaultReserveLectureFormData,
-} from '@/app/reserve/lecture/reserve.lecture.data';
-import {
-	eventTypeOptions,
-	SubmissionType,
-} from '@/app/reserve/lecture/reserve.lecture.data';
-import EquipmentSelector from '@/app/reserve/components/EquipmentSelector';
 
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
-
-export default function ReserveLectureForm() {
+export default function ReserveEventForm() {
+	// const { handleSubmit, isLoading, error, success, reset } = useBooking();
 	const { handleSubmit, isLoading, error, success } = useBooking();
 
-	const form = useForm<ReserveLectureFormData>({
-		defaultValues: defaultReserveLectureFormData,
+	const form = useForm<ReserveEventFormData>({
+		defaultValues: defaultReserveEventFormData,
 	});
 
-	const onSubmit = (formData: ReserveLectureFormData) => {
+	const onSubmit = (formData: ReserveEventFormData) => {
 		const status = submissionType.current === 'draft' ? 'draft' : 'pending';
 
-		if (status === 'draft' && !formData.course?.trim()) {
-			alert('Course code is still required to save a draft.');
+		if (status === 'draft' && !formData.name?.trim()) {
+			alert('Event name is still required to save a draft.');
 			return;
 		}
 		handleSubmit(formData, status);
 	};
-
-	const submissionType = useRef<SubmissionType>('pending');
 
 	const hallOptions = [
 		{ value: 'availability', label: 'Availability' },
@@ -57,7 +50,6 @@ export default function ReserveLectureForm() {
 	const hallSelection = useWatch({
 		control: form.control,
 		name: 'hallOpt',
-		defaultValue: 'availability' as 'availability' | 'manual' | '',
 	});
 
 	const halls = [
@@ -65,41 +57,7 @@ export default function ReserveLectureForm() {
 		{ value: 'LCH-AB-02', label: 'LCH-AB-02' },
 	];
 
-	// const courseCodeOptions = [
-	// 	{ label: 'CSCI 22012 - Advanced Operating System', value: 'csci22012' },
-	// 	{
-	// 		label: 'CSCI 22022 - Object Oriented Programming',
-	// 		value: 'csci22022',
-	// 	},
-	// ];
-
-	const [courseCodeOptions, setCourseCodeOptions] = useState<
-		{ label: string; value: string }[]
-	>([]);
-
-	useEffect(() => {
-		const fetchCourses = async () => {
-			const { data, error } = await supabase
-				.from('course')
-				.select('id, char, digit, name');
-
-			if (error) {
-				console.error('Error fetching courses:', error);
-				return;
-			}
-
-			if (data) {
-				const options = data.map((course) => ({
-					label: `${course.char} ${course.digit} - ${course.name}`,
-					value: course.id, // Use `id` as value for submission
-				}));
-				setCourseCodeOptions(options);
-				console.log('Fetched course options:', options);
-			}
-		};
-
-		fetchCourses();
-	}, []);
+	const submissionType = useRef<SubmissionType>('pending');
 
 	return (
 		<Form {...form}>
@@ -110,38 +68,25 @@ export default function ReserveLectureForm() {
 				}}
 			>
 				<div className='flex flex-row flex-wrap'>
-					<div className='flex flex-row items-start'>
-						<div className='w-1/2 px-2'>
-							<FormField
-								control={form.control}
-								name='course'
-								rules={{
-									required: 'Please select course code',
-								}}
-								render={({ field }) => (
-									<FormItem className='mb-6 flex flex-col'>
-										<FormLabel>Course Code:</FormLabel>
-										<FormControl>
-											<Combobox
-												options={courseCodeOptions}
-												value={field.value ?? ''}
-												onChange={(val) =>
-													field.onChange(val)
-												}
-												// placeholder='Select Course Code'
-												placeholder={
-													courseCodeOptions.length ===
-													0
-														? 'Loading courses...'
-														: 'Select Course Code'
-												}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						</div>
+					{/* Event Name */}
+					<div className='w-1/2 px-2'>
+						<FormField
+							control={form.control}
+							name='name'
+							rules={{ required: 'Event name is empty!' }}
+							render={({ field }) => (
+								<FormItem className='mb-6 flex flex-col'>
+									<FormLabel>Event Name:</FormLabel>
+									<FormControl>
+										<Input
+											{...field}
+											placeholder='Name of the event'
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 					</div>
 
 					<div className='w-1/2 px-2'>
@@ -151,7 +96,7 @@ export default function ReserveLectureForm() {
 							render={({ field }) => (
 								<FormItem className='mb-6 flex flex-col'>
 									<FormLabel>
-										Lecture Description (Opt):
+										Event Description (Opt):
 									</FormLabel>
 									<FormControl>
 										<Input
@@ -175,10 +120,10 @@ export default function ReserveLectureForm() {
 						<FormField
 							control={form.control}
 							name='type'
-							rules={{ required: 'Please select lecture type' }}
+							rules={{ required: 'Please select event type' }}
 							render={({ field }) => (
 								<FormItem className='mb-6 flex flex-col'>
-									<FormLabel>Lecture Type:</FormLabel>
+									<FormLabel>Event Type:</FormLabel>
 									<FormControl>
 										<Combobox
 											options={eventTypeOptions}
@@ -187,6 +132,28 @@ export default function ReserveLectureForm() {
 												field.onChange(val)
 											}
 											placeholder='Select Event Type'
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</div>
+					{/* Organizer */}
+					<div className='px-2 w-1/2'>
+						<FormField
+							control={form.control}
+							name='organizer'
+							rules={{
+								required: 'Please enter event description',
+							}}
+							render={({ field }) => (
+								<FormItem className='mb-6 flex flex-col'>
+									<FormLabel>Organized By:</FormLabel>
+									<FormControl>
+										<Input
+											{...field}
+											placeholder='Organization'
 										/>
 									</FormControl>
 									<FormMessage />
@@ -223,10 +190,13 @@ export default function ReserveLectureForm() {
 					/>
 				</div>
 
+				{/* Time Inputs Section */}
 				<div className='flex flex-row gap-4 px-2 mb-6'>
+					{/* Start Time */}
 					<div className='w-1/2'>
 						<FormLabel>Start Time:</FormLabel>
 						<div className='flex flex-col gap-2 w-1/2'>
+							{/* Hour */}
 							<FormField
 								control={form.control}
 								name='startHour'
@@ -251,6 +221,7 @@ export default function ReserveLectureForm() {
 									</FormItem>
 								)}
 							/>
+							{/* Minute */}
 							<FormField
 								control={form.control}
 								name='startMinute'
@@ -288,9 +259,11 @@ export default function ReserveLectureForm() {
 						</div>
 					</div>
 
+					{/* End Time */}
 					<div className='w-1/2'>
 						<FormLabel>End Time:</FormLabel>
 						<div className='flex flex-col gap-2'>
+							{/* Hour */}
 							<FormField
 								control={form.control}
 								name='endHour'
@@ -315,6 +288,7 @@ export default function ReserveLectureForm() {
 									</FormItem>
 								)}
 							/>
+							{/* Minute */}
 							<FormField
 								control={form.control}
 								name='endMinute'
@@ -350,6 +324,58 @@ export default function ReserveLectureForm() {
 								)}
 							/>
 						</div>
+					</div>
+				</div>
+
+				<div className='px-2 mb-4'>
+					<Separator />
+				</div>
+
+				<div className='flex flex-row'>
+					{/* Attendance List*/}
+					<div className='w-1/2 px-2'>
+						<FormField
+							control={form.control}
+							name='attendeeList'
+							render={({ field }) => (
+								<FormItem className='mb-6'>
+									<FormLabel>Attendee List (Opt):</FormLabel>
+									<FormControl>
+										<Input
+											type='file'
+											accept='.csv, .xlsx'
+											onChange={(e) =>
+												field.onChange(e.target.files)
+											}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</div>
+					{/* Attendance Count*/}
+					<div className='w-1/2 px-2'>
+						<FormField
+							control={form.control}
+							name='attendeeCount'
+							rules={{
+								required: 'Please enter number of attendees',
+							}}
+							render={({ field }) => (
+								<FormItem className='mb-6'>
+									<FormLabel>Number of Attendees:</FormLabel>
+									<FormControl>
+										<Input
+											{...field}
+											type='number'
+											placeholder='100'
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 					</div>
 				</div>
 
@@ -430,6 +456,7 @@ export default function ReserveLectureForm() {
 					<Separator />
 				</div>
 
+				{/* Equipments */}
 				<FormLabel className='px-2'>
 					Request Equipments (Opt):
 				</FormLabel>
@@ -439,6 +466,7 @@ export default function ReserveLectureForm() {
 					<Separator />
 				</div>
 
+				{/* Additional Notes */}
 				<div className='px-2'>
 					<FormField
 						control={form.control}
@@ -463,6 +491,7 @@ export default function ReserveLectureForm() {
 					<Separator />
 				</div>
 
+				{/* Error Message */}
 				{error && (
 					<p className='text-red-600 font-medium mb-4'>
 						{submissionType.current === 'draft'
@@ -471,6 +500,7 @@ export default function ReserveLectureForm() {
 					</p>
 				)}
 
+				{/* Success Message */}
 				{success && (
 					<p className='text-green-600 font-medium mt-4'>
 						{submissionType.current === 'draft'
@@ -479,6 +509,7 @@ export default function ReserveLectureForm() {
 					</p>
 				)}
 
+				{/* Buttons */}
 				<div className='flex gap-4 px-2 py-4 mt-6'>
 					<Button
 						type='submit'
