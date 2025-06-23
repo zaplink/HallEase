@@ -33,7 +33,6 @@ export default function ReservePage() {
 					</Select>
 				}
 			/>
-
 			{!purpose && (
 				<div className='mt-[140px] text-sm text-muted-foreground text-center'>
 					Please select a purpose to continue!
