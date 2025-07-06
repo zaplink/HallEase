@@ -103,10 +103,14 @@ export default function ReservePage() {
 				</div>
 			)}
 
-			{purpose === 'lecture' && <StepperForm />}
+			{purpose === 'lecture' && (
+				<StepperForm onBackToSelection={() => setPurpose(undefined)} />
+			)}
 			{purpose === 'event' && <ReserveEventForm />}
 			{purpose === 'meeting' && <ReserveLectureForm />}
-			{purpose === 'workshop' && <StepperForm />}
+			{purpose === 'workshop' && (
+				<StepperForm onBackToSelection={() => setPurpose(undefined)} />
+			)}
 			{purpose === 'seminar' && <ReserveLectureForm />}
 		</SidebarLayout>
 	);

@@ -394,7 +394,11 @@ function ReviewStep({ form }: { form: UseFormReturn<FormData> }) {
 	);
 }
 
-export default function StepperForm() {
+export default function StepperForm({
+	onBackToSelection,
+}: {
+	onBackToSelection?: () => void;
+}) {
 	const [currentStep, setCurrentStep] = useState(0);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -442,6 +446,9 @@ export default function StepperForm() {
 	const prevStep = () => {
 		if (currentStep > 0) {
 			setCurrentStep(currentStep - 1);
+		} else if (currentStep === 0 && onBackToSelection) {
+			// Go back to purpose selection if we're at the first step and callback is provided
+			onBackToSelection();
 		}
 	};
 
@@ -503,11 +510,13 @@ export default function StepperForm() {
 							type='button'
 							variant='outline'
 							onClick={prevStep}
-							disabled={currentStep === 0}
+							disabled={currentStep === 0 && !onBackToSelection}
 							className='flex items-center gap-2'
 						>
 							<ChevronLeft className='h-4 w-4' />
-							Previous
+							{currentStep === 0 && onBackToSelection
+								? 'Back to Selection'
+								: 'Previous'}
 						</Button>
 
 						{currentStep === steps.length - 1 ? (
