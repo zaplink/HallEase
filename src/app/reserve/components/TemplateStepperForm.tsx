@@ -10,9 +10,9 @@ import { Button } from '@/components/ui/button';
 import {
 	Card,
 	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
+	// CardDescription,
+	// CardHeader,
+	// CardTitle,
 } from '@/components/ui/card';
 import {
 	Form,
@@ -471,34 +471,40 @@ export default function StepperForm() {
 
 	return (
 		<div className='w-full mx-auto'>
-			<Card className='min-h-[calc(100vh-180px)] relative'>
+			<Card className='min-h-[calc(100vh-200px)] flex flex-col'>
 				{/* <CardHeader>
 					<CardTitle>Account Setup</CardTitle>
 					<CardDescription>
 						Complete your profile in a few simple steps
 					</CardDescription>
 				</CardHeader> */}
-				<CardContent className='h-full flex flex-col pb-20'>
+				<CardContent className='p-6 flex flex-col flex-1'>
+					{/* Stepper */}
 					<Stepper currentStep={currentStep} steps={steps} />
-
 					<Separator className='mt-2 mb-6' />
 
-					<Form {...form}>
-						<form
-							onSubmit={form.handleSubmit(onSubmit)}
-							className='w-full flex-1 flex flex-col'
-						>
-							<div className='flex-1'>{renderStepContent()}</div>
-						</form>
-					</Form>
+					{/* Form Content */}
+					<div className='flex-1 flex flex-col'>
+						<Form {...form}>
+							<form
+								onSubmit={form.handleSubmit(onSubmit)}
+								className='w-full flex-1 flex flex-col'
+							>
+								<div className='flex-1'>
+									{renderStepContent()}
+								</div>
+							</form>
+						</Form>
+					</div>
 
-					<div className='absolute bottom-6 left-6 right-6 flex justify-between'>
+					{/* Navigation Buttons - Always at bottom */}
+					<div className='mt-6 pt-6 border-t flex justify-between'>
 						<Button
 							type='button'
 							variant='outline'
 							onClick={prevStep}
 							disabled={currentStep === 0}
-							className='flex items-center gap-2 bg-transparent'
+							className='flex items-center gap-2'
 						>
 							<ChevronLeft className='h-4 w-4' />
 							Previous

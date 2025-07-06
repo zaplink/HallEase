@@ -34,7 +34,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
 	return (
 		// Sidebar placeholder
-		<SidebarProvider>
+		<SidebarProvider className='h-full'>
 			{/* Sideabar */}
 			<Sidebar side='left'>
 				<SidebarHeader className='p-1'>
@@ -75,12 +75,14 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 			</Sidebar>
 
 			{/* Page */}
-			<div className='w-full'>
-				{/* Header navigation bar */}
-				<PageHeader />
+			<div className='w-full h-screen flex flex-col'>
+				{/* Header navigation bar - Fixed height */}
+				<div className='flex-shrink-0'>
+					<PageHeader />
+				</div>
 
-				{/* Put page content here*/}
-				<main className='px-4 pt-2 flex flex-col h-full'>
+				{/* Put page content here - Takes remaining height */}
+				<main className='px-4 pt-2 flex flex-col flex-1 overflow-auto overscroll-none'>
 					{children}
 				</main>
 

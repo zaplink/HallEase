@@ -1,0 +1,51 @@
+/* Custom scroll behavior fixes */
+
+/* Force immediate scroll position updates */
+* {
+	scroll-behavior: auto !important;
+}
+
+/* Prevent scroll delays and momentum scrolling issues */
+.sidebar-layout,
+.sidebar-layout * {
+	overscroll-behavior: none !important;
+	scroll-behavior: auto !important;
+}
+
+/* Specific fixes for main content areas */
+main {
+	overscroll-behavior: none !important;
+	scroll-behavior: auto !important;
+	/* Force hardware acceleration for smoother scrolling */
+	transform: translateZ(0);
+	will-change: scroll-position;
+}
+
+/* Fix for dropdown and select components */
+[data-radix-select-content],
+[data-radix-dropdown-menu-content] {
+	overscroll-behavior: none !important;
+}
+
+/* Prevent scroll position jumping */
+.overflow-auto,
+.overflow-y-auto {
+	overscroll-behavior: none !important;
+	scroll-behavior: auto !important;
+	/* Ensure immediate position updates */
+	scroll-snap-type: none !important;
+}
+
+/* Fix for Tailwind flex containers */
+.flex-1 {
+	/* Prevent flex items from causing scroll issues */
+	min-height: 0 !important;
+}
+
+/* Prevent momentum scrolling on touch devices */
+@media (pointer: coarse) {
+	* {
+		-webkit-overflow-scrolling: auto !important;
+		overscroll-behavior: none !important;
+	}
+}
