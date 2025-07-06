@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/select';
 import { useState } from 'react';
 import ReserveEventForm from './forms/event/ReserveEventForm';
-import ReserveLectureForm from './forms/lecture/ReserveLectureForm';
+// import ReserveLectureForm from './forms/lecture/ReserveLectureForm';
 import StepperForm from './components/TemplateStepperForm';
 
 export default function ReservePage() {
@@ -21,28 +21,13 @@ export default function ReservePage() {
 	const purposes = [
 		{
 			id: 'lecture',
-			label: 'Lecture',
+			label: 'Extra Lecture',
 			description: 'Academic lectures and classes',
 		},
 		{
 			id: 'event',
 			label: 'Event',
 			description: 'Conferences and presentations',
-		},
-		{
-			id: 'meeting',
-			label: 'Meeting',
-			description: 'Team meetings and discussions',
-		},
-		{
-			id: 'workshop',
-			label: 'Workshop',
-			description: 'Training and workshops',
-		},
-		{
-			id: 'seminar',
-			label: 'Seminar',
-			description: 'Educational seminars',
 		},
 	];
 
@@ -76,19 +61,19 @@ export default function ReservePage() {
 				<div className='space-y-6'>
 					<div className='text-center'>
 						<h3 className='text-lg font-medium mb-2'>
-							What's the purpose of your reservation?
+							What&apos;s the purpose of your reservation?
 						</h3>
 						<p className='text-sm text-muted-foreground'>
-							Select the type of activity you're planning
+							Select the type of activity you&apos;re planning
 						</p>
 					</div>
 
-					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto'>
+					<div className='flex flex-wrap justify-center gap-4 max-w-4xl mx-auto'>
 						{purposes.map((purposeOption) => (
 							<Button
 								key={purposeOption.id}
 								variant='outline'
-								className='h-auto p-6 flex flex-col items-center text-center space-y-2 hover:bg-accent'
+								className='h-auto p-6 flex flex-col items-center text-center space-y-2 hover:bg-accent w-full sm:w-64 md:w-72'
 								onClick={() => setPurpose(purposeOption.id)}
 							>
 								<div className='font-medium text-base'>
@@ -106,12 +91,11 @@ export default function ReservePage() {
 			{purpose === 'lecture' && (
 				<StepperForm onBackToSelection={() => setPurpose(undefined)} />
 			)}
-			{purpose === 'event' && <ReserveEventForm />}
-			{purpose === 'meeting' && <ReserveLectureForm />}
-			{purpose === 'workshop' && (
-				<StepperForm onBackToSelection={() => setPurpose(undefined)} />
+			{purpose === 'event' && (
+				<ReserveEventForm
+					onBackToSelection={() => setPurpose(undefined)}
+				/>
 			)}
-			{purpose === 'seminar' && <ReserveLectureForm />}
 		</SidebarLayout>
 	);
 }
