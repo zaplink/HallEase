@@ -16,7 +16,7 @@ const PageHeader: FC<PageHeaderProps> = ({
 		<div className='w-full pb-2 mb-2'>
 			<div className='flex justify-between items-start pb-2'>
 				<div>
-					<h2 className='text-xl font-semibold'>{title}</h2>
+					<h2 className='font-bold'>{title}</h2>
 
 					{descriptions.length > 0 && (
 						<div className='text-gray-600 text-sm flex space-x-2'>
