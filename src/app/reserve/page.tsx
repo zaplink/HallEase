@@ -12,6 +12,7 @@ import {
 import { useState } from 'react';
 import ReserveEventForm from './forms/event/ReserveEventForm';
 import ReserveLectureForm from './forms/lecture/ReserveLectureForm';
+import StepperForm from './components/TemplateStepperForm';
 
 export default function ReservePage() {
 	const [purpose, setPurpose] = useState<string | undefined>(undefined);
@@ -34,9 +35,11 @@ export default function ReservePage() {
 				}
 			/>
 			{!purpose && (
-				<div className='mt-[140px] text-sm text-muted-foreground text-center'>
-					Please select a purpose to continue!
-				</div>
+				// <div className='mt-[140px] text-sm text-muted-foreground text-center'>
+				// 	Please select a purpose to continue!
+				// </div>
+
+				<StepperForm />
 			)}
 			{purpose === 'event' && <ReserveEventForm />}
 			{purpose === 'lecture' && <ReserveLectureForm />}
