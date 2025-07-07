@@ -1,0 +1,57 @@
+reserve
+    id : uuid
+    date : date
+    start_time : time
+    end_time : time
+    hall_option : string (availability | manual)
+    status : string (pending | approved | waiting | rejected)
+    type : (extra_lecture | event)
+    profile_id : uuid : FK(profiles, id)
+    modified_date : date
+    modified_time : time
+    is_submitted : boolean (true = submitted | false = draft)
+
+event
+    id : uuid
+    name : string
+    description : string
+    organizer : string
+    type : string (conference | seminar | workshop | event)
+    attendee_count : integer
+    reserve_id : uuid : FK(reserve, id)
+    additional_notes : string
+    additional_file : string
+    equipment : uuid : FK(equipment, id)
+
+extra_lecture
+    id : uuid
+    description : string
+    attendee_count : integer
+    reserve_id : uuid : FK(reserve, id)
+    course_id : uuid : FK(course, id)
+    type : string (quiz | extra_lecture | practical)
+    additional_notes : string
+    additional_file : string
+    attendee_file : string
+    equipment : uuid : FK(equipment, id)
+
+
+course
+    id : uuid
+    char : string (exmaple: MGMT)
+    digit : text (example: 22012)
+    name : string
+    capacity : integer
+
+profiles
+    id : uuid
+    full_name : string
+    role : string (GUEST | USER | ADMIN | SYSTEM)
+    pro_pic : string
+    email : string
+    position : string
+
+equipment
+    id : uuid
+    reserve_id : uuid : FK(reserve, id)
+    description : string (all equipments as one string combined by ; )

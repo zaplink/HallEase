@@ -36,21 +36,42 @@ export const defaultReserveEventFormData: ReserveEventFormData = {
 
 // Mapper function to convert form data from camelCase to snake_case
 export function mapBookingDataToApi(data: ReserveEventFormData) {
+	// Create time strings in HH:MM format
+	const startTime = `${data.startHour.padStart(2, '0')}:${data.startMinute.padStart(2, '0')}`;
+	const endTime = `${data.endHour.padStart(2, '0')}:${data.endMinute.padStart(2, '0')}`;
+
+	// Convert equipment array to semicolon-separated string as per schema
+	const equipmentString =
+		data.equipments?.map((eq) => eq.name).join(';') || '';
+
+	// Format date to YYYY-MM-DD string for database
+	const formattedDate = data.date
+		? data.date.toISOString().split('T')[0]
+		: null;
+
+	console.log('Mapping data:', {
+		originalData: data,
+		startTime,
+		endTime,
+		equipmentString,
+		formattedDate,
+	});
+
 	return {
+		// Reserve table fields
+		date: formattedDate,
+		start_time: startTime,
+		end_time: endTime,
+		hall_option: data.hallOpt,
+
+		// Event table fields
 		name: data.name,
 		description: data.description,
 		type: data.type,
 		organizer: data.organizer,
-		date: data.date,
-		start_hour: data.startHour,
-		start_minute: data.startMinute,
-		end_hour: data.endHour,
-		end_minute: data.endMinute,
 		attendee_count: data.attendeeCount,
-		// attendee_list: data.attendeeList,
-		hall_option: data.hallOpt,
-		// hall: data.hall,
-		// additional_notes: data.additionalNotes,
+		additional_notes: data.additionalNotes,
+		equipment: equipmentString,
 	};
 }
 

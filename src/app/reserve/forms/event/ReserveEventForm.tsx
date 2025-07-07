@@ -29,9 +29,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { Combobox } from '@/components/combobox';
-import { eventTypeOptions } from './reserve.event.data';
+import { eventTypeOptions, ReserveEventFormData } from './reserve.event.data';
 import { DatePickerDemo } from '@/components/ui/DatePicker';
 import { Textarea } from '@/components/ui/textarea';
+import { useBooking } from './useReserveEvent';
 
 // Form schema with all steps
 const formSchema = z.object({
@@ -1206,7 +1207,7 @@ export default function ReserveEventForm({
 	onBackToSelection?: () => void;
 }) {
 	const [currentStep, setCurrentStep] = useState(0);
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const { handleSubmit, isLoading } = useBooking();
 
 	const form = useForm<FormData>({
 		resolver: zodResolver(formSchema),
@@ -1283,16 +1284,29 @@ export default function ReserveEventForm({
 	};
 
 	const onSubmit = async (data: FormData) => {
-		setIsSubmitting(true);
 		try {
-			// Here you would typically send the data to your API
-			console.log('Event form submitted:', data);
-			alert('Event reservation submitted successfully!');
+			console.log('Form onSubmit called with data:', data);
+
+			// Convert FormData to ReserveEventFormData
+			const { equipment, ...eventData } = data;
+			const formData: ReserveEventFormData = {
+				...eventData,
+				description: eventData.description || null,
+				additionalNotes: eventData.additionalNotes || null,
+				hall: eventData.hall || '',
+				equipments:
+					equipment?.map((eq) => ({
+						name: eq as string,
+						count: 1,
+					})) || [],
+				// additionalDocuments will be handled separately if needed
+			};
+
+			console.log('Converted formData:', formData);
+			await handleSubmit(formData, 'pending');
+			// Success handled by the hook
 		} catch (error) {
 			console.error('Error submitting form:', error);
-			alert('Error submitting reservation. Please try again.');
-		} finally {
-			setIsSubmitting(false);
 		}
 	};
 
@@ -1309,8 +1323,22 @@ export default function ReserveEventForm({
 				return;
 			}
 
-			// Here you would typically send the draft data to your API
-			console.log('Draft saved:', currentData);
+			// Convert FormData to ReserveEventFormData for draft
+			const { equipment, ...eventData } = currentData;
+			const formData: ReserveEventFormData = {
+				...eventData,
+				description: eventData.description || null,
+				additionalNotes: eventData.additionalNotes || null,
+				hall: eventData.hall || '',
+				equipments:
+					equipment?.map((eq) => ({
+						name: eq as string,
+						count: 1,
+					})) || [],
+			};
+
+			await handleSubmit(formData, 'draft');
+			// Success handled by the hook
 			toast.success('Draft saved successfully!', {
 				description: 'Your event reservation draft has been saved.',
 			});
@@ -1405,11 +1433,11 @@ export default function ReserveEventForm({
 							{currentStep === steps.length - 1 ? (
 								<Button
 									type='submit'
-									disabled={isSubmitting}
+									disabled={isLoading}
 									className='flex items-center gap-2'
 									onClick={form.handleSubmit(onSubmit)}
 								>
-									{isSubmitting
+									{isLoading
 										? 'Submitting...'
 										: 'Submit Event'}
 								</Button>

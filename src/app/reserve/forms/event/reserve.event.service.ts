@@ -3,125 +3,135 @@ import {
 	ReserveEventFormData,
 	mapBookingDataToApi,
 } from './reserve.event.data';
-import { pick } from 'lodash';
-
-const {
-	data: { user },
-	error: userError,
-} = await supabase.auth.getUser();
-
-if (userError) {
-	throw new Error(userError.message);
-}
-
-const profileId = user?.id;
 
 // Use to submit booking form details
 export async function submitReserveEvent(
 	formData: ReserveEventFormData,
 	status: 'pending' | 'draft'
 ) {
+	console.log('submitReserveEvent called with:', { formData, status });
+
+	// Get current user
+	const {
+		data: { user },
+		error: userError,
+	} = await supabase.auth.getUser();
+
+	if (userError) {
+		throw new Error(userError.message);
+	}
+
+	const profileId = user?.id;
+	if (!profileId) {
+		throw new Error('User not authenticated');
+	}
+
 	const mappedFormData = mapBookingDataToApi(formData);
+	console.log('Mapped form data:', mappedFormData);
 
-	// const enrichedData = {
-	// 	...mappedFormData,
-	// 	status,
-	// };
+	const now = new Date();
 
+	// Prepare reserve table data according to schema
 	const reserveData = {
-		...pick(mappedFormData, [
-			'date',
-			'start_hour',
-			'start_minute',
-			'end_hour',
-			'end_minute',
-			'hall_option',
-			'description',
-		]),
+		date: mappedFormData.date,
+		start_time: mappedFormData.start_time,
+		end_time: mappedFormData.end_time,
+		hall_option: mappedFormData.hall_option || 'availability',
 		status,
-		type: 'event',
+		type: 'event' as const,
 		profile_id: profileId,
+		modified_date: now.toISOString().split('T')[0], // YYYY-MM-DD format
+		modified_time: now.toTimeString().split(' ')[0], // HH:MM:SS format
+		is_submitted: status === 'pending', // true for submitted, false for draft
 	};
 
+	console.log('Reserve data to insert:', reserveData);
+
+	// Insert into reserve table
 	const { data: reserveDataResult, error: reserveDataError } = await supabase
 		.from('reserve')
 		.insert([reserveData])
 		.select('id');
 
+	console.log('Reserve insert result:', {
+		reserveDataResult,
+		reserveDataError,
+	});
+
 	if (reserveDataError) {
-		console.log(reserveDataError);
+		console.log('Reserve data error:', reserveDataError);
 		throw new Error(reserveDataError.message);
 	}
 	const reserveId = reserveDataResult?.[0]?.id;
 
+	// Insert equipment if any equipment is selected
+	let equipmentId: string | null = null;
+	if (mappedFormData.equipment && mappedFormData.equipment.trim()) {
+		const equipmentData = {
+			reserve_id: reserveId,
+			description: mappedFormData.equipment, // Already semicolon-separated from mapping
+		};
+
+		const { data: equipmentResult, error: equipmentError } = await supabase
+			.from('equipment')
+			.insert([equipmentData])
+			.select('id');
+
+		if (equipmentError) {
+			console.log('Equipment data error:', equipmentError);
+			throw new Error(equipmentError.message);
+		}
+		equipmentId = equipmentResult?.[0]?.id;
+	}
+
+	// Prepare event table data according to schema
 	const eventData = {
-		...pick(mappedFormData, [
-			'name',
-			'type',
-			'organizer',
-			'attendee_count',
-		]),
-		status,
+		name: mappedFormData.name,
+		description: mappedFormData.description || '',
+		organizer: mappedFormData.organizer,
+		type: mappedFormData.type,
+		attendee_count: mappedFormData.attendee_count || 0,
 		reserve_id: reserveId,
+		additional_notes: mappedFormData.additional_notes || '',
+		additional_file: '', // Empty for now, can be populated with file upload logic
+		equipment: equipmentId, // UUID foreign key to equipment table
 	};
 
+	console.log('Event data to insert:', eventData);
+
+	// Insert into event table
 	const { data: eventDataResult, error: eventDataError } = await supabase
 		.from('event')
 		.insert([eventData])
 		.select('id');
 
-	if (eventDataError) throw new Error(eventDataError.message);
+	console.log('Event insert result:', { eventDataResult, eventDataError });
+
+	if (eventDataError) {
+		console.log('Event data error:', eventDataError);
+		throw new Error(eventDataError.message);
+	}
 	const eventId = eventDataResult?.[0]?.id;
 
-	// Fetch requester email from profile table
+	// Fetch requester email from profiles table
 	let requesterEmail: string | null = null;
-	if (profileId) {
-		const { data: profileData, error: profileError } = await supabase
-			.from('profiles')
-			.select('email')
-			.eq('id', profileId)
-			.single();
-		if (profileError) {
-			console.log(profileError);
-			throw new Error(profileError.message);
-		}
-		requesterEmail = profileData?.email ?? null;
+	const { data: profileData, error: profileError } = await supabase
+		.from('profiles')
+		.select('email')
+		.eq('id', profileId)
+		.single();
+
+	if (profileError) {
+		console.log(profileError);
+		throw new Error(profileError.message);
 	}
+	requesterEmail = profileData?.email ?? null;
 
 	return {
 		reserveId,
 		eventId,
-		requesterEmail, // <-- now returned!
+		requesterEmail,
 	};
-
-	// const { error: reserveEventsError } = await supabase
-	// 	.from('reserve')
-	// 	.update({ event_id: eventId })
-	// 	.eq('id', reserveId);
-	// if (reserveEventsError) throw new Error(reserveEventsError.message);
-
-	// const { error: reserveEventsError } = await supabase
-	// 	.from('event')
-	// 	.update({ reserve_id: reserveId })
-	// 	.eq('id', eventId);
-	// if (reserveEventsError) throw new Error(reserveEventsError.message);
-
-	// const { error: joinReserveEventsError } = await supabase
-	// 	.from('reserve_events')
-	// 	.insert([
-	// 		{
-	// 			reserve_id: reserveId,
-	// 			event_id: eventId,
-	// 		},
-	// 	]);
-	// if (joinReserveEventsError) throw new Error(joinReserveEventsError.message);
-
-	// return {
-	// 	reserveId,
-	// 	eventId,
-	// };
-
-	// return { reserveData: reserveDataResult, eventData: eventDataResult };
 }
 
 // Subscribe to real-time updates from the 'bookings' table

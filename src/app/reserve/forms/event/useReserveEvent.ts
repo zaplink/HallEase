@@ -11,6 +11,11 @@ export function useBooking() {
 		formData: ReserveEventFormData,
 		status: 'pending' | 'draft'
 	) => {
+		console.log('useBooking handleSubmit called with:', {
+			formData,
+			status,
+		});
+
 		setIsLoading(true);
 		setError(null);
 		setSuccess(false);
@@ -18,6 +23,7 @@ export function useBooking() {
 		try {
 			console.log('Submitting booking...');
 			const result = await submitReserveEvent(formData, status);
+			console.log('Booking submitted successfully, result:', result);
 			console.log('Booking submitted, sending email...');
 
 			const toEmail = result.requesterEmail;

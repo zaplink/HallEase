@@ -35,23 +35,31 @@ export const defaultReserveLectureFormData: ReserveLectureFormData = {
 export type SubmissionType = 'pending' | 'draft';
 
 export const eventTypeOptions = [
-	{ label: 'Extra Lecutre', value: 'extralecture' },
+	{ label: 'Extra Lecture', value: 'extra_lecture' },
 	{ label: 'Quiz', value: 'quiz' },
 	{ label: 'Practical', value: 'practical' },
 ];
 
 export function mapBookingDataToApi(data: ReserveLectureFormData) {
+	// Create time strings in HH:MM format
+	const startTime = `${data.startHour.padStart(2, '0')}:${data.startMinute.padStart(2, '0')}`;
+	const endTime = `${data.endHour.padStart(2, '0')}:${data.endMinute.padStart(2, '0')}`;
+
+	// Convert equipment array to semicolon-separated string as per schema
+	const equipmentString = data.equipment?.join(';') || '';
+
 	return {
+		// Reserve table fields
 		course: data.course,
+		date: data.date,
+		start_time: startTime,
+		end_time: endTime,
+		hall_option: data.hallOpt,
+
+		// Extra lecture table fields
 		description: data.description || null,
 		type: data.type,
-		date: data.date,
-		start_hour: data.startHour,
-		start_minute: data.startMinute,
-		end_hour: data.endHour,
-		end_minute: data.endMinute,
-		hall_option: data.hallOpt,
-		// hall: data.hall,
 		additional_notes: data.additionalNotes || null,
+		equipment: equipmentString,
 	};
 }
