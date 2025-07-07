@@ -73,6 +73,27 @@ export async function submitReserveEvent(
 	if (eventDataError) throw new Error(eventDataError.message);
 	const eventId = eventDataResult?.[0]?.id;
 
+	// Fetch requester email from profile table
+	let requesterEmail: string | null = null;
+	if (profileId) {
+		const { data: profileData, error: profileError } = await supabase
+			.from('profiles')
+			.select('email')
+			.eq('id', profileId)
+			.single();
+		if (profileError) {
+			console.log(profileError);
+			throw new Error(profileError.message);
+		}
+		requesterEmail = profileData?.email ?? null;
+	}
+
+	return {
+		reserveId,
+		eventId,
+		requesterEmail, // <-- now returned!
+	};
+
 	// const { error: reserveEventsError } = await supabase
 	// 	.from('reserve')
 	// 	.update({ event_id: eventId })
@@ -95,10 +116,10 @@ export async function submitReserveEvent(
 	// 	]);
 	// if (joinReserveEventsError) throw new Error(joinReserveEventsError.message);
 
-	return {
-		reserveId,
-		eventId,
-	};
+	// return {
+	// 	reserveId,
+	// 	eventId,
+	// };
 
 	// return { reserveData: reserveDataResult, eventData: eventDataResult };
 }

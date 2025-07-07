@@ -19,10 +19,9 @@ import {
 	UserPlus,
 	ContactRound,
 	Lock,
-	PencilRuler,
-	Cast,
 	Library,
 	SquareLibrary,
+	CircleDot,
 } from 'lucide-react';
 
 export interface SubMenuItem {
@@ -45,7 +44,7 @@ export interface SidebarSection {
 
 const sidebarMenu = [
 	{
-		sectionTitle: 'Dashboard & Overview',
+		sectionTitle: 'Overview',
 		sectionMenu: [
 			{
 				itemTitle: 'Dashboard',
@@ -54,37 +53,37 @@ const sidebarMenu = [
 				roleSlugs: [],
 			},
 			{
-				itemTitle: 'Calender View',
-				itemUrl: '/calender-view',
+				itemTitle: 'Timeline',
+				itemUrl: '/timeline',
 				itemIcon: CalendarClock,
 				roleSlugs: [],
 			},
 		],
 	},
 	{
-		sectionTitle: 'Event Management',
+		sectionTitle: 'Events',
 		sectionMenu: [
 			{
 				itemTitle: 'View Events',
-				itemUrl: '/event',
+				itemUrl: '/events',
 				itemIcon: Airplay,
 				roleSlugs: [],
 			},
 		],
 	},
 	{
-		sectionTitle: 'Hall & Booking Management',
+		sectionTitle: 'Reservations',
 		sectionMenu: [
 			{
 				itemTitle: 'All Reservations',
 				itemUrl: '/all-reservations',
-				itemIcon: SquareLibrary,
+				itemIcon: Library,
 				roleSlugs: [],
 			},
 			{
 				itemTitle: 'My Reservations',
 				itemUrl: '/my-reservations',
-				itemIcon: Library,
+				itemIcon: SquareLibrary,
 				roleSlugs: [],
 			},
 			{
@@ -92,18 +91,6 @@ const sidebarMenu = [
 				itemUrl: '/reserve',
 				itemIcon: FilePlus2,
 				roleSlugs: [],
-				subMenu: [
-					{
-						subTitle: 'Event',
-						subUrl: '/reserve/event',
-						subIcon: Cast,
-					},
-					{
-						subTitle: 'Lecture',
-						subUrl: '/reserve/lecture',
-						subIcon: PencilRuler,
-					},
-				],
 			},
 			{
 				itemTitle: 'Reservation Requests',
@@ -126,8 +113,18 @@ const sidebarMenu = [
 						subUrl: '/requests/rejected',
 						subIcon: CircleX,
 					},
+					{
+						subTitle: 'All',
+						subUrl: '/requests/all',
+						subIcon: CircleDot,
+					},
 				],
 			},
+		],
+	},
+	{
+		sectionTitle: 'Spaces',
+		sectionMenu: [
 			{
 				itemTitle: 'Hall Facilities',
 				itemUrl: '/halls',
@@ -137,7 +134,7 @@ const sidebarMenu = [
 		],
 	},
 	{
-		sectionTitle: 'Notifications & Communication',
+		sectionTitle: 'Notifications',
 		sectionMenu: [
 			{
 				itemTitle: 'Announcements',
@@ -154,7 +151,7 @@ const sidebarMenu = [
 		],
 	},
 	{
-		sectionTitle: 'Reports & Analytics',
+		sectionTitle: 'Insights',
 		sectionMenu: [
 			{
 				itemTitle: 'Reports',
@@ -171,7 +168,7 @@ const sidebarMenu = [
 		],
 	},
 	{
-		sectionTitle: 'Settings & Configurations',
+		sectionTitle: 'Preferences',
 		sectionMenu: [
 			{
 				itemTitle: 'System Preferences',
@@ -207,7 +204,7 @@ const sidebarMenu = [
 		],
 	},
 	{
-		sectionTitle: 'Help & Support',
+		sectionTitle: 'Assistance',
 		sectionMenu: [
 			{
 				itemTitle: 'FAQs & Documentation',

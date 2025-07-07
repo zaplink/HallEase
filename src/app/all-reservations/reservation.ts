@@ -1,4 +1,5 @@
 export interface Reservation {
+	id: string;
 	description: string | null;
 	type: 'event' | 'lecture';
 	date: Date | undefined;
@@ -28,6 +29,7 @@ export interface Course {
 }
 
 export interface UnifiedReservationRow {
+	id: string;
 	name: string;
 	date: string;
 	startTime: string;

@@ -4,7 +4,7 @@ import { Hall as HallType } from './hall';
 export async function getHalls(): Promise<HallType[]> {
 	const supabase = createClient();
 
-	const { data, error } = await supabase.from('halls-v1').select('*');
+	const { data, error } = await supabase.from('halls').select('*');
 
 	if (error) {
 		console.error('Error fetching halls:', error.message);
