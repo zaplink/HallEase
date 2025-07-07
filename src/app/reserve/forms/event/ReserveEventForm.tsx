@@ -4,8 +4,15 @@ import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, UseFormReturn, useWatch } from 'react-hook-form';
 import { z } from 'zod';
-import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+	Check,
+	ChevronLeft,
+	ChevronRight,
+	CheckCircle,
+	AlertCircle,
+} from 'lucide-react';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -15,6 +22,15 @@ import {
 	// CardHeader,
 	// CardTitle,
 } from '@/components/ui/card';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
 	Form,
 	FormControl,
@@ -1207,7 +1223,9 @@ export default function ReserveEventForm({
 	onBackToSelection?: () => void;
 }) {
 	const [currentStep, setCurrentStep] = useState(0);
-	const { handleSubmit, isLoading } = useBooking();
+	const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+	const { handleSubmit, isLoading, isSubmitted, error } = useBooking();
+	const router = useRouter();
 
 	const form = useForm<FormData>({
 		resolver: zodResolver(formSchema),
@@ -1299,8 +1317,11 @@ export default function ReserveEventForm({
 				// additionalDocuments will be handled separately if needed
 			};
 
-			await handleSubmit(formData, 'pending');
-			// Success handled by the hook
+			const result = await handleSubmit(formData, 'pending');
+			// Show success dialog if submission was successful
+			if (result) {
+				setShowSuccessDialog(true);
+			}
 		} catch (error) {
 			console.error('Error submitting form:', error);
 		}
@@ -1377,6 +1398,17 @@ export default function ReserveEventForm({
 					<Stepper currentStep={currentStep} steps={steps} />
 					<Separator className='mb-4' />
 
+					{/* Status Messages */}
+					{error && (
+						<div className='mb-4 p-4 bg-red-50 border border-red-200 rounded-lg'>
+							<div className='flex items-center gap-2 text-red-800'>
+								<AlertCircle className='h-5 w-5' />
+								<span className='font-medium'>Error</span>
+							</div>
+							<p className='text-red-700 text-sm mt-1'>{error}</p>
+						</div>
+					)}
+
 					{/* Form Content */}
 					<div className='flex-1 flex flex-col'>
 						<Form {...form}>
@@ -1398,6 +1430,7 @@ export default function ReserveEventForm({
 								type='button'
 								variant='outline'
 								onClick={onBackToSelection}
+								disabled={isSubmitted}
 								className='flex items-center gap-2'
 							>
 								<ChevronLeft className='h-4 w-4' />
@@ -1408,7 +1441,7 @@ export default function ReserveEventForm({
 								type='button'
 								variant='outline'
 								onClick={prevStep}
-								disabled={currentStep === 0}
+								disabled={currentStep === 0 || isSubmitted}
 								className='flex items-center gap-2'
 							>
 								<ChevronLeft className='h-4 w-4' />
@@ -1421,6 +1454,7 @@ export default function ReserveEventForm({
 								type='button'
 								variant='secondary'
 								onClick={onSaveDraft}
+								disabled={isSubmitted}
 								className='flex items-center gap-2'
 							>
 								Save Draft
@@ -1429,13 +1463,15 @@ export default function ReserveEventForm({
 							{currentStep === steps.length - 1 ? (
 								<Button
 									type='submit'
-									disabled={isLoading}
+									disabled={isLoading || isSubmitted}
 									className='flex items-center gap-2'
 									onClick={form.handleSubmit(onSubmit)}
 								>
-									{isLoading
-										? 'Submitting...'
-										: 'Submit Event'}
+									{isSubmitted
+										? 'Submitted ✓'
+										: isLoading
+											? 'Submitting...'
+											: 'Submit Event'}
 								</Button>
 							) : (
 								<Button
@@ -1451,6 +1487,36 @@ export default function ReserveEventForm({
 					</div>
 				</CardContent>
 			</Card>
+
+			{/* Success Dialog */}
+			<AlertDialog
+				open={showSuccessDialog}
+				onOpenChange={setShowSuccessDialog}
+			>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle className='flex items-center gap-2 text-green-600'>
+							<CheckCircle className='h-5 w-5' />
+							Reservation Submitted Successfully!
+						</AlertDialogTitle>
+						<AlertDialogDescription>
+							Your event reservation has been submitted for
+							approval. You&apos;ll receive a confirmation email
+							shortly with further details.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogAction
+							onClick={() => {
+								setShowSuccessDialog(false);
+								router.push('/reserve');
+							}}
+						>
+							OK
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 	);
 }

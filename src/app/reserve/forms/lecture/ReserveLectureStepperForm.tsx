@@ -4,11 +4,21 @@ import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch, UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
-import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
 	Form,
 	FormControl,
@@ -181,7 +191,9 @@ export default function ReserveLectureStepperForm({
 	onBackToSelection,
 }: ReserveLectureStepperFormProps) {
 	const [currentStep, setCurrentStep] = useState(0);
-	const { handleSubmit, isLoading } = useBooking();
+	const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+	const { handleSubmit, isLoading, isSubmitted } = useBooking();
+	const router = useRouter();
 
 	const form = useForm<StepperFormData>({
 		resolver: zodResolver(formSchema),
@@ -307,12 +319,15 @@ export default function ReserveLectureStepperForm({
 		try {
 			// Remove acceptTerms from the data before submission
 			const { ...submissionData } = data;
-			await handleSubmit(
+			const result = await handleSubmit(
 				submissionData as ReserveLectureFormData,
 				'pending'
 			);
 			console.log('Lecture form submitted:', submissionData);
-			alert('Lecture request submitted successfully!');
+			// Show success dialog if submission was successful
+			if (result) {
+				setShowSuccessDialog(true);
+			}
 		} catch (error) {
 			console.error('Submission error:', error);
 		}
@@ -402,6 +417,7 @@ export default function ReserveLectureStepperForm({
 								type='button'
 								variant='outline'
 								onClick={onBackToSelection}
+								disabled={isSubmitted}
 								className='flex items-center gap-2'
 							>
 								<ChevronLeft className='h-4 w-4' />
@@ -412,7 +428,7 @@ export default function ReserveLectureStepperForm({
 								type='button'
 								variant='outline'
 								onClick={prevStep}
-								disabled={isLoading}
+								disabled={isLoading || isSubmitted}
 								className='flex items-center gap-2'
 							>
 								<ChevronLeft className='h-4 w-4' />
@@ -425,7 +441,7 @@ export default function ReserveLectureStepperForm({
 								type='button'
 								variant='outline'
 								onClick={saveDraft}
-								disabled={isLoading}
+								disabled={isLoading || isSubmitted}
 							>
 								Save Draft
 							</Button>
@@ -434,7 +450,7 @@ export default function ReserveLectureStepperForm({
 								<Button
 									type='button'
 									onClick={nextStep}
-									disabled={isLoading}
+									disabled={isLoading || isSubmitted}
 									className='flex items-center gap-2'
 								>
 									Next
@@ -443,19 +459,51 @@ export default function ReserveLectureStepperForm({
 							) : (
 								<Button
 									type='button'
-									disabled={isLoading}
+									disabled={isLoading || isSubmitted}
 									className='flex items-center gap-2'
 									onClick={form.handleSubmit(onSubmit)}
 								>
-									{isLoading
-										? 'Submitting...'
-										: 'Submit Lecture Request'}
+									{isSubmitted
+										? 'Submitted ✓'
+										: isLoading
+											? 'Submitting...'
+											: 'Submit Lecture Request'}
 								</Button>
 							)}
 						</div>
 					</div>
 				</CardContent>
 			</Card>
+
+			{/* Success Dialog */}
+			<AlertDialog
+				open={showSuccessDialog}
+				onOpenChange={setShowSuccessDialog}
+			>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle className='flex items-center gap-2 text-green-600'>
+							<CheckCircle className='h-5 w-5' />
+							Lecture Request Submitted Successfully!
+						</AlertDialogTitle>
+						<AlertDialogDescription>
+							Your lecture request has been submitted for
+							approval. You&apos;ll receive a confirmation email
+							shortly with further details.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogAction
+							onClick={() => {
+								setShowSuccessDialog(false);
+								router.push('/reserve');
+							}}
+						>
+							OK
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 	);
 }
