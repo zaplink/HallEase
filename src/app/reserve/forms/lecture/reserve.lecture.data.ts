@@ -11,7 +11,7 @@ export interface ReserveLectureFormData {
 	hall?: string;
 	equipment?: string[];
 	additionalNotes?: string;
-	additionalDocuments?: any;
+	additionalDocuments?: FileList | null;
 	acceptTerms?: boolean;
 }
 

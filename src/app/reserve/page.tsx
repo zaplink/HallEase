@@ -10,13 +10,13 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Edit } from 'lucide-react';
+// import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// import { Edit } from 'lucide-react';
 import { useState } from 'react';
 import ReserveEventForm from './forms/event/ReserveEventForm';
-import ReserveLectureForm from './forms/lecture/ReserveLectureForm';
+// import ReserveLectureForm from './forms/lecture/ReserveLectureForm';
 import ReserveLectureStepperForm from './forms/lecture/ReserveLectureStepperForm';
-import StepperForm from './components/TemplateStepperForm';
+// import StepperForm from './components/TemplateStepperForm';
 
 export default function ReservePage() {
 	const [purpose, setPurpose] = useState<string | undefined>(undefined);

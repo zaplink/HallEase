@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch, UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
@@ -28,8 +28,8 @@ import { DatePickerDemo } from '@/components/ui/DatePicker';
 import {
 	eventTypeOptions,
 	ReserveLectureFormData,
-	defaultReserveLectureFormData,
-	SubmissionType,
+	// defaultReserveLectureFormData,
+	// SubmissionType,
 } from './reserve.lecture.data';
 import { useBooking } from './useReserveLecture';
 import { supabase } from '@/lib/supabaseClient';
@@ -181,7 +181,7 @@ export default function ReserveLectureStepperForm({
 	onBackToSelection,
 }: ReserveLectureStepperFormProps) {
 	const [currentStep, setCurrentStep] = useState(0);
-	const { handleSubmit, isLoading, error, success } = useBooking();
+	const { handleSubmit, isLoading } = useBooking();
 
 	const form = useForm<StepperFormData>({
 		resolver: zodResolver(formSchema),
@@ -306,7 +306,7 @@ export default function ReserveLectureStepperForm({
 	const onSubmit = async (data: StepperFormData) => {
 		try {
 			// Remove acceptTerms from the data before submission
-			const { acceptTerms, ...submissionData } = data;
+			const { ...submissionData } = data;
 			await handleSubmit(
 				submissionData as ReserveLectureFormData,
 				'pending'
@@ -793,7 +793,7 @@ function DateTimeStep({ form }: { form: UseFormReturn<StepperFormData> }) {
 
 function VenueStep({
 	form,
-	hallOptions,
+	// hallOptions,
 	halls,
 	hallSelection,
 }: {
