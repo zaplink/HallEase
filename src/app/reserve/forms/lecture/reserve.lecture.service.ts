@@ -7,8 +7,11 @@ import {
 // Use to submit booking form details
 export async function submitBooking(
 	formData: ReserveLectureFormData,
-	status: 'pending' | 'draft'
+	status: 'pending' | 'draft',
+	draftId?: string // Optional draft ID for updating existing draft
 ) {
+	console.log('submitBooking called with:', { formData, status, draftId });
+
 	// Get current user
 	const {
 		data: { user },
@@ -34,24 +37,55 @@ export async function submitBooking(
 		end_time: mappedFormData.end_time,
 		hall_option: mappedFormData.hall_option,
 		status,
-		type: 'extra_lecture',
+		type: 'extra_lecture' as const,
 		profile_id: profileId,
 		modified_date: now.toISOString().split('T')[0], // YYYY-MM-DD format
 		modified_time: now.toTimeString().split(' ')[0], // HH:MM:SS format
 		is_submitted: status === 'pending', // true for submitted, false for draft
+		is_consented: status === 'pending', // true if submitted (consented), false for draft
 	};
 
-	// Insert into reserve table
-	const { data: reserveDataResult, error: reserveDataError } = await supabase
-		.from('reserve')
-		.insert([reserveData])
-		.select('id');
+	let reserveId: string;
 
-	if (reserveDataError) {
-		console.log(reserveDataError);
-		throw new Error(reserveDataError.message);
+	if (draftId) {
+		// Update existing draft
+		const { data: reserveUpdateResult, error: reserveUpdateError } =
+			await supabase
+				.from('reserve')
+				.update(reserveData)
+				.eq('id', draftId)
+				.eq('profile_id', profileId) // Security check
+				.select('id');
+
+		if (reserveUpdateError) {
+			console.log('Reserve update error:', reserveUpdateError);
+			throw new Error(reserveUpdateError.message);
+		}
+
+		if (!reserveUpdateResult || reserveUpdateResult.length === 0) {
+			throw new Error(
+				'Draft not found or you do not have permission to update it'
+			);
+		}
+
+		reserveId = reserveUpdateResult[0].id;
+	} else {
+		// Insert new reserve record
+		const { data: reserveDataResult, error: reserveDataError } =
+			await supabase.from('reserve').insert([reserveData]).select('id');
+
+		if (reserveDataError) {
+			console.log(reserveDataError);
+			throw new Error(reserveDataError.message);
+		}
+		reserveId = reserveDataResult?.[0]?.id;
 	}
-	const reserveId = reserveDataResult?.[0]?.id;
+
+	// Handle equipment - delete old equipment first if updating draft
+	if (draftId) {
+		// Delete existing equipment for this reserve
+		await supabase.from('equipment').delete().eq('reserve_id', reserveId);
+	}
 
 	// Insert equipment if any equipment is selected
 	let equipmentId: string | null = null;
@@ -103,17 +137,36 @@ export async function submitBooking(
 		equipment: equipmentId, // UUID foreign key to equipment table
 	};
 
-	// Insert into extra_lecture table
-	const { data: extraLectureDataResult, error: extraLectureDataError } =
-		await supabase
+	let extraLectureId: string;
+
+	if (draftId) {
+		// Update existing extra_lecture
+		const {
+			data: extraLectureUpdateResult,
+			error: extraLectureUpdateError,
+		} = await supabase
 			.from('extra_lecture')
-			.insert([extraLectureData])
+			.update(extraLectureData)
+			.eq('reserve_id', reserveId)
 			.select('id');
 
-	if (extraLectureDataError) {
-		throw new Error(extraLectureDataError.message);
+		if (extraLectureUpdateError) {
+			throw new Error(extraLectureUpdateError.message);
+		}
+		extraLectureId = extraLectureUpdateResult?.[0]?.id;
+	} else {
+		// Insert new extra_lecture
+		const { data: extraLectureDataResult, error: extraLectureDataError } =
+			await supabase
+				.from('extra_lecture')
+				.insert([extraLectureData])
+				.select('id');
+
+		if (extraLectureDataError) {
+			throw new Error(extraLectureDataError.message);
+		}
+		extraLectureId = extraLectureDataResult?.[0]?.id;
 	}
-	const extraLectureId = extraLectureDataResult?.[0]?.id;
 
 	// Fetch requester email from profiles table
 	let requesterEmail: string | null = null;
@@ -155,4 +208,52 @@ export function subscribeToNewBookings(
 		.subscribe();
 
 	return channel;
+}
+
+// Function to load existing drafts for the current user
+export async function loadUserDrafts() {
+	const {
+		data: { user },
+		error: userError,
+	} = await supabase.auth.getUser();
+
+	if (userError || !user?.id) {
+		throw new Error('User not authenticated');
+	}
+
+	const { data: drafts, error: draftsError } = await supabase
+		.from('reserve')
+		.select(
+			`
+			id,
+			date,
+			start_time,
+			end_time,
+			hall_option,
+			status,
+			modified_date,
+			modified_time,
+			extra_lecture (
+				id,
+				description,
+				attendee_count,
+				course_id,
+				type,
+				additional_notes,
+				equipment (
+					id,
+					description
+				)
+			)
+		`
+		)
+		.eq('profile_id', user.id)
+		.eq('type', 'extra_lecture')
+		.eq('is_submitted', false); // Only get drafts
+
+	if (draftsError) {
+		throw new Error(draftsError.message);
+	}
+
+	return drafts || [];
 }

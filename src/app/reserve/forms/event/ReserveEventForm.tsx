@@ -1282,11 +1282,8 @@ export default function ReserveEventForm({
 			setCurrentStep(currentStep - 1);
 		}
 	};
-
 	const onSubmit = async (data: FormData) => {
 		try {
-			console.log('Form onSubmit called with data:', data);
-
 			// Convert FormData to ReserveEventFormData
 			const { equipment, ...eventData } = data;
 			const formData: ReserveEventFormData = {
@@ -1302,7 +1299,6 @@ export default function ReserveEventForm({
 				// additionalDocuments will be handled separately if needed
 			};
 
-			console.log('Converted formData:', formData);
 			await handleSubmit(formData, 'pending');
 			// Success handled by the hook
 		} catch (error) {

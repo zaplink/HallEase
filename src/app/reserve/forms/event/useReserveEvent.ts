@@ -6,6 +6,7 @@ export function useBooking() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<boolean>(false);
+	const [draftId, setDraftId] = useState<string | null>(null); // Track current draft ID
 
 	const handleSubmit = async (
 		formData: ReserveEventFormData,
@@ -14,6 +15,7 @@ export function useBooking() {
 		console.log('useBooking handleSubmit called with:', {
 			formData,
 			status,
+			draftId,
 		});
 
 		setIsLoading(true);
@@ -22,8 +24,21 @@ export function useBooking() {
 
 		try {
 			console.log('Submitting booking...');
-			const result = await submitReserveEvent(formData, status);
+			const result = await submitReserveEvent(
+				formData,
+				status,
+				draftId || undefined
+			);
 			console.log('Booking submitted successfully, result:', result);
+
+			// If this was a draft save, store the draft ID for future updates
+			if (status === 'draft') {
+				setDraftId(result.reserveId);
+			} else {
+				// If submitted, clear the draft ID
+				setDraftId(null);
+			}
+
 			console.log('Booking submitted, sending email...');
 
 			const toEmail = result.requesterEmail;
@@ -62,7 +77,8 @@ export function useBooking() {
 		setIsLoading(false);
 		setError(null);
 		setSuccess(false);
+		setDraftId(null); // Also reset draft ID
 	};
 
-	return { handleSubmit, isLoading, error, success, reset };
+	return { handleSubmit, isLoading, error, success, reset, draftId };
 }

@@ -7,10 +7,9 @@ import {
 // Use to submit booking form details
 export async function submitReserveEvent(
 	formData: ReserveEventFormData,
-	status: 'pending' | 'draft'
+	status: 'pending' | 'draft',
+	draftId?: string // Optional draft ID for updating existing draft
 ) {
-	console.log('submitReserveEvent called with:', { formData, status });
-
 	// Get current user
 	const {
 		data: { user },
@@ -27,8 +26,6 @@ export async function submitReserveEvent(
 	}
 
 	const mappedFormData = mapBookingDataToApi(formData);
-	console.log('Mapped form data:', mappedFormData);
-
 	const now = new Date();
 
 	// Prepare reserve table data according to schema
@@ -43,26 +40,62 @@ export async function submitReserveEvent(
 		modified_date: now.toISOString().split('T')[0], // YYYY-MM-DD format
 		modified_time: now.toTimeString().split(' ')[0], // HH:MM:SS format
 		is_submitted: status === 'pending', // true for submitted, false for draft
+		is_consented: status === 'pending', // true if submitted (consented), false for draft
 	};
 
-	console.log('Reserve data to insert:', reserveData);
+	console.log('Reserve data to insert/update:', reserveData);
 
-	// Insert into reserve table
-	const { data: reserveDataResult, error: reserveDataError } = await supabase
-		.from('reserve')
-		.insert([reserveData])
-		.select('id');
+	let reserveId: string;
 
-	console.log('Reserve insert result:', {
-		reserveDataResult,
-		reserveDataError,
-	});
+	if (draftId) {
+		// Update existing draft
+		const { data: reserveUpdateResult, error: reserveUpdateError } =
+			await supabase
+				.from('reserve')
+				.update(reserveData)
+				.eq('id', draftId)
+				.eq('profile_id', profileId) // Security check
+				.select('id');
 
-	if (reserveDataError) {
-		console.log('Reserve data error:', reserveDataError);
-		throw new Error(reserveDataError.message);
+		console.log('Reserve update result:', {
+			reserveUpdateResult,
+			reserveUpdateError,
+		});
+
+		if (reserveUpdateError) {
+			console.log('Reserve update error:', reserveUpdateError);
+			throw new Error(reserveUpdateError.message);
+		}
+
+		if (!reserveUpdateResult || reserveUpdateResult.length === 0) {
+			throw new Error(
+				'Draft not found or you do not have permission to update it'
+			);
+		}
+
+		reserveId = reserveUpdateResult[0].id;
+	} else {
+		// Insert new reserve record
+		const { data: reserveDataResult, error: reserveDataError } =
+			await supabase.from('reserve').insert([reserveData]).select('id');
+
+		console.log('Reserve insert result:', {
+			reserveDataResult,
+			reserveDataError,
+		});
+
+		if (reserveDataError) {
+			console.log('Reserve data error:', reserveDataError);
+			throw new Error(reserveDataError.message);
+		}
+		reserveId = reserveDataResult?.[0]?.id;
 	}
-	const reserveId = reserveDataResult?.[0]?.id;
+
+	// Handle equipment - delete old equipment first if updating draft
+	if (draftId) {
+		// Delete existing equipment for this reserve
+		await supabase.from('equipment').delete().eq('reserve_id', reserveId);
+	}
 
 	// Insert equipment if any equipment is selected
 	let equipmentId: string | null = null;
@@ -97,21 +130,47 @@ export async function submitReserveEvent(
 		equipment: equipmentId, // UUID foreign key to equipment table
 	};
 
-	console.log('Event data to insert:', eventData);
+	console.log('Event data to insert/update:', eventData);
 
-	// Insert into event table
-	const { data: eventDataResult, error: eventDataError } = await supabase
-		.from('event')
-		.insert([eventData])
-		.select('id');
+	let eventId: string;
 
-	console.log('Event insert result:', { eventDataResult, eventDataError });
+	if (draftId) {
+		// Update existing event
+		const { data: eventUpdateResult, error: eventUpdateError } =
+			await supabase
+				.from('event')
+				.update(eventData)
+				.eq('reserve_id', reserveId)
+				.select('id');
 
-	if (eventDataError) {
-		console.log('Event data error:', eventDataError);
-		throw new Error(eventDataError.message);
+		console.log('Event update result:', {
+			eventUpdateResult,
+			eventUpdateError,
+		});
+
+		if (eventUpdateError) {
+			console.log('Event update error:', eventUpdateError);
+			throw new Error(eventUpdateError.message);
+		}
+		eventId = eventUpdateResult?.[0]?.id;
+	} else {
+		// Insert new event
+		const { data: eventDataResult, error: eventDataError } = await supabase
+			.from('event')
+			.insert([eventData])
+			.select('id');
+
+		console.log('Event insert result:', {
+			eventDataResult,
+			eventDataError,
+		});
+
+		if (eventDataError) {
+			console.log('Event data error:', eventDataError);
+			throw new Error(eventDataError.message);
+		}
+		eventId = eventDataResult?.[0]?.id;
 	}
-	const eventId = eventDataResult?.[0]?.id;
 
 	// Fetch requester email from profiles table
 	let requesterEmail: string | null = null;
@@ -153,4 +212,53 @@ export function subscribeToNewBookings(
 		.subscribe();
 
 	return channel;
+}
+
+// Function to load existing drafts for the current user
+export async function loadUserDrafts() {
+	const {
+		data: { user },
+		error: userError,
+	} = await supabase.auth.getUser();
+
+	if (userError || !user?.id) {
+		throw new Error('User not authenticated');
+	}
+
+	const { data: drafts, error: draftsError } = await supabase
+		.from('reserve')
+		.select(
+			`
+			id,
+			date,
+			start_time,
+			end_time,
+			hall_option,
+			status,
+			modified_date,
+			modified_time,
+			event (
+				id,
+				name,
+				description,
+				organizer,
+				type,
+				attendee_count,
+				additional_notes,
+				equipment (
+					id,
+					description
+				)
+			)
+		`
+		)
+		.eq('profile_id', user.id)
+		.eq('type', 'event')
+		.eq('is_submitted', false); // Only get drafts
+
+	if (draftsError) {
+		throw new Error(draftsError.message);
+	}
+
+	return drafts || [];
 }

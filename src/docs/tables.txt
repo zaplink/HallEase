@@ -10,6 +10,7 @@ reserve
     modified_date : date
     modified_time : time
     is_submitted : boolean (true = submitted | false = draft)
+    is_consented : boolean
 
 event
     id : uuid

@@ -14,6 +14,7 @@ export interface ReserveEventFormData {
 	hall: string;
 	equipments: EquipmentItemType[];
 	additionalNotes: string | null;
+	acceptTerms?: boolean; // Add consent field
 }
 
 export const defaultReserveEventFormData: ReserveEventFormData = {
@@ -32,6 +33,7 @@ export const defaultReserveEventFormData: ReserveEventFormData = {
 	hall: '',
 	equipments: [],
 	additionalNotes: null,
+	acceptTerms: false,
 };
 
 // Mapper function to convert form data from camelCase to snake_case
@@ -48,14 +50,6 @@ export function mapBookingDataToApi(data: ReserveEventFormData) {
 	const formattedDate = data.date
 		? data.date.toISOString().split('T')[0]
 		: null;
-
-	console.log('Mapping data:', {
-		originalData: data,
-		startTime,
-		endTime,
-		equipmentString,
-		formattedDate,
-	});
 
 	return {
 		// Reserve table fields

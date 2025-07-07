@@ -6,6 +6,7 @@ export function useBooking() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<boolean>(false);
+	const [draftId, setDraftId] = useState<string | null>(null); // Track current draft ID
 
 	const handleSubmit = async (
 		formData: ReserveLectureFormData,
@@ -16,7 +17,20 @@ export function useBooking() {
 		setSuccess(false);
 
 		try {
-			const result = await submitBooking(formData, status);
+			const result = await submitBooking(
+				formData,
+				status,
+				draftId || undefined
+			);
+
+			// If this was a draft save, store the draft ID for future updates
+			if (status === 'draft') {
+				setDraftId(result.reserveId);
+			} else {
+				// If submitted, clear the draft ID
+				setDraftId(null);
+			}
+
 			setSuccess(true);
 			return result;
 		} catch (err: unknown) {
@@ -32,7 +46,8 @@ export function useBooking() {
 		setIsLoading(false);
 		setError(null);
 		setSuccess(false);
+		setDraftId(null); // Also reset draft ID
 	};
 
-	return { handleSubmit, isLoading, error, success, reset };
+	return { handleSubmit, isLoading, error, success, reset, draftId };
 }
