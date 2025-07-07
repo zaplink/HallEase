@@ -1,31 +1,35 @@
 export interface ReserveLectureFormData {
 	course: string;
-	description: null;
-	type: null;
-	date: undefined;
-	startHour: '';
-	startMinute: '';
-	endHour: '';
-	endMinute: '';
+	description?: string;
+	type: string;
+	date: Date | undefined;
+	startHour: string;
+	startMinute: string;
+	endHour: string;
+	endMinute: string;
 	hallOpt: string;
-	hall: '';
-	equipments: [];
-	additionalNotes: null;
+	hall?: string;
+	equipment?: string[];
+	additionalNotes?: string;
+	additionalDocuments?: any;
+	acceptTerms?: boolean;
 }
 
 export const defaultReserveLectureFormData: ReserveLectureFormData = {
 	course: '',
-	description: null,
-	type: null,
+	description: '',
+	type: '',
 	date: undefined,
 	startHour: '',
 	startMinute: '',
 	endHour: '',
 	endMinute: '',
-	hallOpt: '',
+	hallOpt: 'availability',
 	hall: '',
-	equipments: [],
-	additionalNotes: null,
+	equipment: [],
+	additionalNotes: '',
+	additionalDocuments: null,
+	acceptTerms: false,
 };
 
 export type SubmissionType = 'pending' | 'draft';
@@ -39,7 +43,7 @@ export const eventTypeOptions = [
 export function mapBookingDataToApi(data: ReserveLectureFormData) {
 	return {
 		course: data.course,
-		description: data.description,
+		description: data.description || null,
 		type: data.type,
 		date: data.date,
 		start_hour: data.startHour,
@@ -48,6 +52,6 @@ export function mapBookingDataToApi(data: ReserveLectureFormData) {
 		end_minute: data.endMinute,
 		hall_option: data.hallOpt,
 		// hall: data.hall,
-		additional_notes: data.additionalNotes,
+		additional_notes: data.additionalNotes || null,
 	};
 }

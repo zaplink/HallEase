@@ -14,7 +14,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Edit } from 'lucide-react';
 import { useState } from 'react';
 import ReserveEventForm from './forms/event/ReserveEventForm';
-// import ReserveLectureForm from './forms/lecture/ReserveLectureForm';
+import ReserveLectureForm from './forms/lecture/ReserveLectureForm';
+import ReserveLectureStepperForm from './forms/lecture/ReserveLectureStepperForm';
 import StepperForm from './components/TemplateStepperForm';
 
 export default function ReservePage() {
@@ -22,9 +23,9 @@ export default function ReservePage() {
 
 	const purposes = [
 		{
-			id: 'lecture',
+			id: 'lecture-stepper',
 			label: 'Extra Lecture',
-			description: 'Academic lectures and classes',
+			description: 'Reserve a hall for your extra lecture',
 		},
 		{
 			id: 'event',
@@ -136,7 +137,7 @@ export default function ReservePage() {
 							</div>
 
 							<div className='pt-8'>
-								<div className='grid grid-cols-2 gap-4 w-full max-w-2xl mx-auto'>
+								<div className='grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl mx-auto'>
 									{purposes.map((purposeOption) => (
 										<div
 											key={purposeOption.id}
@@ -241,8 +242,10 @@ export default function ReservePage() {
 				</div>
 			)}
 
-			{purpose === 'lecture' && (
-				<StepperForm onBackToSelection={() => setPurpose(undefined)} />
+			{purpose === 'lecture-stepper' && (
+				<ReserveLectureStepperForm
+					onBackToSelection={() => setPurpose(undefined)}
+				/>
 			)}
 			{purpose === 'event' && (
 				<ReserveEventForm
