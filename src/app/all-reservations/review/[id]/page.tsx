@@ -9,7 +9,6 @@ import { createClient } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -22,15 +21,7 @@ import {
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import {
-	ArrowLeft,
-	Calendar,
-	Clock,
-	User,
-	MapPin,
-	CheckCircle,
-	XCircle,
-} from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
 
 interface ReservationDetails {
 	id: string;
@@ -46,6 +37,10 @@ interface ReservationDetails {
 		email: string;
 		role: string;
 	};
+	createdDate: string;
+	createdTime: string;
+	modifiedDate: string;
+	modifiedTime: string;
 	event?: {
 		name: string;
 		description: string;
@@ -83,6 +78,7 @@ export default function ReviewReservationPage() {
 
 	useEffect(() => {
 		fetchReservationDetails();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [reservationId]);
 
 	const fetchReservationDetails = async () => {
@@ -102,6 +98,8 @@ export default function ReviewReservationPage() {
 					type,
 					hall_option,
 					is_submitted,
+					created_at,
+					updated_at,
 					profiles:profile_id (
 						full_name,
 						email,
@@ -141,6 +139,14 @@ export default function ReviewReservationPage() {
 					email: profileData?.email || 'Unknown',
 					role: profileData?.role || 'Unknown',
 				},
+				createdDate: reserveData.created_at.split('T')[0],
+				createdTime: reserveData.created_at
+					.split('T')[1]
+					?.substring(0, 5),
+				modifiedDate: reserveData.updated_at.split('T')[0],
+				modifiedTime: reserveData.updated_at
+					.split('T')[1]
+					?.substring(0, 5),
 			};
 
 			// Fetch event or extra lecture details based on type

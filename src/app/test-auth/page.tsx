@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabaseClient';
+import { User, AuthError } from '@supabase/supabase-js';
 
 export default function TestAuth() {
-	const [user, setUser] = useState<any>(null);
+	const [user, setUser] = useState<User | null>(null);
 	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<any>(null);
+	const [error, setError] = useState<AuthError | Error | null>(null);
 
 	useEffect(() => {
 		async function checkAuth() {
@@ -22,11 +23,11 @@ export default function TestAuth() {
 				if (error) {
 					setError(error);
 				} else {
-					setUser(user);
+					setUser(user as User);
 				}
 			} catch (err) {
 				console.error('Auth test error:', err);
-				setError(err);
+				setError(err as Error);
 			} finally {
 				setLoading(false);
 			}
