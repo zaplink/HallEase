@@ -205,21 +205,6 @@ export default function MyReservationReviewPage() {
 		return timeString.substring(0, 5);
 	};
 
-	const getStatusBadgeVariant = (status: string) => {
-		switch (status.toLowerCase()) {
-			case 'approved':
-				return 'default';
-			case 'pending':
-				return 'secondary';
-			case 'rejected':
-				return 'destructive';
-			case 'waiting':
-				return 'outline';
-			default:
-				return 'secondary';
-		}
-	};
-
 	if (loading) {
 		return (
 			<SidebarLayout>

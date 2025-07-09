@@ -2,9 +2,6 @@ import {
 	LayoutDashboard,
 	CalendarClock,
 	Building2,
-	CircleCheckBig,
-	CircleX,
-	CirclePause,
 	FilePlus2,
 	Airplay,
 	BookOpen,
@@ -21,7 +18,6 @@ import {
 	Lock,
 	Library,
 	SquareLibrary,
-	CircleDot,
 } from 'lucide-react';
 
 export interface SubMenuItem {
@@ -34,6 +30,7 @@ export interface SidebarItem {
 	itemTitle: string;
 	itemUrl: string;
 	itemIcon: React.ComponentType<{ size?: number; className?: string }>;
+	roleSlugs: string[];
 	subMenu?: SubMenuItem[];
 }
 

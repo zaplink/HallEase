@@ -53,6 +53,18 @@ export default function MenuContent() {
 	// 	};
 	// }, []);
 
+	// Use type guard to avoid 'any' and TS errors
+	function hasSubMenu(
+		item: unknown
+	): item is { subMenu: import('./menu-items').SubMenuItem[] } {
+		return (
+			typeof item === 'object' &&
+			item !== null &&
+			'subMenu' in item &&
+			Array.isArray((item as { subMenu?: unknown }).subMenu)
+		);
+	}
+
 	return (
 		<>
 			{sidebarMenu.map((section) => (
@@ -63,7 +75,7 @@ export default function MenuContent() {
 					<SidebarGroupContent>
 						<SidebarMenu>
 							{section.sectionMenu.map((item) => {
-								if (item.subMenu) {
+								if (hasSubMenu(item)) {
 									const isOpen =
 										openSubMenu === item.itemTitle;
 									return (
@@ -113,42 +125,45 @@ export default function MenuContent() {
 												</CollapsibleTrigger>
 												<CollapsibleContent>
 													<SidebarMenuSub>
-														{item.subMenu.map(
-															(subItem) => (
-																<SidebarMenuSubItem
-																	key={
-																		subItem.subTitle
-																	}
-																>
-																	<SidebarMenuButton
-																		asChild
-																		isActive={
-																			currentPath ==
-																			subItem.subUrl
+														{hasSubMenu(item) &&
+															item.subMenu.map(
+																(
+																	subItem: import('./menu-items').SubMenuItem
+																) => (
+																	<SidebarMenuSubItem
+																		key={
+																			subItem.subTitle
 																		}
 																	>
-																		<Link
-																			href={
+																		<SidebarMenuButton
+																			asChild
+																			isActive={
+																				currentPath ==
 																				subItem.subUrl
 																			}
-																			className='flex flex-row justify-left'
 																		>
-																			<subItem.subIcon
-																				size={
-																					20
+																			<Link
+																				href={
+																					subItem.subUrl
 																				}
-																				className='mr-1'
-																			/>
-																			<span>
-																				{
-																					subItem.subTitle
-																				}
-																			</span>
-																		</Link>
-																	</SidebarMenuButton>
-																</SidebarMenuSubItem>
-															)
-														)}
+																				className='flex flex-row justify-left'
+																			>
+																				<subItem.subIcon
+																					size={
+																						20
+																					}
+																					className='mr-1'
+																				/>
+																				<span>
+																					{
+																						subItem.subTitle
+																					}
+																				</span>
+																			</Link>
+																		</SidebarMenuButton>
+																	</SidebarMenuSubItem>
+																)
+															)}
 													</SidebarMenuSub>
 												</CollapsibleContent>
 											</SidebarMenuItem>

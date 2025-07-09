@@ -133,6 +133,9 @@ export async function getUnifiedReservations(): Promise<
 				status: reserve.status || 'pending',
 				createdDate: reserve.created_date || '',
 				createdTime: reserve.created_time || '',
+				// Set default empty values for modified fields since they don't exist in the database
+				modifiedDate: '',
+				modifiedTime: '',
 			};
 		});
 
