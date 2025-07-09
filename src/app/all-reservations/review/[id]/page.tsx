@@ -98,8 +98,10 @@ export default function ReviewReservationPage() {
 					type,
 					hall_option,
 					is_submitted,
-					created_at,
-					updated_at,
+					created_date,
+					created_time,
+					modified_date,
+					modified_time,
 					profiles:profile_id (
 						full_name,
 						email,
@@ -139,14 +141,10 @@ export default function ReviewReservationPage() {
 					email: profileData?.email || 'Unknown',
 					role: profileData?.role || 'Unknown',
 				},
-				createdDate: reserveData.created_at.split('T')[0],
-				createdTime: reserveData.created_at
-					.split('T')[1]
-					?.substring(0, 5),
-				modifiedDate: reserveData.updated_at.split('T')[0],
-				modifiedTime: reserveData.updated_at
-					.split('T')[1]
-					?.substring(0, 5),
+				createdDate: reserveData.created_date || '',
+				createdTime: reserveData.created_time || '',
+				modifiedDate: reserveData.modified_date || '',
+				modifiedTime: reserveData.modified_time || '',
 			};
 
 			// Fetch event or extra lecture details based on type

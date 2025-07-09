@@ -37,6 +37,8 @@ export async function submitReserveEvent(
 		status,
 		type: 'event' as const,
 		profile_id: profileId,
+		created_date: now.toISOString().split('T')[0], // YYYY-MM-DD format
+		created_time: now.toTimeString().split(' ')[0], // HH:MM:SS format
 		modified_date: now.toISOString().split('T')[0], // YYYY-MM-DD format
 		modified_time: now.toTimeString().split(' ')[0], // HH:MM:SS format
 		is_submitted: status === 'pending', // true for submitted, false for draft
