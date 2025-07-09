@@ -38,4 +38,6 @@ export interface UnifiedReservationRow {
 	bookedBy: string;
 	createdDate: string;
 	createdTime: string;
+	modifiedDate: string;
+	modifiedTime: string;
 }
