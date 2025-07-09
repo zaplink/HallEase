@@ -1,6 +1,6 @@
 'use client';
 
-import ReserveLectureForm from '../forms/lecture/ReserveLectureForm';
+import ReserveLectureForm from '../forms/lecture/ReserveLectureStepperForm';
 import SidebarLayout from '@/layouts/Sidebar/Layout';
 import PageHeader from '@/components/custom/PageHeader';
 import { useRouter } from 'next/navigation';
