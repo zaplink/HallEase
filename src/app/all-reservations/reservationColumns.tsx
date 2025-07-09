@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, ArrowUpDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 type ActionsCellProps = {
@@ -76,7 +76,20 @@ export const reservationColumns: ColumnDef<UnifiedReservationRow>[] = [
 	},
 	{
 		accessorKey: 'date',
-		header: 'Date',
+		header: ({ column }) => {
+			return (
+				<Button
+					variant='ghost'
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === 'asc')
+					}
+					className='h-auto p-0 font-medium'
+				>
+					Date
+					<ArrowUpDown className='ml-2 h-4 w-4' />
+				</Button>
+			);
+		},
 		cell: ({ row }) => {
 			const date = row.getValue('date') as string;
 			if (date) {
@@ -96,6 +109,11 @@ export const reservationColumns: ColumnDef<UnifiedReservationRow>[] = [
 				);
 			}
 			return 'N/A';
+		},
+		sortingFn: (rowA, rowB) => {
+			const dateA = new Date(rowA.getValue('date') as string);
+			const dateB = new Date(rowB.getValue('date') as string);
+			return dateA.getTime() - dateB.getTime();
 		},
 	},
 	{
