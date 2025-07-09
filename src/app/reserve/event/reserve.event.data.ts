@@ -1,26 +1,3 @@
-// Event type options and equipment options - defined first
-export const eventTypeOptions = [
-	{ label: 'Conference', value: 'conference' },
-	{ label: 'Event', value: 'event' },
-	{ label: 'Workshop', value: 'workshop' },
-	{ label: 'Seminar', value: 'seminar' },
-];
-
-export const equipmentOptions = [
-	{ label: 'Smart Board', value: 'smartboard' },
-	{ label: 'Projector', value: 'projector' },
-	{ label: 'Laptop', value: 'laptop' },
-	{ label: 'Microphone', value: 'microphone' },
-];
-
-// Types derived from the options - defined after the options
-export type EventType = (typeof eventTypeOptions)[number]['value'];
-
-export type EquipmentItemType = {
-	name: (typeof equipmentOptions)[number]['value'];
-	count: number;
-};
-
 export interface ReserveEventFormData {
 	name: string;
 	description: string | null;
@@ -91,5 +68,26 @@ export function mapBookingDataToApi(data: ReserveEventFormData) {
 		equipment: equipmentString,
 	};
 }
+
+export type EventType = (typeof eventTypeOptions)[number]['value'];
+
+export type EquipmentItemType = {
+	name: (typeof equipmentOptions)[number]['value'];
+	count: number;
+};
+
+export const eventTypeOptions = [
+	{ label: 'Conference', value: 'conference' },
+	{ label: 'Event', value: 'event' },
+	{ label: 'Workshop', value: 'workshop' },
+	{ label: 'Seminar', value: 'seminar' },
+];
+
+export const equipmentOptions = [
+	{ label: 'Smart Board', value: 'smartboard' },
+	{ label: 'Projector', value: 'projector' },
+	{ label: 'Laptop', value: 'laptop' },
+	{ label: 'Microphone', value: 'microphone' },
+];
 
 export type SubmissionType = 'pending' | 'draft';

@@ -193,19 +193,19 @@ export async function submitReserveEvent(
 	};
 }
 
-// Subscribe to real-time updates from the 'reserve' table
+// Subscribe to real-time updates from the 'bookings' table
 export function subscribeToNewBookings(
-	callback: (newReserveEvent: unknown) => void
+	callback: (newReserveEvent: ReserveEventFormData) => void
 ) {
 	const channel = supabase
 		.channel('reserve-event-channel') // Channel name
 		.on(
 			'postgres_changes',
-			{ event: 'INSERT', schema: 'public', table: 'reserve' },
+			{ event: 'INSERT', schema: 'public', table: 'event' },
 			(payload) => {
 				// The callback that will be triggered when a new booking is inserted
 				if (payload.new) {
-					callback(payload.new); // Pass the new booking data
+					callback(payload.new as ReserveEventFormData); // Pass the new booking data
 				}
 			}
 		)

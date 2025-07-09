@@ -4,7 +4,7 @@ import {
 	CollapsibleTrigger,
 	CollapsibleContent,
 } from '@/components/ui/collapsible';
-import { ChevronDown, ChevronRight, Asterisk } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import {
 	SidebarGroup,
 	SidebarMenu,
@@ -18,9 +18,9 @@ import {
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import React, { useState } from 'react';
-import { subscribeToNewBookings } from '@/app/reserve/forms/event/reserve.event.service';
+// import { subscribeToNewBookings } from '@/app/reserve/forms/event/reserve.event.service';
 
-import { useEffect } from 'react';
+// import { useEffect } from 'react';
 
 export default function MenuContent() {
 	// Current path of URL
@@ -34,24 +34,24 @@ export default function MenuContent() {
 		setOpenSubMenu((prev) => (prev === menuTitle ? null : menuTitle));
 	};
 
-	const [notification, setNotification] = useState<string | null>(null);
+	// const [notification, setNotification] = useState<string | null>(null);
 	// Use below for show notificaitons on booking data submission
 	// {notification && (
 	// 	<div className='notification'>{notification}</div>
 	// )}
 
 	// Subscribe to new bookings on component mount
-	useEffect(() => {
-		const channel = subscribeToNewBookings((newBooking) => {
-			console.log('Booking received:', newBooking);
-			setNotification(`New booking received: ${newBooking.name}`);
-		});
+	// useEffect(() => {
+	// 	const channel = subscribeToNewBookings((newBooking) => {
+	// 		console.log('Booking received:', newBooking);
+	// 		setNotification(`New booking received: ${newBooking.name}`);
+	// 	});
 
-		// Cleanup on unmount
-		return () => {
-			channel.unsubscribe();
-		};
-	}, []);
+	// 	// Cleanup on unmount
+	// 	return () => {
+	// 		channel.unsubscribe();
+	// 	};
+	// }, []);
 
 	return (
 		<>
@@ -94,9 +94,9 @@ export default function MenuContent() {
 														<span>
 															{item.itemTitle}
 														</span>
-														{notification && (
+														{/* {notification && (
 															<Asterisk />
-														)}
+														)} */}
 
 														{isOpen ? (
 															<ChevronDown
