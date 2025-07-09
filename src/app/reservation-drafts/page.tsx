@@ -32,7 +32,7 @@ function Page() {
 			<PageHeader title='Saved Drafts' />
 			<div className='container mx-auto'>
 				{loading || data === null ? (
-					<Loading reason='Loading Draft Reservations' pageView />
+					<Loading text='Loading drafts' pageView />
 				) : (
 					<DataTable columns={draftReservationColumns} data={data} />
 				)}

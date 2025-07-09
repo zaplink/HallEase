@@ -137,7 +137,9 @@ export const draftReservationColumns: ColumnDef<UnifiedReservationRow>[] = [
 		accessorKey: 'progress',
 		header: 'Progress',
 		cell: () => (
-			<div className='w-24 text-xs text-gray-600 text-center'>N/A</div>
+			<div className='px-2 py-0.5 text-xs bg-amber-100 text-amber-800 rounded-full w-fit'>
+				0%
+			</div>
 		),
 	},
 	{

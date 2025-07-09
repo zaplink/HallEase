@@ -38,7 +38,7 @@ function Page() {
 			<PageHeader title='All Reservations' />
 			<div className='container mx-auto'>
 				{loading ? (
-					<Loading reason='Loading All Reservations' pageView />
+					<Loading text='Loading all reservations' pageView />
 				) : error ? (
 					<div className='flex items-center justify-center min-h-[200px]'>
 						<div className='text-center'>

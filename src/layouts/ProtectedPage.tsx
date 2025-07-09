@@ -34,7 +34,7 @@ export default function ProtectedPage({
 			// 	</p>
 			// </div>
 
-			<Loading reason='Checking Authentication' pageView={true} />
+			<Loading text='Checking Authentication' pageView={true} />
 		);
 
 	return <>{children}</>;

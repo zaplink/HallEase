@@ -1,12 +1,32 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import SidebarLayout from '@/layouts/Sidebar/Layout';
 import PageHeader from '@/components/custom/PageHeader';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import { DraftSummary, getRecentDrafts } from './getRecentDrafts';
+import Loading from '@/components/custom/Loading';
 
 export default function ReservePage() {
 	const router = useRouter();
+	const [drafts, setDrafts] = useState<DraftSummary[]>([]);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		async function fetchDrafts() {
+			try {
+				const recentDrafts = await getRecentDrafts(5); // Get most recent 5 drafts
+				setDrafts(recentDrafts);
+			} catch (error) {
+				console.error('Failed to fetch drafts:', error);
+			} finally {
+				setLoading(false);
+			}
+		}
+
+		fetchDrafts();
+	}, []);
 
 	const purposes = [
 		{
@@ -21,39 +41,11 @@ export default function ReservePage() {
 		},
 	];
 
-	// Dummy saved drafts data
-	const savedDrafts = [
-		{
-			id: 'draft-1',
-			name: 'Annual Tech Conference',
-			organizer: 'Tech Society',
-			type: 'event',
-			typeLabel: 'Event',
-			lastModified: new Date('2025-07-06T14:30:00'),
-		},
-		{
-			id: 'draft-2',
-			name: 'Data Structures & Algorithms',
-			organizer: 'Dr. Smith',
-			type: 'extra-lecture',
-			typeLabel: 'Extra Lecture',
-			lastModified: new Date('2025-07-05T16:45:00'),
-		},
-		{
-			id: 'draft-3',
-			name: 'Workshop on Machine Learning',
-			organizer: 'AI Club',
-			type: 'event',
-			typeLabel: 'Event',
-			lastModified: new Date('2025-07-04T10:15:00'),
-		},
-	];
-
 	const handlePurposeSelection = (purposeId: string) => {
 		router.push(`/reserve/${purposeId}`);
 	};
 
-	const handleEditDraft = (draft: (typeof savedDrafts)[0]) => {
+	const handleEditDraft = (draft: DraftSummary) => {
 		// Navigate to the appropriate form based on draft type
 		router.push(`/reserve/${draft.type}`);
 		// In a real implementation, you would also load the draft data into the form
@@ -142,22 +134,27 @@ export default function ReservePage() {
 				</div>
 
 				{/* Right Panel - Saved Drafts */}
-				{savedDrafts.length > 0 && (
-					<div className='w-72 bg-muted/20 rounded-lg border border-border p-4'>
-						<div className='space-y-4'>
-							<div className='pb-2 border-b border-border'>
-								<h3 className='text-base font-medium text-foreground'>
-									Saved Drafts
-								</h3>
+				<div className='w-72 bg-muted/20 rounded-lg border border-border p-4'>
+					<div className='space-y-4'>
+						<div className='pb-2 border-b border-border'>
+							<h3 className='text-base font-medium text-foreground'>
+								Saved Drafts
+							</h3>
+							{!loading && (
 								<p className='text-xs text-muted-foreground mt-1'>
-									{savedDrafts.length} draft
-									{savedDrafts.length !== 1 ? 's' : ''}{' '}
-									available
+									{drafts.length} draft
+									{drafts.length !== 1 ? 's' : ''} available
 								</p>
-							</div>
+							)}
+						</div>
 
-							<div className='space-y-2'>
-								{savedDrafts.map((draft) => (
+						<div className='space-y-2'>
+							{loading ? (
+								<div className='flex justify-center py-8'>
+									<Loading text='Loading drafts' />
+								</div>
+							) : drafts.length > 0 ? (
+								drafts.map((draft) => (
 									<div
 										key={draft.id}
 										className='bg-background border border-border rounded p-3 hover:border-primary/50 transition-colors duration-200 cursor-pointer'
@@ -168,40 +165,51 @@ export default function ReservePage() {
 												<h4 className='text-sm font-medium text-foreground truncate'>
 													{draft.name}
 												</h4>
-												<span
-													className={`px-2 py-0.5 text-xs rounded ${
-														draft.type === 'event'
-															? 'bg-primary/10 text-primary'
-															: 'bg-secondary/10 text-secondary-foreground'
-													}`}
-												>
-													{draft.type === 'event'
-														? 'Event'
-														: 'Lecture'}
-												</span>
 											</div>
 
-											<div className='flex items-center justify-between text-xs text-muted-foreground'>
-												<span>{draft.organizer}</span>
-												<span>
+											<div className='flex items-center justify-between text-xs'>
+												<span className='text-muted-foreground'>
 													{formatLastModified(
 														draft.lastModified
 													)}
 												</span>
+												<span className='px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full text-xs'>
+													0%
+												</span>
 											</div>
 										</div>
 									</div>
-								))}
-							</div>
+								))
+							) : (
+								<div className='text-center py-6 text-sm text-muted-foreground'>
+									No saved drafts found
+								</div>
+							)}
+						</div>
 
+						{drafts.length > 0 && (
 							<div className='pt-2 border-t border-border'>
 								<p className='text-xs text-center text-muted-foreground'>
 									Click any draft to continue editing
 								</p>
 							</div>
-						</div>
+						)}
+
+						{drafts.length > 0 && (
+							<div className='text-center'>
+								<Button
+									variant='link'
+									className='text-xs'
+									onClick={() =>
+										router.push('/reservation-drafts')
+									}
+								>
+									View all drafts
+								</Button>
+							</div>
+						)}
 					</div>
-				)}
+				</div>
 			</div>
 		</SidebarLayout>
 	);

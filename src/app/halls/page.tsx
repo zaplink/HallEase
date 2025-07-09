@@ -42,7 +42,7 @@ export default function Hall() {
 				<div className='container mx-auto'>
 					{halls === null ? (
 						// <p>Loading halls...</p>
-						<Loading reason='Loading Halls' pageView={true} />
+						<Loading text='Loading Halls' pageView={true} />
 					) : (
 						<DataTable columns={columns} data={halls} />
 					)}

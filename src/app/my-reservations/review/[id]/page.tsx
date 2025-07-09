@@ -208,7 +208,7 @@ export default function MyReservationReviewPage() {
 	if (loading) {
 		return (
 			<SidebarLayout>
-				<Loading reason='Loading reservation details' pageView />
+				<Loading text='Loading reservation details' pageView />
 			</SidebarLayout>
 		);
 	}

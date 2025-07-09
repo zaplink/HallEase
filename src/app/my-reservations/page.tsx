@@ -33,7 +33,7 @@ function Page() {
 			<PageHeader title='Reservation History' />
 			<div className='container mx-auto'>
 				{loading || data === null ? (
-					<Loading reason='Loading Reservations' pageView />
+					<Loading text='Loading reservations' pageView />
 				) : (
 					<DataTable columns={reservationColumns} data={data} />
 				)}

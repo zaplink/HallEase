@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 function UnderConstruction() {
 	return (
 		<div className='flex flex-col items-center gap-4'>
-			<Loading pageView={true} reason='Under Construction!' />
+			<Loading pageView={true} text='Under Construction!' />
 			<Button asChild>
 				<Link href='/dashboard'>Return Home</Link>
 			</Button>
