@@ -11,6 +11,8 @@ reserve
     modified_time : time
     is_submitted : boolean (true = submitted | false = draft)
     is_consented : boolean
+    created_date: date
+    created_time : time
 
 event
     id : uuid
@@ -36,14 +38,6 @@ extra_lecture
     attendee_file : string
     equipment : uuid : FK(equipment, id)
 
-
-course
-    id : uuid
-    char : string (exmaple: MGMT)
-    digit : text (example: 22012)
-    name : string
-    capacity : integer
-
 profiles
     id : uuid
     full_name : string
@@ -52,7 +46,15 @@ profiles
     email : string
     position : string
 
-equipment
+equipment (Equipment list of each reservation)
     id : uuid
     reserve_id : uuid : FK(reserve, id)
-    description : string (all equipments as one string combined by ; )
+    description : string (List of equipments - all equipments as one string combined by ; )
+
+course
+    id : uuid
+    char : string (example: MGMT)
+    digit : string (example: 22012)
+    name : string
+    capacity : integer
+    lecturer_id : uuid : FK(lecturer, id)

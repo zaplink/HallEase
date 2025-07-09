@@ -3,7 +3,7 @@ import { Separator } from '@/components/ui/separator';
 
 interface PageHeaderProps {
 	title: string;
-	descriptions?: string[];
+	descriptions?: ReactNode[];
 	extra?: ReactNode;
 }
 
