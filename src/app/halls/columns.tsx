@@ -12,7 +12,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, Calendar, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 
 type ActionsCellProps = {
@@ -24,99 +24,108 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
 	const router = useRouter();
 
 	return (
-		<DropdownMenu>
-			<DropdownMenuTrigger asChild>
-				<Button variant='ghost' className='h-8 w-8 p-0'>
-					<span className='sr-only'>Open menu</span>
-					<MoreHorizontal className='h-4 w-4' />
-				</Button>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent align='end'>
-				<DropdownMenuLabel>Actions</DropdownMenuLabel>
-				<DropdownMenuSeparator />
-				<DropdownMenuItem
-					onClick={() => {
-						navigator.clipboard.writeText(hall.id);
-						toast('Hall ID Copied!', {
-							description: `${hall.id}`,
-							action: {
-								label: 'View Hall',
-								onClick: () => router.push(`/hall/${hall.id}`),
-							},
-						});
-					}}
-				>
-					Copy Hall ID
-				</DropdownMenuItem>
-				<DropdownMenuSeparator />
-				<DropdownMenuItem
-					onClick={() => router.push(`/reserve/${hall.id}`)}
-				>
-					Book Hall
-				</DropdownMenuItem>
-				<DropdownMenuItem
-					onClick={() => router.push(`/hall/${hall.id}`)}
-				>
-					View Hall
-				</DropdownMenuItem>
-				<DropdownMenuItem
-					onClick={() => router.push(`/hall/${hall.id}/edit`)}
-				>
-					Edit Hall
-				</DropdownMenuItem>
-			</DropdownMenuContent>
-		</DropdownMenu>
+		<div className='flex items-center gap-2'>
+			<Button
+				variant='ghost'
+				size='sm'
+				onClick={() => router.push(`/reserve/${hall.code}`)}
+				className='h-8 w-8 p-0'
+				disabled={!hall.is_available}
+				title='Reserve Hall'
+			>
+				<Calendar className='h-4 w-4' />
+			</Button>
+			<Button
+				variant='ghost'
+				size='sm'
+				onClick={() => router.push(`/hall/${hall.code}`)}
+				className='h-8 w-8 p-0'
+				title='View Details'
+			>
+				<Eye className='h-4 w-4' />
+			</Button>
+			<DropdownMenu>
+				<DropdownMenuTrigger asChild>
+					<Button variant='ghost' className='h-8 w-8 p-0'>
+						<span className='sr-only'>Open menu</span>
+						<MoreHorizontal className='h-4 w-4' />
+					</Button>
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align='end'>
+					<DropdownMenuLabel>Actions</DropdownMenuLabel>
+					<DropdownMenuItem
+						onClick={() => {
+							navigator.clipboard.writeText(hall.code);
+							toast('Hall Code Copied!', {
+								description: hall.code,
+							});
+						}}
+					>
+						Copy Hall Code
+					</DropdownMenuItem>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem
+						onClick={() => router.push(`/hall/${hall.code}/edit`)}
+					>
+						Edit Hall
+					</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
+		</div>
 	);
 };
 
-const buildingNameMap: Record<string, string> = {
-	ACD: 'Academic',
-	LAB: 'Lab',
-	ADM: 'Admin',
-	ACC: 'Accommodation',
-	AUD: 'Auditorium',
-};
-
 const hallTypeMap: Record<string, string> = {
+	EW: 'Engineering Workshop',
+	LCH: 'Lecture Hall',
 	CMP: 'Computer Lab',
 	'CMP-VR': 'Computer Lab - VR',
 	'CMP-MAIN': 'Computer Lab - Main',
 	'CMP-MAT': 'Computer Lab - Material',
-	'CMP-DAT': 'Computer Lab - Data science',
-	EW: 'Engineering Workshop',
-	LCH: 'Lecture Hall',
+	'CMP-DAT': 'Computer Lab - Data Science',
 	ELP: 'Chemistry Lab',
 	ML: 'Mechanical Lab',
 };
 
 export const columns: ColumnDef<HallType>[] = [
 	{
-		accessorKey: 'id', // This is the column name you want
-		header: 'ID',
-		cell: ({ row }) => row.original.id, // Use the real property name here
-	},
-	{
-		accessorKey: 'location',
-		header: 'Location',
-		cell: ({ row }) => {
-			const hall = row.original;
-			const buildingFull =
-				buildingNameMap[hall.building] || hall.building;
-			return `${buildingFull} -  ${hall.floor == 0 ? 'G' : hall.floor}`;
+		accessorKey: 'code',
+		header: 'Code',
+		cell: ({ row }) => row.original.code,
+		enableGlobalFilter: true,
+		filterFn: (row, columnId, filterValue) => {
+			// Remove hyphens and spaces from both the search value and the cell value
+			const searchValue = filterValue.toLowerCase().replace(/[-\s]/g, '');
+			const cellValue = (row.getValue(columnId) as string)
+				.toLowerCase()
+				.replace(/[-\s]/g, '');
+			return cellValue.includes(searchValue);
 		},
 	},
-	{ accessorKey: 'capacity', header: 'Capacity' },
 	{
 		accessorKey: 'type',
 		header: 'Type',
-		cell: ({ row }) => {
-			const hall = row.original;
-			return hallTypeMap[hall.type] || hall.type;
-		},
+		cell: ({ row }) => hallTypeMap[row.original.type] || row.original.type,
 	},
-	{ accessorKey: 'status', header: 'Status' },
+	{
+		accessorKey: 'capacity',
+		header: 'Capacity',
+		cell: ({ row }) => row.original.capacity,
+	},
+	{
+		accessorKey: 'is_available',
+		header: 'Status',
+		cell: ({ row }) => (
+			<div
+				className={`font-medium ${!row.original.is_available ? 'text-red-600' : ''}`}
+			>
+				{row.original.is_available ? 'Available' : 'Not Available'}
+			</div>
+		),
+	},
 	{
 		id: 'actions',
-		cell: ActionsCell, // Use typed component here
+		header: 'Actions',
+		cell: ActionsCell,
 	},
 ];

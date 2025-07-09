@@ -1,10 +1,11 @@
 export type Hall = {
-	uuid: string;
 	id: string;
-	type: string;
-	building: string;
+	code: string;
 	capacity: number;
-	floor: number;
+	building: string;
 	description: string;
-	status: string;
+	floor: number;
+	type: string;
+	is_available: boolean;
+	energy_consumption: number;
 };

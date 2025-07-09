@@ -58,3 +58,14 @@ course
     name : string
     capacity : integer
     lecturer_id : uuid : FK(lecturer, id)
+
+hall
+    id : uuid
+    code : string
+    capacity : integer
+    building : string (LAB, ACD, ...)
+    description: string
+    floor : int (0 - Ground)
+    type : string (EW | LCH, ...)
+    is_available : boolean
+    energy consumption :  integer (example: 80 means 80 out of 100)
