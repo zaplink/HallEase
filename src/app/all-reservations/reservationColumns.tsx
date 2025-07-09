@@ -75,6 +75,46 @@ export const reservationColumns: ColumnDef<UnifiedReservationRow>[] = [
 		cell: ({ row }) => <div>{row.getValue('bookedBy')}</div>,
 	},
 	{
+		accessorKey: 'createdDate',
+		header: ({ column }) => (
+			<Button
+				variant='ghost'
+				onClick={() =>
+					column.toggleSorting(column.getIsSorted() === 'asc')
+				}
+				className='h-auto p-0 font-medium'
+			>
+				Requested On
+				<ArrowUpDown className='ml-2 h-4 w-4' />
+			</Button>
+		),
+		cell: ({ row }) => {
+			const date = row.getValue('createdDate') as string;
+			if (date) {
+				const dateObj = new Date(date);
+				const weekday = dateObj.toLocaleDateString('en-US', {
+					weekday: 'short',
+				});
+				const day = dateObj.getDate();
+				const month = dateObj.toLocaleDateString('en-US', {
+					month: 'short',
+				});
+				const year = dateObj.getFullYear();
+				return (
+					<div>
+						{weekday}, {day} {month} {year}
+					</div>
+				);
+			}
+			return 'N/A';
+		},
+		sortingFn: (rowA, rowB) => {
+			const dateA = new Date(rowA.getValue('createdDate') as string);
+			const dateB = new Date(rowB.getValue('createdDate') as string);
+			return dateA.getTime() - dateB.getTime();
+		},
+	},
+	{
 		accessorKey: 'date',
 		header: ({ column }) => {
 			return (
@@ -85,7 +125,7 @@ export const reservationColumns: ColumnDef<UnifiedReservationRow>[] = [
 					}
 					className='h-auto p-0 font-medium'
 				>
-					Date
+					Occurs On
 					<ArrowUpDown className='ml-2 h-4 w-4' />
 				</Button>
 			);

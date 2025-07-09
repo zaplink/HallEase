@@ -18,6 +18,8 @@ export async function getUnifiedReservations(): Promise<
 				end_time,
 				status,
 				type,
+				created_date,
+				created_time,
 				profiles:profile_id (
 					full_name
 				)
@@ -118,6 +120,8 @@ export async function getUnifiedReservations(): Promise<
 				startTime: reserve.start_time || '',
 				endTime: reserve.end_time || '',
 				status: reserve.status || 'pending',
+				createdDate: reserve.created_date || '',
+				createdTime: reserve.created_time || '',
 			};
 		});
 

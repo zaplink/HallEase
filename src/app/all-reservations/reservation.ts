@@ -7,4 +7,6 @@ export interface UnifiedReservationRow {
 	startTime: string;
 	endTime: string;
 	status: string;
+	createdDate: string;
+	createdTime: string;
 }
