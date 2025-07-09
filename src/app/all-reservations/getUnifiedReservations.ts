@@ -1,172 +1,129 @@
 import { createClient } from '@/lib/supabaseClient';
-import {
-	// LectureReservation,
-	UnifiedReservationRow,
-	// Course,
-} from './reservation';
-// import { date } from 'zod';
-
-interface EventWithReserve {
-	name: string;
-	organizer: string;
-	attendee_count: number;
-	status: string;
-	reserve?: {
-		id: string;
-		date: string;
-		start_hour: string;
-		start_minute: string;
-		end_hour: string;
-		end_minute: string;
-	};
-}
-
-interface LectureWithReserve {
-	status: string;
-	reserve?: {
-		id: string;
-		date: string;
-		start_hour: string;
-		start_minute: string;
-		end_hour: string;
-		end_minute: string;
-	};
-	course?: {
-		char: string;
-		digit: string;
-		name: string;
-	};
-}
+import { UnifiedReservationRow } from './reservation';
 
 export async function getUnifiedReservations(): Promise<
 	UnifiedReservationRow[]
 > {
 	const supabase = createClient();
 
-	const [eventRes, lectureRes] = await Promise.all([
-		supabase.from('event').select(`
-        name,
-        organizer,
-        attendee_count,
-        status,
-        reserve:reserve_id (
-		  id,
-          date,
-          start_hour,
-          start_minute,
-          end_hour,
-          end_minute
-        )
-      `),
-		// supabase.from('reserve').select('*').eq('type', 'lecture'),
-		supabase.from('extra_lecture').select(`
-			status,
-			reserve:reserve_id(
+	try {
+		// Get all submitted reservations with profile information
+		const { data: reserves, error: reserveError } = await supabase
+			.from('reserve')
+			.select(
+				`
 				id,
 				date,
-				start_hour,
-				start_minute,
-				end_hour,
-				end_minute
-			),
-			course: course_id (
-				char,
-				digit,
-				name
+				start_time,
+				end_time,
+				status,
+				type,
+				profiles:profile_id (
+					full_name
+				)
+			`
 			)
-			`),
-		// supabase.from('course').select('id, char, digit, name'),
-	]);
+			.eq('is_submitted', true);
 
-	const eventData = ((eventRes.data ?? []) as Record<string, unknown>[]).map(
-		(e) => ({
-			name: e['name'] as string,
-			organizer: e['organizer'] as string,
-			attendee_count: e['attendee_count'] as number,
-			status: e['status'] as string,
-			reserve: Array.isArray(e['reserve'])
-				? (e['reserve'][0] as EventWithReserve['reserve'])
-				: (e['reserve'] as EventWithReserve['reserve']),
-		})
-	) as EventWithReserve[];
+		if (reserveError) {
+			console.error('Error fetching reserves:', reserveError);
+			return [];
+		}
 
-	const lectureData = (
-		(lectureRes.data ?? []) as Record<string, unknown>[]
-	).map((e) => ({
-		// courseChar: e['char'] as string,
-		// courseDigit: e['digit'] as string,
-		// courseName: e['name'] as string,
-		status: e['status'] as string,
-		reserve: Array.isArray(e['reserve'])
-			? (e['reserve'][0] as LectureWithReserve['reserve'])
-			: (e['reserve'] as LectureWithReserve['reserve']),
-		course: Array.isArray(e['course'])
-			? (e['course'][0] as LectureWithReserve['course'])
-			: (e['course'] as LectureWithReserve['course']),
-	})) as LectureWithReserve[];
+		if (!reserves || reserves.length === 0) {
+			return [];
+		}
 
-	console.log('eventData', eventData);
+		// Separate event and extra_lecture reserve IDs
+		const eventReserveIds = reserves
+			.filter((r) => r.type === 'event')
+			.map((r) => r.id);
 
-	// const lectureRaw = lectureRes.data ?? [];
+		const lectureReserveIds = reserves
+			.filter((r) => r.type === 'extra_lecture')
+			.map((r) => r.id);
 
-	// const courses = (coursesRes.data ?? []) as Course[];
+		// Fetch event details
+		const { data: events, error: eventError } =
+			eventReserveIds.length > 0
+				? await supabase
+						.from('event')
+						.select('name, reserve_id')
+						.in('reserve_id', eventReserveIds)
+				: { data: [], error: null };
 
-	// const courseMap = new Map<string, string>();
-	// courses.forEach((c) => courseMap.set(c.id, c.name));
+		// Fetch extra lecture details with course information
+		const { data: lectures, error: lectureError } =
+			lectureReserveIds.length > 0
+				? await supabase
+						.from('extra_lecture')
+						.select(
+							`
+					reserve_id,
+					course:course_id (
+						char,
+						digit
+					)
+				`
+						)
+						.in('reserve_id', lectureReserveIds)
+				: { data: [], error: null };
 
-	// Map raw lecture data (snake_case) to LectureReservation (camelCase)
-	// const lectureReservations: LectureReservation[] = lectureRaw.map(
-	// 	(lecture: Record<string, unknown>) => ({
-	// 		description: lecture['description'] as string | null,
-	// 		type: lecture['type'] as 'lecture',
-	// 		date: lecture['date'] as Date | undefined,
-	// 		startHour: lecture['start_hour'] as string,
-	// 		startMinute: lecture['start_minute'] as string,
-	// 		endHour: lecture['end_hour'] as string,
-	// 		endMinute: lecture['end_minute'] as string,
-	// 		hallOpt: lecture['hallOpt'] as string,
-	// 		status: lecture['status'] as string,
-	// 		course_id: lecture['course_id'] as string,
-	// 	})
-	// );
+		if (eventError) {
+			console.error('Error fetching events:', eventError);
+		}
+		if (lectureError) {
+			console.error('Error fetching lectures:', lectureError);
+		}
 
-	const unifiedRows: UnifiedReservationRow[] = [
-		...eventData.map((event) => {
-			const reserve = event.reserve;
+		// Create maps for quick lookup
+		const eventMap = new Map(
+			(events || []).map((event) => [event.reserve_id, event])
+		);
+
+		const lectureMap = new Map(
+			(lectures || []).map((lecture) => [lecture.reserve_id, lecture])
+		);
+
+		// Build unified results
+		const unifiedRows: UnifiedReservationRow[] = reserves.map((reserve) => {
+			const profile = Array.isArray(reserve.profiles)
+				? reserve.profiles[0]
+				: reserve.profiles;
+
+			let name = 'Unknown';
+
+			if (reserve.type === 'event') {
+				const event = eventMap.get(reserve.id);
+				name = event?.name || 'Unnamed Event';
+			} else if (reserve.type === 'extra_lecture') {
+				const lecture = lectureMap.get(reserve.id);
+				const course = Array.isArray(lecture?.course)
+					? lecture.course[0]
+					: lecture?.course;
+
+				if (course && course.char && course.digit) {
+					name = `${course.char} ${course.digit}`;
+				} else {
+					name = 'Unknown Course';
+				}
+			}
+
 			return {
-				id: reserve?.id ?? '',
-				name: event.name ?? 'Unnamed Event',
-				date: reserve?.date ?? '',
-				startTime: `${reserve?.start_hour ?? '00'}:${reserve?.start_minute ?? '00'}`,
-				endTime: `${reserve?.end_hour ?? '00'}:${reserve?.end_minute ?? '00'}`,
-				type: 'event' as const,
-				status: event.status,
+				id: reserve.id,
+				name,
+				type: reserve.type as 'event' | 'extra_lecture',
+				bookedBy: profile?.full_name || 'Unknown User',
+				date: reserve.date || '',
+				startTime: reserve.start_time || '',
+				endTime: reserve.end_time || '',
+				status: reserve.status || 'pending',
 			};
-		}),
+		});
 
-		...lectureData.map((lecture) => {
-			const reserve = lecture.reserve;
-			const course = lecture.course;
-			return {
-				id: reserve?.id ?? '',
-				name: `${course?.char} ${course?.digit} - ${course?.name}`,
-				date: reserve?.date ?? '',
-				startTime: `${reserve?.start_hour ?? '00'}:${reserve?.start_minute ?? '00'}`,
-				endTime: `${reserve?.end_hour ?? '00'}:${reserve?.end_minute ?? '00'}`,
-				type: 'event' as const,
-				status: lecture.status,
-			};
-		}),
-
-		// ...lectureReservations.map((lecture) => ({
-		// 	name: courseMap.get(lecture.course_id) ?? 'Unknown Course',
-		// 	date: lecture.date?.toString() ?? '',
-		// 	startTime: `${lecture.startHour}:${lecture.startMinute}`,
-		// 	endTime: `${lecture.endHour}:${lecture.endMinute}`,
-		// 	type: 'lecture' as const,
-		// 	status: lecture.status,
-		// })),
-	];
-
-	return unifiedRows;
+		return unifiedRows;
+	} catch (error) {
+		console.error('Unexpected error fetching reservations:', error);
+		return [];
+	}
 }

@@ -21,9 +21,9 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
-	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { MoreHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -48,11 +48,15 @@ export const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
 			.eq('id', reservation.id);
 
 		if (error) {
-			toast.error(`Failed to update: ${error.message}`);
+			toast.error('Failed to update reservation status');
+			console.error('Error updating reservation:', error);
 		} else {
-			toast.success(`Reservation ${newStatus}`);
+			toast.success(
+				`Reservation ${newStatus === 'approved' ? 'approved' : 'rejected'} successfully`
+			);
 			router.refresh();
 		}
+		setDialogOpen(false);
 	};
 
 	return (
@@ -68,89 +72,22 @@ export const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
 					<DropdownMenuLabel>Actions</DropdownMenuLabel>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem
-						onClick={() =>
-							router.push(`/reservation/${reservation.id}`)
-						}
+						onClick={() => {
+							setActionType('accept');
+							setDialogOpen(true);
+						}}
+						disabled={reservation.status === 'approved'}
 					>
-						View Reservation
+						Approve
 					</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem asChild>
-						<AlertDialog>
-							<AlertDialogTrigger asChild>
-								<Button
-									variant='ghost'
-									className='w-full justify-start'
-									onClick={() => {
-										setActionType('accept');
-									}}
-								>
-									Accept
-								</Button>
-							</AlertDialogTrigger>
-							<AlertDialogContent>
-								<AlertDialogHeader>
-									<AlertDialogTitle>
-										Accept this reservation?
-									</AlertDialogTitle>
-									<AlertDialogDescription>
-										This will change the status to{' '}
-										<strong>accepted</strong>.
-									</AlertDialogDescription>
-								</AlertDialogHeader>
-								<AlertDialogFooter>
-									<AlertDialogCancel>
-										Cancel
-									</AlertDialogCancel>
-									<AlertDialogAction
-										onClick={() => {
-											handleUpdateStatus('approved');
-										}}
-									>
-										Confirm
-									</AlertDialogAction>
-								</AlertDialogFooter>
-							</AlertDialogContent>
-						</AlertDialog>
-					</DropdownMenuItem>
-
-					<DropdownMenuItem asChild>
-						<AlertDialog>
-							<AlertDialogTrigger asChild>
-								<Button
-									variant='ghost'
-									className='w-full justify-start'
-									onClick={() => {
-										setActionType('reject');
-									}}
-								>
-									Reject
-								</Button>
-							</AlertDialogTrigger>
-							<AlertDialogContent>
-								<AlertDialogHeader>
-									<AlertDialogTitle>
-										Reject this reservation?
-									</AlertDialogTitle>
-									<AlertDialogDescription>
-										This will change the status to{' '}
-										<strong>rejected</strong>.
-									</AlertDialogDescription>
-								</AlertDialogHeader>
-								<AlertDialogFooter>
-									<AlertDialogCancel>
-										Cancel
-									</AlertDialogCancel>
-									<AlertDialogAction
-										onClick={() => {
-											handleUpdateStatus('rejected');
-										}}
-									>
-										Confirm
-									</AlertDialogAction>
-								</AlertDialogFooter>
-							</AlertDialogContent>
-						</AlertDialog>
+					<DropdownMenuItem
+						onClick={() => {
+							setActionType('reject');
+							setDialogOpen(true);
+						}}
+						disabled={reservation.status === 'rejected'}
+					>
+						Reject
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
@@ -159,42 +96,28 @@ export const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>
-							{actionType === 'accept'
-								? 'Accept this reservation?'
-								: 'Reject this reservation?'}
+							{actionType === 'accept' ? 'Approve' : 'Reject'}{' '}
+							Reservation
 						</AlertDialogTitle>
 						<AlertDialogDescription>
-							This action will change the status to{' '}
-							<strong>
-								{actionType === 'accept'
-									? 'accepted'
-									: 'rejected'}
-							</strong>
-							. It can be reversed by editing the reservation.
+							Are you sure you want to{' '}
+							{actionType === 'accept' ? 'approve' : 'reject'}{' '}
+							this reservation for "{reservation.name}"? This
+							action cannot be undone.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel
-							onClick={() => {
-								setActionType(null);
-							}}
-						>
-							Cancel
-						</AlertDialogCancel>
+						<AlertDialogCancel>Cancel</AlertDialogCancel>
 						<AlertDialogAction
-							onClick={() => {
-								if (actionType) {
-									handleUpdateStatus(
-										actionType === 'accept'
-											? 'approved'
-											: 'rejected'
-									);
-									setActionType(null);
-									setDialogOpen(false);
-								}
-							}}
+							onClick={() =>
+								handleUpdateStatus(
+									actionType === 'accept'
+										? 'approved'
+										: 'rejected'
+								)
+							}
 						>
-							Confirm
+							{actionType === 'accept' ? 'Approve' : 'Reject'}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
@@ -204,14 +127,81 @@ export const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
 };
 
 export const reservationColumns: ColumnDef<UnifiedReservationRow>[] = [
-	{ accessorKey: 'name', header: 'Name / Course' },
-	{ accessorKey: 'date', header: 'Date' },
-	{ accessorKey: 'startTime', header: 'Start Time' },
-	{ accessorKey: 'endTime', header: 'End Time' },
-	{ accessorKey: 'type', header: 'Type' },
-	{ accessorKey: 'status', header: 'Status' },
+	{
+		accessorKey: 'name',
+		header: 'Name/Course Code',
+		cell: ({ row }) => (
+			<div className='font-medium'>{row.getValue('name')}</div>
+		),
+	},
+	{
+		accessorKey: 'type',
+		header: 'Type',
+		cell: ({ row }) => {
+			const type = row.getValue('type') as string;
+			return (
+				<Badge variant={type === 'event' ? 'default' : 'secondary'}>
+					{type === 'event' ? 'Event' : 'Extra Lecture'}
+				</Badge>
+			);
+		},
+	},
+	{
+		accessorKey: 'bookedBy',
+		header: 'Booked By',
+		cell: ({ row }) => <div>{row.getValue('bookedBy')}</div>,
+	},
+	{
+		accessorKey: 'date',
+		header: 'Date',
+		cell: ({ row }) => {
+			const date = row.getValue('date') as string;
+			if (date) {
+				return new Date(date).toLocaleDateString();
+			}
+			return 'N/A';
+		},
+	},
+	{
+		accessorKey: 'startTime',
+		header: 'Start Time',
+		cell: ({ row }) => <div>{row.getValue('startTime')}</div>,
+	},
+	{
+		accessorKey: 'endTime',
+		header: 'End Time',
+		cell: ({ row }) => <div>{row.getValue('endTime')}</div>,
+	},
+	{
+		accessorKey: 'status',
+		header: 'Status',
+		cell: ({ row }) => {
+			const status = row.getValue('status') as string;
+			const getVariant = (status: string) => {
+				switch (status.toLowerCase()) {
+					case 'approved':
+						return 'default';
+					case 'pending':
+						return 'secondary';
+					case 'rejected':
+						return 'destructive';
+					case 'waiting':
+						return 'outline';
+					default:
+						return 'secondary';
+				}
+			};
+
+			return (
+				<Badge variant={getVariant(status)}>
+					{status.charAt(0).toUpperCase() + status.slice(1)}
+				</Badge>
+			);
+		},
+	},
 	{
 		id: 'actions',
-		cell: ActionsCell, // Use typed component here
+		enableHiding: false,
+		cell: ({ row }) => <ActionsCell row={row} />,
 	},
 ];

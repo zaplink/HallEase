@@ -65,21 +65,26 @@ export function DataTable<TData, TValue>({
 		},
 	});
 
+	// Safety check for name column
+	const nameColumn = table.getColumn('name');
+	const hasNameColumn = nameColumn !== undefined;
+
 	return (
 		<div>
 			<div className='flex items-center pb-4'>
 				<Input
 					placeholder='Filter Reservations...'
 					value={
-						(table.getColumn('name')?.getFilterValue() as string) ??
-						''
+						hasNameColumn
+							? ((nameColumn.getFilterValue() as string) ?? '')
+							: ''
 					}
 					onChange={(event) =>
-						table
-							.getColumn('name')
-							?.setFilterValue(event.target.value)
+						hasNameColumn &&
+						nameColumn.setFilterValue(event.target.value)
 					}
 					className='max-w-sm'
+					disabled={!hasNameColumn}
 				/>
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
