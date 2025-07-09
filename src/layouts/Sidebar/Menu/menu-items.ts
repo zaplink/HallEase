@@ -93,32 +93,10 @@ const sidebarMenu = [
 				roleSlugs: [],
 			},
 			{
-				itemTitle: 'Reservation Requests',
-				itemUrl: '/requests',
+				itemTitle: 'Saved Drafts',
+				itemUrl: '/reservation-drafts',
 				itemIcon: BookOpen,
 				roleSlugs: ['MBR'],
-				subMenu: [
-					{
-						subTitle: 'Pending',
-						subUrl: '/requests/pending',
-						subIcon: CirclePause,
-					},
-					{
-						subTitle: 'Approved',
-						subUrl: '/requests/approved',
-						subIcon: CircleCheckBig,
-					},
-					{
-						subTitle: 'Rejected',
-						subUrl: '/requests/rejected',
-						subIcon: CircleX,
-					},
-					{
-						subTitle: 'All',
-						subUrl: '/requests/all',
-						subIcon: CircleDot,
-					},
-				],
 			},
 		],
 	},
