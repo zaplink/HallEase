@@ -80,7 +80,20 @@ export const reservationColumns: ColumnDef<UnifiedReservationRow>[] = [
 		cell: ({ row }) => {
 			const date = row.getValue('date') as string;
 			if (date) {
-				return new Date(date).toLocaleDateString();
+				const dateObj = new Date(date);
+				const weekday = dateObj.toLocaleDateString('en-US', {
+					weekday: 'short',
+				});
+				const day = dateObj.getDate();
+				const month = dateObj.toLocaleDateString('en-US', {
+					month: 'short',
+				});
+				const year = dateObj.getFullYear();
+				return (
+					<div>
+						{weekday}, {day} {month} {year}
+					</div>
+				);
 			}
 			return 'N/A';
 		},
@@ -88,12 +101,26 @@ export const reservationColumns: ColumnDef<UnifiedReservationRow>[] = [
 	{
 		accessorKey: 'startTime',
 		header: 'Start Time',
-		cell: ({ row }) => <div>{row.getValue('startTime')}</div>,
+		cell: ({ row }) => {
+			const time = row.getValue('startTime') as string;
+			if (time) {
+				// Remove seconds if present (e.g., "14:30:00" becomes "14:30")
+				return <div>{time.substring(0, 5)}</div>;
+			}
+			return <div>N/A</div>;
+		},
 	},
 	{
 		accessorKey: 'endTime',
 		header: 'End Time',
-		cell: ({ row }) => <div>{row.getValue('endTime')}</div>,
+		cell: ({ row }) => {
+			const time = row.getValue('endTime') as string;
+			if (time) {
+				// Remove seconds if present (e.g., "16:30:00" becomes "16:30")
+				return <div>{time.substring(0, 5)}</div>;
+			}
+			return <div>N/A</div>;
+		},
 	},
 	{
 		accessorKey: 'status',
@@ -124,6 +151,7 @@ export const reservationColumns: ColumnDef<UnifiedReservationRow>[] = [
 	},
 	{
 		id: 'actions',
+		header: 'Actions',
 		enableHiding: false,
 		cell: ({ row }) => <ActionsCell row={row} />,
 	},
