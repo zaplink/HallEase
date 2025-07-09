@@ -1,13 +1,11 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-
 import { createClient } from '@/lib/supabaseServer';
 
 export async function signup(formData: FormData) {
 	const supabase = await createClient();
 
-	// type-casting here for convenience
 	const data = {
 		email: formData.get('email') as string,
 		password: formData.get('password') as string,
@@ -15,19 +13,38 @@ export async function signup(formData: FormData) {
 		username: formData.get('username') as string,
 	};
 
-	// Handle missing fields properly
 	if (!data.username || !data.email || !data.phone || !data.password) {
-		redirect('/error');
+		redirect(
+			'/access-control/register/error?message=' +
+				encodeURIComponent('Missing fields in the form.')
+		);
 	}
 
-	const { error } = await supabase.auth.signUp(data);
+	const { data: signupData, error } = await supabase.auth.signUp({
+		email: data.email,
+		password: data.password,
+		options: {
+			data: {
+				phone: data.phone,
+				username: data.username,
+			},
+		},
+	});
 
 	if (error) {
-		redirect('/error');
+		redirect(
+			'/access-control/register/error?message=' +
+				encodeURIComponent(error.message)
+		);
 	}
 
-	await supabase.from('users').insert(data);
+	// Optionally insert into custom users table
+	await supabase.from('users').insert({
+		id: signupData.user?.id,
+		email: data.email,
+		phone: data.phone,
+		username: data.username,
+	});
 
-	// return success instead of redirecting
 	return { success: true, message: 'Invitation sent to user email.' };
 }
