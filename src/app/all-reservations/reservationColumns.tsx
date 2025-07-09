@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, ArrowUpDown } from 'lucide-react';
+import { MoreHorizontal, ArrowUpDown, Eye } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 type ActionsCellProps = {
@@ -42,7 +42,7 @@ export const ActionsCell: React.FC<ActionsCellProps> = ({ row }) => {
 				<DropdownMenuLabel>Actions</DropdownMenuLabel>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem onClick={handleReview}>
-					Review
+					<Eye className='mr-2 h-4 w-4' /> Review
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
