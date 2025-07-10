@@ -1,3 +1,5 @@
+'use server';
+
 import { NextRequest, NextResponse } from 'next/server';
 import mailjet from 'node-mailjet';
 
@@ -24,7 +26,7 @@ function buildStatusUpdateEmail({
 	requesterName: string;
 }) {
 	const statusColor = status === 'approved' ? '#16a34a' : '#dc2626';
-	const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+	const statusText = status === 'approved' ? 'Approved' : 'Rejected';
 	const message =
 		status === 'approved'
 			? 'Your reservation has been approved. You can now proceed with your planned event.'
@@ -36,7 +38,7 @@ function buildStatusUpdateEmail({
         <head>
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-            <title>Reservation ${statusText}</title>
+            <title>Reservation Status Update</title>
             <style>
                 body {
                     background: #f8fafc;
@@ -142,31 +144,70 @@ function buildStatusUpdateEmail({
 }
 
 export async function POST(req: NextRequest) {
-	const {
-		toEmail,
-		eventName,
-		eventDateTime,
-		eventLocation,
-		reservationId,
-		status,
-		requesterName,
-	} = await req.json();
-
-	if (
-		!process.env.MAILJET_API_KEY ||
-		!process.env.MAILJET_API_SECRET ||
-		!process.env.MAILJET_SENDER_EMAIL
-	) {
-		return NextResponse.json(
-			{ error: 'Missing Mailjet environment variables.' },
-			{ status: 500 }
-		);
-	}
-
-	// URL encode reservationId in case it contains special characters
-	const formattedReservationLink = `https://hallease.zaploq.com/reservation/${encodeURIComponent(reservationId)}`;
-
 	try {
+		const {
+			toEmail,
+			eventName,
+			eventDateTime,
+			eventLocation,
+			reservationId,
+			status,
+			requesterName,
+		} = await req.json();
+
+		// Validate all required fields
+		const requiredFields = {
+			toEmail,
+			eventName,
+			eventDateTime,
+			eventLocation,
+			reservationId,
+			status,
+			requesterName,
+		};
+
+		const missingFields = Object.entries(requiredFields)
+			.filter(([_, value]) => !value)
+			.map(([key]) => key);
+
+		if (missingFields.length > 0) {
+			return NextResponse.json(
+				{
+					error: 'Missing required fields',
+					missingFields,
+				},
+				{ status: 400 }
+			);
+		}
+
+		if (
+			!process.env.MAILJET_API_KEY ||
+			!process.env.MAILJET_API_SECRET ||
+			!process.env.MAILJET_SENDER_EMAIL
+		) {
+			return NextResponse.json(
+				{
+					error: 'Missing Mailjet environment variables.',
+					details: 'Email service configuration is incomplete.',
+				},
+				{ status: 500 }
+			);
+		}
+
+		if (!status || (status !== 'approved' && status !== 'rejected')) {
+			return NextResponse.json(
+				{
+					error: 'Invalid status value',
+					details: 'Status must be either "approved" or "rejected".',
+					receivedStatus: status,
+				},
+				{ status: 400 }
+			);
+		}
+
+		// URL encode reservationId in case it contains special characters
+		const formattedReservationLink = `https://hallease.zaploq.com/reservation/${encodeURIComponent(reservationId)}`;
+
 		const result = await mailjetClient
 			.post('send', { version: 'v3.1' })
 			.request({
@@ -177,7 +218,7 @@ export async function POST(req: NextRequest) {
 							Name: 'HallEase',
 						},
 						To: [{ Email: toEmail }],
-						Subject: `Your Reservation Has Been ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+						Subject: `Reservation ${status === 'approved' ? 'Approved' : 'Rejected'}`,
 						HTMLPart: buildStatusUpdateEmail({
 							eventName,
 							eventLocation,
@@ -198,12 +239,34 @@ export async function POST(req: NextRequest) {
 	} catch (err) {
 		console.error('Mailjet Error:', err);
 		const error = err as Error;
-		return NextResponse.json(
-			{
-				error: 'Failed to send email',
-				details: error?.message || 'Unknown error',
-			},
-			{ status: 500 }
+		const errorResponse = {
+			error: 'Failed to send email',
+			details: error?.message || 'Unknown error',
+			errorType: error?.name,
+			timestamp: new Date().toISOString(),
+			mailjetError:
+				err instanceof Error
+					? {
+							name: error.name,
+							message: error.message,
+							statusCode: (err as any).statusCode,
+							errorIdentifier: (err as any).ErrorIdentifier,
+							errorCode: (err as any).ErrorCode,
+							response:
+								process.env.NODE_ENV === 'development'
+									? (err as any).response
+									: undefined,
+						}
+					: undefined,
+			stack:
+				process.env.NODE_ENV === 'development'
+					? error?.stack
+					: undefined,
+		};
+		console.error(
+			'Email send error details:',
+			JSON.stringify(errorResponse, null, 2)
 		);
+		return NextResponse.json(errorResponse, { status: 500 });
 	}
 }

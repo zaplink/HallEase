@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import SidebarLayout from '@/layouts/Sidebar/Layout';
 import PageHeader from '@/components/custom/PageHeader';
 import Loading from '@/components/custom/Loading';
@@ -229,7 +230,7 @@ export default function ReviewReservationPage() {
 		}
 	};
 
-	const handleUpdateStatus = async (newStatus: 'approved' | 'rejected') => {
+	const handleUpdateStatus = async (status: 'approved' | 'rejected') => {
 		if (!reservation) return;
 
 		setUpdating(true);
@@ -237,84 +238,125 @@ export default function ReviewReservationPage() {
 			const supabase = createClient();
 			const { error: updateError } = await supabase
 				.from('reserve')
-				.update({ status: newStatus })
+				.update({ status })
 				.eq('id', reservationId);
 
 			if (updateError) throw updateError;
 
 			// Prepare email data
 			const eventDateTime = reservation.date
-				? `${formatDate(reservation.date)}, ${formatTime(
-						reservation.startTime
-					)} - ${formatTime(reservation.endTime)}`
+				? `${formatDate(reservation.date)} ${formatTime(reservation.startTime)} - ${formatTime(reservation.endTime)}`
 				: 'N/A';
 
 			const eventName =
 				reservation.event?.name ||
 				reservation.extraLecture?.course?.name ||
-				'N/A';
+				'Unnamed Event';
+
 			const eventLocation =
 				reservation.hallOption === 'availability'
-					? 'Notified on Availability'
+					? 'Preferred Hall: Any Available'
 					: `Requested Hall: ${reservation.hallOption}`;
 
 			// Send email notification
 			try {
+				const emailPayload = {
+					toEmail: reservation.profile.email,
+					eventName,
+					eventDateTime,
+					eventLocation,
+					reservationId: reservation.id,
+					status,
+					requesterName: reservation.profile.fullName,
+				};
+
 				const emailRes = await fetch('/api/send-status-mail', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						toEmail: reservation.profile.email,
-						eventName,
-						eventDateTime,
-						eventLocation,
-						reservationId: reservation.id,
-						status,
-						requesterName: reservation.profile.fullName,
-					}),
+					body: JSON.stringify(emailPayload),
 				});
 
 				if (!emailRes.ok) {
-					console.error('Failed to send status email:', {
-						status: emailRes.status,
-						statusText: emailRes.statusText,
-						reservationId,
-						newStatus,
+					let errorMessage = 'Failed to send notification email';
+					try {
+						const errorData = await emailRes.json();
+						console.error('Status email API error:', {
+							status: emailRes.status,
+							statusText: emailRes.statusText,
+							error: errorData,
+							reservationId,
+							payload: emailPayload,
+						});
+
+						// Use detailed error message if available
+						if (errorData.error && errorData.details) {
+							errorMessage = `${errorData.error}: ${errorData.details}`;
+						}
+					} catch (parseErr) {
+						console.error(
+							'Failed to parse email API error response:',
+							{
+								error: parseErr,
+								status: emailRes.status,
+								statusText: emailRes.statusText,
+								reservationId,
+							}
+						);
+					}
+					toast.error(errorMessage + ' (status was updated)', {
+						duration: 5000,
 					});
 				}
 			} catch (emailErr) {
-				console.error('Error sending status email:', {
+				const errorDetails = {
 					error: emailErr,
 					message:
 						emailErr instanceof Error
 							? emailErr.message
 							: String(emailErr),
 					stack:
-						emailErr instanceof Error ? emailErr.stack : undefined,
+						process.env.NODE_ENV === 'development' &&
+						emailErr instanceof Error
+							? emailErr.stack
+							: undefined,
 					reservationId,
-					newStatus,
+					networkError:
+						emailErr instanceof TypeError &&
+						emailErr.message.includes('fetch'),
+				};
+				console.error(
+					'Status email network/system error:',
+					errorDetails
+				);
+				// Show more specific error message based on error type
+				const isNetworkError =
+					emailErr instanceof TypeError &&
+					emailErr.message.includes('fetch');
+				const errorMessage = isNetworkError
+					? 'Network error while sending email notification'
+					: 'System error while sending email notification';
+				toast.error(errorMessage + ' (status was updated)', {
+					duration: 5000,
 				});
-				// Continue with status update even if email fails
 			}
 
-			// Update local state
-			setReservation((prev) =>
-				prev ? { ...prev, status: newStatus } : null
-			); // Show success message
-			window.alert(`The reservation has been ${newStatus} successfully.`);
+			// Update UI
+			setReservation((prev) => (prev ? { ...prev, status } : null));
+
+			toast.success(`The reservation has been ${status} successfully.`);
+
+			if (status === 'approved') {
+				setApproveDialogOpen(false);
+			} else {
+				setRejectDialogOpen(false);
+			}
 		} catch (err) {
-			console.error('Error updating status:', {
-				error: err,
-				message: err instanceof Error ? err.message : String(err),
-				stack: err instanceof Error ? err.stack : undefined,
-				reservationId,
-				newStatus,
-			}); // Show error message
-			window.alert('Failed to update reservation status.');
+			console.error('Failed to update reservation status:', err);
+			toast.error(
+				'Failed to update reservation status. Please try again.'
+			);
 		} finally {
 			setUpdating(false);
-			setApproveDialogOpen(false);
-			setRejectDialogOpen(false);
 		}
 	};
 
