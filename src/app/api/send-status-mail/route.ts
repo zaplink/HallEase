@@ -3,6 +3,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import mailjet from 'node-mailjet';
 
+interface EmailError extends Error {
+	statusCode?: number;
+	ErrorIdentifier?: string;
+	ErrorCode?: string;
+	ErrorMessage?: string;
+	response?: {
+		status: number;
+		data: unknown;
+	};
+}
+
 const mailjetClient = mailjet.apiConnect(
 	process.env.MAILJET_API_KEY!,
 	process.env.MAILJET_API_SECRET!
@@ -167,8 +178,8 @@ export async function POST(req: NextRequest) {
 		};
 
 		const missingFields = Object.entries(requiredFields)
-			.filter(([_, value]) => !value)
-			.map(([key]) => key);
+			.filter(([, value]) => !value)
+			.map(([fieldName]) => fieldName);
 
 		if (missingFields.length > 0) {
 			return NextResponse.json(
@@ -238,31 +249,35 @@ export async function POST(req: NextRequest) {
 		});
 	} catch (err) {
 		console.error('Mailjet Error:', err);
-		const error = err as Error;
+		const error = err as EmailError;
+
+		const mailjetError =
+			err instanceof Error
+				? {
+						name: error.name,
+						message: error.message,
+						...(error.statusCode && {
+							statusCode: error.statusCode,
+						}),
+						...(error.ErrorIdentifier && {
+							errorIdentifier: error.ErrorIdentifier,
+						}),
+						...(error.ErrorCode && { errorCode: error.ErrorCode }),
+						...(process.env.NODE_ENV === 'development' &&
+							error.response && { response: error.response }),
+					}
+				: undefined;
+
 		const errorResponse = {
 			error: 'Failed to send email',
 			details: error?.message || 'Unknown error',
 			errorType: error?.name,
 			timestamp: new Date().toISOString(),
-			mailjetError:
-				err instanceof Error
-					? {
-							name: error.name,
-							message: error.message,
-							statusCode: (err as any).statusCode,
-							errorIdentifier: (err as any).ErrorIdentifier,
-							errorCode: (err as any).ErrorCode,
-							response:
-								process.env.NODE_ENV === 'development'
-									? (err as any).response
-									: undefined,
-						}
-					: undefined,
-			stack:
-				process.env.NODE_ENV === 'development'
-					? error?.stack
-					: undefined,
+			...(mailjetError && { mailjetError }),
+			...(process.env.NODE_ENV === 'development' &&
+				error?.stack && { stack: error.stack }),
 		};
+
 		console.error(
 			'Email send error details:',
 			JSON.stringify(errorResponse, null, 2)
