@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Combobox } from '@/components/combobox';
+import { submitAuditoriumReservation } from './reservationActions/auditorium';
 
 const formSchema = z.object({
 	eventname: z.string().min(1, {
@@ -28,17 +29,19 @@ const formSchema = z.object({
 		message: 'Description must be at least 10 characters long.',
 	}),
 
-	attendence: z
-		.number()
-		.min(100, { message: 'Minimum attendance should be 100.' })
-		.max(1000, { message: 'Maximum attendance should be 1000.' }),
+	attendence: z.preprocess(
+		(val) => Number(val),
+		z
+			.number()
+			.min(100, { message: 'Minimum attendance is 100.' })
+			.max(1000, {
+				message: 'Maximum attendance is 1000.',
+			})
+	),
 
-	date: z
-		.string()
-		.regex(/^\d{4}-\d{2}-\d{2}$/, {
-			message: 'Invalid date format. Use YYYY-MM-DD.',
-		})
-		.transform((val) => new Date(val)),
+	date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
+		message: 'Invalid date format. Use YYYY-MM-DD.',
+	}),
 
 	start_time: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
 		message: 'Invalid time format. Use HH:MM (24-hour format).',
@@ -48,7 +51,6 @@ const formSchema = z.object({
 		message: 'Invalid time format. Use HH:MM (24-hour format).',
 	}),
 
-	// contact details
 	contact_name: z.string(),
 	requirements: z.string(),
 	contact_email: z
@@ -62,7 +64,7 @@ const formSchema = z.object({
 
 export function AuditoriumForm() {
 	const [agreed, setAgreed] = useState(false);
-	// 1. Define your form.
+
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -70,7 +72,7 @@ export function AuditoriumForm() {
 			community: '',
 			description: '',
 			attendence: 100,
-			date: new Date(),
+			date: '',
 			start_time: '08:00',
 			end_time: '10:00',
 			contact_name: '',
@@ -80,11 +82,25 @@ export function AuditoriumForm() {
 		},
 	});
 
-	// 2. Define a submit handler.
-	function onSubmit(values: z.infer<typeof formSchema>) {
-		// Do something with the form values.
-		// ✅ This will be type-safe and validated.
-		console.log(values);
+	async function onSubmit(values: z.infer<typeof formSchema>) {
+		console.log('✔ Form submitted with values:', values);
+
+		const formData = new FormData();
+		Object.entries(values).forEach(([key, value]) => {
+			formData.append(key, String(value));
+		});
+
+		for (const [key, value] of formData.entries()) {
+			console.log(`${key}: ${value}`);
+		}
+
+		const res = await submitAuditoriumReservation(formData);
+
+		if (res.success) {
+			alert('🎉 Reservation submitted successfully!');
+		} else {
+			alert('❌ ' + res.message);
+		}
 	}
 
 	const eventType = [
@@ -101,7 +117,13 @@ export function AuditoriumForm() {
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+			<form
+				onSubmit={form.handleSubmit(onSubmit, (errors) => {
+					console.error('❌ Validation Errors:', errors);
+				})}
+				className='space-y-8'
+			>
+				{/* EVENT NAME */}
 				<FormField
 					control={form.control}
 					name='eventname'
@@ -110,7 +132,7 @@ export function AuditoriumForm() {
 							<FormLabel>Event Name</FormLabel>
 							<FormControl>
 								<Input
-									placeholder='Name of the event'
+									placeholder='Event name'
 									type='text'
 									{...field}
 								/>
@@ -120,6 +142,7 @@ export function AuditoriumForm() {
 					)}
 				/>
 
+				{/* COMMUNITY */}
 				<FormField
 					control={form.control}
 					name='community'
@@ -129,11 +152,9 @@ export function AuditoriumForm() {
 							<FormControl>
 								<Combobox
 									options={eventType}
-									placeholder='Enter your organization / company (if any)'
+									placeholder='Organization'
 									value={field.value}
-									onChange={(selected) =>
-										field.onChange(selected)
-									}
+									onChange={field.onChange}
 								/>
 							</FormControl>
 							<FormMessage />
@@ -141,6 +162,7 @@ export function AuditoriumForm() {
 					)}
 				/>
 
+				{/* DESCRIPTION */}
 				<FormField
 					control={form.control}
 					name='description'
@@ -149,7 +171,7 @@ export function AuditoriumForm() {
 							<FormLabel>Description</FormLabel>
 							<FormControl>
 								<Input
-									placeholder='Briefly describe your event or function'
+									placeholder='Event description'
 									type='text'
 									{...field}
 								/>
@@ -159,6 +181,7 @@ export function AuditoriumForm() {
 					)}
 				/>
 
+				{/* ATTENDENCE & DATE */}
 				<div className='flex gap-6'>
 					<div className='w-1/2'>
 						<FormField
@@ -166,12 +189,17 @@ export function AuditoriumForm() {
 							name='attendence'
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Number of Attendance</FormLabel>
+									<FormLabel>Attendance</FormLabel>
 									<FormControl>
 										<Input
-											placeholder='Estimated number of attendees'
 											type='number'
+											placeholder='100'
 											{...field}
+											onChange={(e) =>
+												field.onChange(
+													Number(e.target.value)
+												)
+											}
 										/>
 									</FormControl>
 									<FormMessage />
@@ -179,7 +207,6 @@ export function AuditoriumForm() {
 							)}
 						/>
 					</div>
-
 					<div className='w-1/2'>
 						<FormField
 							control={form.control}
@@ -189,18 +216,9 @@ export function AuditoriumForm() {
 									<FormLabel>Date</FormLabel>
 									<FormControl>
 										<Input
-											placeholder='Date'
 											type='date'
-											value={
-												field.value
-													? new Date(field.value)
-															.toISOString()
-															.split('T')[0]
-													: ''
-											}
-											onChange={(e) =>
-												field.onChange(e.target.value)
-											}
+											value={field.value}
+											onChange={field.onChange}
 										/>
 									</FormControl>
 									<FormMessage />
@@ -210,6 +228,7 @@ export function AuditoriumForm() {
 					</div>
 				</div>
 
+				{/* START & END TIME */}
 				<div className='flex gap-6'>
 					<div className='w-1/2'>
 						<FormField
@@ -226,7 +245,6 @@ export function AuditoriumForm() {
 							)}
 						/>
 					</div>
-
 					<div className='w-1/2'>
 						<FormField
 							control={form.control}
@@ -244,11 +262,10 @@ export function AuditoriumForm() {
 					</div>
 				</div>
 
-				{/* contact details of the applicant  */}
 				<hr />
-
 				<p className='text-gray-500 text-lg m-0'>Contact details</p>
 
+				{/* CONTACT DETAILS */}
 				<FormField
 					control={form.control}
 					name='contact_name'
@@ -258,7 +275,7 @@ export function AuditoriumForm() {
 							<FormControl>
 								<Input
 									type='text'
-									placeholder="Enter the applicant's name"
+									placeholder='Your name'
 									{...field}
 								/>
 							</FormControl>
@@ -266,7 +283,6 @@ export function AuditoriumForm() {
 						</FormItem>
 					)}
 				/>
-
 				<FormField
 					control={form.control}
 					name='contact_email'
@@ -276,7 +292,7 @@ export function AuditoriumForm() {
 							<FormControl>
 								<Input
 									type='email'
-									placeholder='Enter email'
+									placeholder='email@example.com'
 									{...field}
 								/>
 							</FormControl>
@@ -284,17 +300,16 @@ export function AuditoriumForm() {
 						</FormItem>
 					)}
 				/>
-
 				<FormField
 					control={form.control}
 					name='contact_mobile'
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Phone Number</FormLabel>
+							<FormLabel>Phone</FormLabel>
 							<FormControl>
 								<Input
 									type='tel'
-									placeholder='Enter phone number (WhatsApp preffered)'
+									placeholder='Phone number'
 									{...field}
 								/>
 							</FormControl>
@@ -302,17 +317,16 @@ export function AuditoriumForm() {
 						</FormItem>
 					)}
 				/>
-
 				<FormField
 					control={form.control}
 					name='requirements'
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Requirements or Requests</FormLabel>
+							<FormLabel>Requirements</FormLabel>
 							<FormControl>
 								<Input
 									type='text'
-									placeholder='Any additional requirements or requests?'
+									placeholder='Extra needs or comments'
 									{...field}
 								/>
 							</FormControl>
@@ -321,20 +335,18 @@ export function AuditoriumForm() {
 					)}
 				/>
 
+				{/* TERMS */}
 				<div className='flex items-center gap-2'>
 					<input
 						type='checkbox'
 						id='terms'
 						checked={agreed}
 						onChange={() => setAgreed(!agreed)}
-						className='w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500'
+						className='w-5 h-5'
 					/>
 					<label htmlFor='terms' className='text-gray-700 text-sm'>
 						I agree to the{' '}
-						<a
-							href='/terms'
-							className='text-blue-600 hover:underline'
-						>
+						<a href='/terms' className='text-blue-600 underline'>
 							Terms and Conditions
 						</a>
 					</label>
