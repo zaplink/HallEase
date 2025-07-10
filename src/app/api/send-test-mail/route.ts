@@ -133,7 +133,6 @@ export async function POST(req: NextRequest) {
 		reservationType,
 		hall,
 		reservationId,
-		reservationLink,
 	} = await req.json();
 
 	// Fallbacks for missing/empty fields
@@ -203,10 +202,14 @@ export async function POST(req: NextRequest) {
 			success: true,
 			mailjetResponse: result.body,
 		});
-	} catch (err: any) {
+	} catch (err) {
 		console.error('Mailjet Error:', err);
+		const error = err as Error;
 		return NextResponse.json(
-			{ error: 'Failed to send email', details: err?.message || err },
+			{
+				error: 'Failed to send email',
+				details: error?.message || 'Unknown error',
+			},
 			{ status: 500 }
 		);
 	}
