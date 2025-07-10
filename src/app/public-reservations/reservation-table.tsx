@@ -1,5 +1,5 @@
 'use client';
-// components/DataTable.tsx
+
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -12,7 +12,8 @@ import {
 	TableRow,
 } from '@/components/ui/table';
 import { supabase } from '@/lib/supabaseClient';
-// Define the Reservation type locally since '@/types/reservation' cannot be found
+
+// Define the Reservation type locally with additional fields
 type Reservation = {
 	id: string;
 	eventname: string;
@@ -20,6 +21,10 @@ type Reservation = {
 	request_for?: string;
 	contact_name?: string;
 	description?: string;
+	start_time?: string;
+	end_time?: string;
+	contact_email?: string;
+	contact_mobile?: string;
 };
 
 const ReservationTable: React.FC = () => {
@@ -35,7 +40,7 @@ const ReservationTable: React.FC = () => {
 				const { data, error } = await supabase
 					.from('public_reservation')
 					.select(
-						'id, eventname, date, request_for, contact_name, description'
+						'id, eventname, date, request_for, contact_name, description, start_time, end_time, contact_email, contact_mobile'
 					);
 
 				if (error) {
@@ -75,8 +80,12 @@ const ReservationTable: React.FC = () => {
 					<TableRow>
 						<TableHead className='w-[200px]'>Event Name</TableHead>
 						<TableHead>Date</TableHead>
+						<TableHead>Start Time</TableHead>
+						<TableHead>End Time</TableHead>
 						<TableHead>Request For</TableHead>
 						<TableHead>Contact Name</TableHead>
+						<TableHead>Contact Email</TableHead>
+						<TableHead>Contact Phone</TableHead>
 						<TableHead>Description</TableHead>
 					</TableRow>
 				</TableHeader>
@@ -92,10 +101,22 @@ const ReservationTable: React.FC = () => {
 							</TableCell>
 							<TableCell>{reservation.date || 'N/A'}</TableCell>
 							<TableCell>
+								{reservation.start_time || 'N/A'}
+							</TableCell>
+							<TableCell>
+								{reservation.end_time || 'N/A'}
+							</TableCell>
+							<TableCell>
 								{reservation.request_for || 'N/A'}
 							</TableCell>
 							<TableCell>
 								{reservation.contact_name || 'N/A'}
+							</TableCell>
+							<TableCell>
+								{reservation.contact_email || 'N/A'}
+							</TableCell>
+							<TableCell>
+								{reservation.contact_mobile || 'N/A'}
 							</TableCell>
 							<TableCell>
 								{reservation.description || 'N/A'}
