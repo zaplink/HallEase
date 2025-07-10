@@ -59,7 +59,6 @@ export default function MyReservationReviewPage() {
 		null
 	);
 	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
 		fetchReservationDetails();
@@ -179,11 +178,7 @@ export default function MyReservationReviewPage() {
 			setReservation(reservationDetails);
 		} catch (err) {
 			console.error('Error fetching reservation details:', err);
-			setError(
-				err instanceof Error
-					? err.message
-					: 'Failed to load reservation details'
-			);
+			setReservation(null);
 		} finally {
 			setLoading(false);
 		}

@@ -21,7 +21,6 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { toast } from 'sonner';
 import { ReservationDetailsCard } from '@/components/custom/ReservationDetailsCard';
 
 interface ReservationDetails {
@@ -72,7 +71,6 @@ export default function ReviewReservationPage() {
 		null
 	);
 	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
 	const [updating, setUpdating] = useState(false);
 	const [approveDialogOpen, setApproveDialogOpen] = useState(false);
 	const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
@@ -225,11 +223,7 @@ export default function ReviewReservationPage() {
 				stack: err instanceof Error ? err.stack : undefined,
 				reservationId,
 			});
-			setError(
-				err instanceof Error
-					? err.message
-					: 'Failed to load reservation details'
-			);
+			setReservation(null);
 		} finally {
 			setLoading(false);
 		}
