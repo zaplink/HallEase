@@ -40,20 +40,22 @@ const formSchema = z.object({
 		})
 		.transform((val) => new Date(val)),
 
-	starttime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+	start_time: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
 		message: 'Invalid time format. Use HH:MM (24-hour format).',
 	}),
 
-	endtime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+	end_time: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
 		message: 'Invalid time format. Use HH:MM (24-hour format).',
 	}),
 
 	// contact details
-	applicant: z.string(),
-	position: z.string(),
-	email: z.string().email({ message: 'Enter a valid email address.' }),
+	contact_name: z.string(),
+	requirements: z.string(),
+	contact_email: z
+		.string()
+		.email({ message: 'Enter a valid email address.' }),
 
-	phone: z.string().regex(/^\+?[0-9]{10,15}$/, {
+	contact_mobile: z.string().regex(/^\+?[0-9]{10,15}$/, {
 		message: 'Enter a valid phone number (10-15 digits, optional +).',
 	}),
 });
@@ -65,6 +67,16 @@ export function AuditoriumForm() {
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			eventname: '',
+			community: '',
+			description: '',
+			attendence: 100,
+			date: new Date(),
+			start_time: '08:00',
+			end_time: '10:00',
+			contact_name: '',
+			contact_email: '',
+			contact_mobile: '',
+			requirements: '',
 		},
 	});
 
@@ -202,7 +214,7 @@ export function AuditoriumForm() {
 					<div className='w-1/2'>
 						<FormField
 							control={form.control}
-							name='starttime'
+							name='start_time'
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>Start Time</FormLabel>
@@ -218,7 +230,7 @@ export function AuditoriumForm() {
 					<div className='w-1/2'>
 						<FormField
 							control={form.control}
-							name='endtime'
+							name='end_time'
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>End Time</FormLabel>
@@ -239,7 +251,7 @@ export function AuditoriumForm() {
 
 				<FormField
 					control={form.control}
-					name='applicant'
+					name='contact_name'
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Name</FormLabel>
@@ -257,25 +269,7 @@ export function AuditoriumForm() {
 
 				<FormField
 					control={form.control}
-					name='position'
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Position</FormLabel>
-							<FormControl>
-								<Input
-									type='text'
-									placeholder='Enter your position in the organization or company'
-									{...field}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name='email'
+					name='contact_email'
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Email</FormLabel>
@@ -293,7 +287,7 @@ export function AuditoriumForm() {
 
 				<FormField
 					control={form.control}
-					name='phone'
+					name='contact_mobile'
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Phone Number</FormLabel>
@@ -301,6 +295,24 @@ export function AuditoriumForm() {
 								<Input
 									type='tel'
 									placeholder='Enter phone number (WhatsApp preffered)'
+									{...field}
+								/>
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name='requirements'
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Requirements or Requests</FormLabel>
+							<FormControl>
+								<Input
+									type='text'
+									placeholder='Any additional requirements or requests?'
 									{...field}
 								/>
 							</FormControl>
