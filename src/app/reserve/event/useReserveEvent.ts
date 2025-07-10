@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { submitReserveEvent } from './reserve.event.service';
-import { ReserveEventFormData } from './reserve.event.data';
+import {
+	ReserveEventFormData,
+	formatEventDateTime,
+} from './reserve.event.data';
 
 export function useBooking() {
 	const [isLoading, setIsLoading] = useState(false);
@@ -56,17 +59,23 @@ export function useBooking() {
 
 			const toEmail = result.requesterEmail;
 
+			// Prepare eventDateTime and reservationType for email
+			const eventDateTime = formatEventDateTime(formData);
+			const reservationType = formData.hallOpt; // 'availability' or 'manual'
+			const hall = formData.hall;
+
 			const emailRes = await fetch('/api/send-test-mail', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					toEmail,
-					eventName: formData.name, // Assuming name is event name
-					organizer: formData.organizer, // Make sure this exists
-					eventLocation: formData.hall, // Make sure this exists
-					date: formData.date, // Make sure this exists and is a string
-					reservationId: result.reserveId, // Assuming result contains the created reservation ID
-					reservationLink: `https://example.com/reservation/${result.reserveId}`, // Adjust this
+					eventName: formData.name,
+					organizer: formData.organizer,
+					reservationType,
+					hall,
+					eventDateTime,
+					reservationId: result.reserveId,
+					reservationLink: `https://example.com/reservation/${result.reserveId}`,
 				}),
 			});
 

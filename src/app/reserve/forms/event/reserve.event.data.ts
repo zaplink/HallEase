@@ -92,4 +92,23 @@ export function mapBookingDataToApi(data: ReserveEventFormData) {
 	};
 }
 
+// Helper to format event date and time for email
+export function formatEventDateTime(data: ReserveEventFormData): string {
+	if (!data.date) return 'N/A';
+	if (
+		!data.startHour ||
+		!data.startMinute ||
+		!data.endHour ||
+		!data.endMinute
+	)
+		return 'N/A';
+
+	const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+	const weekday = days[data.date.getDay()];
+	const dateStr = data.date.toLocaleDateString();
+	const start = `${data.startHour.padStart(2, '0')}:${data.startMinute.padStart(2, '0')}`;
+	const end = `${data.endHour.padStart(2, '0')}:${data.endMinute.padStart(2, '0')}`;
+	return `${weekday}, ${dateStr}, ${start} - ${end}`;
+}
+
 export type SubmissionType = 'pending' | 'draft';
