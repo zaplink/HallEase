@@ -22,22 +22,28 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Loader2 } from 'lucide-react';
+import { Combobox } from '@/components/combobox';
 
 const formSchema = z.object({
-	username: z.string().min(3, {
-		message: 'Username must be at least 3 characters.',
-	}),
 	email: z
 		.string()
 		.email({ message: 'Please enter a valid email address.' })
 		.transform((value) => value.trim()),
-	phone: z.string().regex(/^\d{10,15}$/, {
-		message: 'Please enter a valid phone number.',
-	}),
 	password: z
 		.string()
 		.min(6, { message: 'Password must be at least 6 characters long.' })
 		.max(20, { message: 'Password must be at most 20 characters long.' }),
+	username: z.string().min(3, {
+		message: 'Username must be at least 3 characters.',
+	}),
+	position: z.string({
+		message: 'Please enter your position or state currently holding',
+	}),
+
+	pro_pic: z.string({
+		message: 'Upload already hosted image url of yours',
+	}),
+	role: z.string({ message: 'Select the previlege level' }),
 });
 
 export default function SignupForm() {
@@ -48,19 +54,23 @@ export default function SignupForm() {
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			username: '',
 			email: '',
-			phone: '',
 			password: '',
+			username: '',
+			position: '',
+			pro_pic: '',
+			role: '',
 		},
 	});
 
 	async function onSubmit(values: z.infer<typeof formSchema>) {
 		const formData = new FormData();
-		formData.append('username', values.username);
 		formData.append('email', values.email);
-		formData.append('phone', values.phone);
 		formData.append('password', values.password);
+		formData.append('username', values.username);
+		formData.append('position', values.position);
+		formData.append('pro_pic', values.pro_pic);
+		formData.append('role', values.role);
 
 		setIsLoading(true);
 		const result = await signup(formData);
@@ -72,6 +82,13 @@ export default function SignupForm() {
 		}
 	}
 
+	const ROLE = [
+		{ value: 'GEUST', label: 'GUEST' },
+		{ value: 'USER', label: 'USER' },
+		{ value: 'ADMIN', label: 'ADMIN' },
+		{ value: 'SYSTEM', label: 'SYSTEM' },
+	];
+
 	return (
 		<>
 			<Form {...form}>
@@ -79,24 +96,7 @@ export default function SignupForm() {
 					onSubmit={form.handleSubmit(onSubmit)}
 					className='space-y-8'
 				>
-					<FormField
-						control={form.control}
-						name='username'
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Username</FormLabel>
-								<FormControl>
-									<Input
-										type='text'
-										placeholder='Enter username'
-										{...field}
-									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
+					<h2 className='underline'>Account credentials</h2>
 					<FormField
 						control={form.control}
 						name='email'
@@ -114,25 +114,6 @@ export default function SignupForm() {
 							</FormItem>
 						)}
 					/>
-
-					<FormField
-						control={form.control}
-						name='phone'
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Phone Number</FormLabel>
-								<FormControl>
-									<Input
-										type='tel'
-										placeholder='Enter phone number'
-										{...field}
-									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
 					<FormField
 						control={form.control}
 						name='password'
@@ -150,11 +131,85 @@ export default function SignupForm() {
 							</FormItem>
 						)}
 					/>
+					<hr />
+					<h2 className='underline'>Profile details</h2>
+					<FormField
+						control={form.control}
+						name='username'
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Username</FormLabel>
+								<FormControl>
+									<Input
+										type='text'
+										placeholder='Enter username'
+										{...field}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name='position'
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Position</FormLabel>
+								<FormControl>
+									<Input
+										type='text'
+										placeholder='Position / state (Lecturer, Demonstrator..etc)'
+										{...field}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name='role'
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Role</FormLabel> <br />
+								<FormControl>
+									<Combobox
+										options={ROLE}
+										placeholder='Select previlege for user'
+										value={field.value}
+										onChange={(selected) =>
+											field.onChange(selected)
+										}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name='pro_pic'
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Profile Picture</FormLabel>
+								<FormControl>
+									<Input
+										type='text'
+										placeholder='Upload URL of the profile picture (LinkedIn ..etc)'
+										{...field}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
 					{errorMessage && (
 						<p className='text-red-500'>{errorMessage}</p>
 					)}
-
 					<Button type='submit' disabled={isLoading}>
 						{isLoading ? (
 							<>
@@ -166,6 +221,7 @@ export default function SignupForm() {
 						)}
 					</Button>
 				</form>
+				<br />
 			</Form>
 
 			{/* Success Popup */}
