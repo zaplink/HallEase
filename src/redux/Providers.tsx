@@ -14,7 +14,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 	return (
 		<Provider store={store}>
 			<PersistGate
-				loading={<Loading reason='Saving Things' pageView={true} />}
+				loading={<Loading text='Saving Things' pageView={true} />}
 				persistor={persistor}
 			>
 				<InnerProviders>{children}</InnerProviders>{' '}

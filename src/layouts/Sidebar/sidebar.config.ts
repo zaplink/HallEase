@@ -1,5 +1,19 @@
 import sidebarMenu from '@/layouts/Sidebar/Menu/menu-items';
 
+// Create a type guard function to check if an item has a subMenu property
+function hasSubMenu(item: unknown): item is {
+	itemTitle: string;
+	itemUrl: string;
+	subMenu: Array<{ subUrl: string; subTitle: string }>;
+} {
+	return Boolean(
+		item &&
+			typeof item === 'object' &&
+			'subMenu' in item &&
+			Array.isArray((item as Record<string, unknown>).subMenu)
+	);
+}
+
 export const findBreadcrumb = (path: string) => {
 	const breadcrumbs: { title: string; url: string }[] = [];
 
@@ -15,8 +29,10 @@ export const findBreadcrumb = (path: string) => {
 			}
 
 			// If it's inside a submenu
-			if (item.subMenu) {
-				const subItem = item.subMenu.find((sub) => sub.subUrl === path);
+			if (hasSubMenu(item)) {
+				const subItem = item.subMenu.find(
+					(sub: { subUrl: string }) => sub.subUrl === path
+				);
 				if (subItem) {
 					breadcrumbs.push(
 						{ title: item.itemTitle, url: item.itemUrl }, // Parent

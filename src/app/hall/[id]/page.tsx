@@ -83,7 +83,15 @@ export default function Hall() {
 											<TableCell className='font-medium'>
 												Status
 											</TableCell>
-											<TableCell>{hall.status}</TableCell>
+											<TableCell>
+												<div
+													className={`font-medium ${!hall.is_available ? 'text-red-600' : ''}`}
+												>
+													{hall.is_available
+														? 'Available'
+														: 'Not Available'}
+												</div>
+											</TableCell>
 										</TableRow>
 										<TableRow>
 											<TableCell className='font-medium'>

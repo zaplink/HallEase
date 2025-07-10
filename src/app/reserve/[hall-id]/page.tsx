@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/select';
 import { useState } from 'react';
 import ReserveEventForm from '../forms/event/ReserveEventForm';
-import ReserveLectureForm from '../forms/lecture/ReserveLectureForm';
+// import ReserveLectureForm from '../forms/lecture/ReserveLectureForm';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -59,7 +59,7 @@ export default function ReservePage() {
 				</div>
 			)}
 			{purpose === 'event' && <ReserveEventForm />}
-			{purpose === 'lecture' && <ReserveLectureForm />}
+			{/* {purpose === 'lecture' && <ReserveLectureForm />} */}
 		</SidebarLayout>
 	);
 }

@@ -2,9 +2,6 @@ import {
 	LayoutDashboard,
 	CalendarClock,
 	Building2,
-	CircleCheckBig,
-	CircleX,
-	CirclePause,
 	FilePlus2,
 	Airplay,
 	BookOpen,
@@ -21,7 +18,6 @@ import {
 	Lock,
 	Library,
 	SquareLibrary,
-	CircleDot,
 } from 'lucide-react';
 
 export interface SubMenuItem {
@@ -34,6 +30,7 @@ export interface SidebarItem {
 	itemTitle: string;
 	itemUrl: string;
 	itemIcon: React.ComponentType<{ size?: number; className?: string }>;
+	roleSlugs: string[];
 	subMenu?: SubMenuItem[];
 }
 
@@ -64,7 +61,7 @@ const sidebarMenu = [
 		sectionTitle: 'Events',
 		sectionMenu: [
 			{
-				itemTitle: 'View Events',
+				itemTitle: 'General Lectures', // changed from 'View Events'
 				itemUrl: '/events',
 				itemIcon: Airplay,
 				roleSlugs: [],
@@ -93,32 +90,10 @@ const sidebarMenu = [
 				roleSlugs: [],
 			},
 			{
-				itemTitle: 'Reservation Requests',
-				itemUrl: '/requests',
+				itemTitle: 'Saved Drafts',
+				itemUrl: '/reservation-drafts',
 				itemIcon: BookOpen,
 				roleSlugs: ['MBR'],
-				subMenu: [
-					{
-						subTitle: 'Pending',
-						subUrl: '/requests/pending',
-						subIcon: CirclePause,
-					},
-					{
-						subTitle: 'Approved',
-						subUrl: '/requests/approved',
-						subIcon: CircleCheckBig,
-					},
-					{
-						subTitle: 'Rejected',
-						subUrl: '/requests/rejected',
-						subIcon: CircleX,
-					},
-					{
-						subTitle: 'All',
-						subUrl: '/requests/all',
-						subIcon: CircleDot,
-					},
-				],
 			},
 		],
 	},

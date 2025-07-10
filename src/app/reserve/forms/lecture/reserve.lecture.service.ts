@@ -3,75 +3,191 @@ import {
 	ReserveLectureFormData,
 	mapBookingDataToApi,
 } from './reserve.lecture.data';
-import { pick } from 'lodash';
-
-const {
-	data: { user },
-	error: userError,
-} = await supabase.auth.getUser();
-
-if (userError) {
-	throw new Error(userError.message);
-}
-
-const profileId = user?.id;
 
 // Use to submit booking form details
 export async function submitBooking(
 	formData: ReserveLectureFormData,
-	status: 'pending' | 'draft'
+	status: 'pending' | 'draft',
+	draftId?: string // Optional draft ID for updating existing draft
 ) {
-	const mappedFormData = mapBookingDataToApi(formData);
+	console.log('submitBooking called with:', { formData, status, draftId });
 
-	// const enrichedData = {
-	// 	...mappedFormData,
-	// 	status,
-	// };
+	// Get current user
+	const {
+		data: { user },
+		error: userError,
+	} = await supabase.auth.getUser();
 
-	const reserveData = {
-		...pick(mappedFormData, [
-			'date',
-			'start_hour',
-			'start_minute',
-			'end_hour',
-			'end_minute',
-			'hall_option',
-			'description',
-		]),
-		status,
-		type: 'lecture',
-		profile_id: profileId,
-	};
-
-	const { data: reserveDataResult, error: reserveDataError } = await supabase
-		.from('reserve')
-		.insert([reserveData])
-		.select('id');
-
-	if (reserveDataError) {
-		console.log(reserveDataError);
-		throw new Error(reserveDataError.message);
+	if (userError) {
+		throw new Error(userError.message);
 	}
-	const reserveId = reserveDataResult?.[0]?.id;
 
-	const lectureData = {
-		...pick(mappedFormData, ['type']),
+	const profileId = user?.id;
+	if (!profileId) {
+		throw new Error('User not authenticated');
+	}
+
+	const mappedFormData = mapBookingDataToApi(formData);
+	const now = new Date();
+
+	// Prepare reserve table data according to schema
+	const reserveData = {
+		date: mappedFormData.date,
+		start_time: mappedFormData.start_time,
+		end_time: mappedFormData.end_time,
+		hall_option: mappedFormData.hall_option,
 		status,
-		reserve_id: reserveId,
-		course_id: mappedFormData.course,
+		type: 'extra_lecture' as const,
+		profile_id: profileId,
+		created_date: now.toISOString().split('T')[0], // YYYY-MM-DD format
+		created_time: now.toTimeString().split(' ')[0], // HH:MM:SS format
+		modified_date: now.toISOString().split('T')[0], // YYYY-MM-DD format
+		modified_time: now.toTimeString().split(' ')[0], // HH:MM:SS format
+		is_submitted: status === 'pending', // true for submitted, false for draft
+		is_consented: status === 'pending', // true if submitted (consented), false for draft
 	};
 
-	const { data: lectureDataResult, error: lectureDataError } = await supabase
-		.from('extra_lecture')
-		.insert([lectureData])
-		.select('id');
+	let reserveId: string;
 
-	if (lectureDataError) throw new Error(lectureDataError.message);
-	const lectureId = lectureDataResult?.[0]?.id;
+	if (draftId) {
+		// Update existing draft
+		const { data: reserveUpdateResult, error: reserveUpdateError } =
+			await supabase
+				.from('reserve')
+				.update(reserveData)
+				.eq('id', draftId)
+				.eq('profile_id', profileId) // Security check
+				.select('id');
+
+		if (reserveUpdateError) {
+			console.log('Reserve update error:', reserveUpdateError);
+			throw new Error(reserveUpdateError.message);
+		}
+
+		if (!reserveUpdateResult || reserveUpdateResult.length === 0) {
+			throw new Error(
+				'Draft not found or you do not have permission to update it'
+			);
+		}
+
+		reserveId = reserveUpdateResult[0].id;
+	} else {
+		// Insert new reserve record
+		const { data: reserveDataResult, error: reserveDataError } =
+			await supabase.from('reserve').insert([reserveData]).select('id');
+
+		if (reserveDataError) {
+			console.log(reserveDataError);
+			throw new Error(reserveDataError.message);
+		}
+		reserveId = reserveDataResult?.[0]?.id;
+	}
+
+	// Handle equipment - delete old equipment first if updating draft
+	if (draftId) {
+		// Delete existing equipment for this reserve
+		await supabase.from('equipment').delete().eq('reserve_id', reserveId);
+	}
+
+	// Insert equipment if any equipment is selected
+	let equipmentId: string | null = null;
+	if (mappedFormData.equipment && mappedFormData.equipment.trim()) {
+		const equipmentData = {
+			reserve_id: reserveId,
+			description: mappedFormData.equipment, // Already semicolon-separated from mapping
+		};
+
+		const { data: equipmentResult, error: equipmentError } = await supabase
+			.from('equipment')
+			.insert([equipmentData])
+			.select('id');
+
+		if (equipmentError) {
+			console.log('Equipment data error:', equipmentError);
+			throw new Error(equipmentError.message);
+		}
+		equipmentId = equipmentResult?.[0]?.id;
+	}
+
+	// Find course_id based on course code
+	let courseId: string | null = null;
+	if (mappedFormData.course) {
+		const { data: courseData, error: courseError } = await supabase
+			.from('course')
+			.select('id')
+			.eq('char', mappedFormData.course)
+			.single();
+
+		if (courseError) {
+			console.log('Course not found:', courseError);
+			// Continue without course_id if course not found
+		} else {
+			courseId = courseData?.id;
+		}
+	}
+
+	// Prepare extra_lecture table data according to schema
+	const extraLectureData = {
+		description: mappedFormData.description,
+		attendee_count: 0, // Default value, can be updated if needed
+		reserve_id: reserveId,
+		course_id: courseId,
+		type: mappedFormData.type,
+		additional_notes: mappedFormData.additional_notes,
+		additional_file: '', // Empty for now, can be populated with file upload logic
+		attendee_file: '', // Empty for now
+		equipment: equipmentId, // UUID foreign key to equipment table
+	};
+
+	let extraLectureId: string;
+
+	if (draftId) {
+		// Update existing extra_lecture
+		const {
+			data: extraLectureUpdateResult,
+			error: extraLectureUpdateError,
+		} = await supabase
+			.from('extra_lecture')
+			.update(extraLectureData)
+			.eq('reserve_id', reserveId)
+			.select('id');
+
+		if (extraLectureUpdateError) {
+			throw new Error(extraLectureUpdateError.message);
+		}
+		extraLectureId = extraLectureUpdateResult?.[0]?.id;
+	} else {
+		// Insert new extra_lecture
+		const { data: extraLectureDataResult, error: extraLectureDataError } =
+			await supabase
+				.from('extra_lecture')
+				.insert([extraLectureData])
+				.select('id');
+
+		if (extraLectureDataError) {
+			throw new Error(extraLectureDataError.message);
+		}
+		extraLectureId = extraLectureDataResult?.[0]?.id;
+	}
+
+	// Fetch requester email from profiles table
+	let requesterEmail: string | null = null;
+	const { data: profileData, error: profileError } = await supabase
+		.from('profiles')
+		.select('email')
+		.eq('id', profileId)
+		.single();
+
+	if (profileError) {
+		console.log(profileError);
+		throw new Error(profileError.message);
+	}
+	requesterEmail = profileData?.email ?? null;
 
 	return {
 		reserveId,
-		lectureId,
+		extraLectureId,
+		requesterEmail,
 	};
 }
 
@@ -94,4 +210,52 @@ export function subscribeToNewBookings(
 		.subscribe();
 
 	return channel;
+}
+
+// Function to load existing drafts for the current user
+export async function loadUserDrafts() {
+	const {
+		data: { user },
+		error: userError,
+	} = await supabase.auth.getUser();
+
+	if (userError || !user?.id) {
+		throw new Error('User not authenticated');
+	}
+
+	const { data: drafts, error: draftsError } = await supabase
+		.from('reserve')
+		.select(
+			`
+			id,
+			date,
+			start_time,
+			end_time,
+			hall_option,
+			status,
+			modified_date,
+			modified_time,
+			extra_lecture (
+				id,
+				description,
+				attendee_count,
+				course_id,
+				type,
+				additional_notes,
+				equipment (
+					id,
+					description
+				)
+			)
+		`
+		)
+		.eq('profile_id', user.id)
+		.eq('type', 'extra_lecture')
+		.eq('is_submitted', false); // Only get drafts
+
+	if (draftsError) {
+		throw new Error(draftsError.message);
+	}
+
+	return drafts || [];
 }

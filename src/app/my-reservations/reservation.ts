@@ -1,6 +1,6 @@
 export interface Reservation {
 	description: string | null;
-	type: 'event' | 'lecture';
+	type: 'event' | 'extra_lecture';
 	date: Date | undefined;
 	startHour: string;
 	startMinute: string;
@@ -28,10 +28,16 @@ export interface Course {
 }
 
 export interface UnifiedReservationRow {
+	id: string;
 	name: string;
 	date: string;
 	startTime: string;
 	endTime: string;
-	type: 'event' | 'lecture';
+	type: 'event' | 'extra_lecture';
 	status: string;
+	bookedBy: string;
+	createdDate: string;
+	createdTime: string;
+	modifiedDate: string;
+	modifiedTime: string;
 }
