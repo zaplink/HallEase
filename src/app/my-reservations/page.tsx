@@ -51,14 +51,6 @@ function Page() {
 							</button>
 						</div>
 					</div>
-				) : data?.length === 0 ? (
-					<div className='flex items-center justify-center min-h-[200px]'>
-						<div className='text-center'>
-							<p className='text-gray-600'>
-								No reservations found.
-							</p>
-						</div>
-					</div>
 				) : (
 					<DataTable columns={reservationColumns} data={data || []} />
 				)}
