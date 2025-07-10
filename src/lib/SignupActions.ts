@@ -20,15 +20,10 @@ export async function signup(formData: FormData) {
 		);
 	}
 
+	// 1. Create user in auth.users
 	const { data: signupData, error } = await supabase.auth.signUp({
 		email: data.email,
 		password: data.password,
-		options: {
-			data: {
-				phone: data.phone,
-				username: data.username,
-			},
-		},
 	});
 
 	if (error) {
@@ -38,12 +33,23 @@ export async function signup(formData: FormData) {
 		);
 	}
 
+	const user = signupData.user;
+
+	console.log(user);
+
+	if (!user) {
+		redirect(
+			'/access-control/register/error?message=' +
+				encodeURIComponent('User creation failed.')
+		);
+	}
+
 	// Optionally insert into custom users table
-	await supabase.from('users').insert({
+	await supabase.from('profiles').insert({
 		id: signupData.user?.id,
 		email: data.email,
-		phone: data.phone,
-		username: data.username,
+		position: data.phone,
+		full_name: data.username,
 	});
 
 	return { success: true, message: 'Invitation sent to user email.' };
