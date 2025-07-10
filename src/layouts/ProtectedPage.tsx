@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabaseClient';
-import { User } from '@supabase/supabase-js';
 
 export default function ProtectedPage({
 	children,
