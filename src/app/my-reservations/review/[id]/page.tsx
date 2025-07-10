@@ -1,0 +1,254 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import SidebarLayout from '@/layouts/Sidebar/Layout';
+import PageHeader from '@/components/custom/PageHeader';
+import Loading from '@/components/custom/Loading';
+import { createClient } from '@/lib/supabaseClient';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, XCircle } from 'lucide-react';
+import { ReservationDetailsCard } from '@/components/custom/ReservationDetailsCard';
+import { Card, CardContent } from '@/components/ui/card';
+
+interface ReservationDetails {
+	id: string;
+	date: string;
+	startTime: string;
+	endTime: string;
+	status: string;
+	type: 'event' | 'extra_lecture';
+	hallOption: string;
+	isSubmitted: boolean;
+	profile: {
+		fullName: string;
+		email: string;
+		role: string;
+	};
+	createdDate: string;
+	createdTime: string;
+	modifiedDate: string;
+	modifiedTime: string;
+	event?: {
+		name: string;
+		description: string;
+		organizer: string;
+		type: string;
+		attendeeCount: number;
+		additionalNotes?: string;
+	};
+	extraLecture?: {
+		description: string;
+		attendeeCount: number;
+		type: string;
+		additionalNotes?: string;
+		course: {
+			char: string;
+			digit: string;
+			name: string;
+		};
+	};
+}
+
+export default function MyReservationReviewPage() {
+	const params = useParams();
+	const router = useRouter();
+	const reservationId = params.id as string;
+
+	const [reservation, setReservation] = useState<ReservationDetails | null>(
+		null
+	);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		fetchReservationDetails();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [reservationId]);
+
+	const fetchReservationDetails = async () => {
+		try {
+			const supabase = createClient();
+			const { data: reserveData, error: reserveError } = await supabase
+				.from('reserve')
+				.select(
+					`
+          id,
+          date,
+          start_time,
+          end_time,
+          status,
+          type,
+          hall_option,
+          is_submitted,
+          created_date,
+          created_time,
+          modified_date,
+          modified_time,
+          profiles:profile_id (
+            full_name,
+            email,
+            role
+          )
+        `
+				)
+				.eq('id', reservationId)
+				.single();
+
+			if (reserveError || !reserveData) {
+				setLoading(false);
+				setReservation(null);
+				return;
+			}
+
+			const profileData = Array.isArray(reserveData.profiles)
+				? reserveData.profiles[0]
+				: reserveData.profiles;
+			const reservationDetails: ReservationDetails = {
+				id: reserveData.id,
+				date: reserveData.date,
+				startTime: reserveData.start_time,
+				endTime: reserveData.end_time,
+				status: reserveData.status,
+				type: reserveData.type as 'event' | 'extra_lecture',
+				hallOption: reserveData.hall_option,
+				isSubmitted: reserveData.is_submitted,
+				profile: {
+					fullName: profileData?.full_name || 'Unknown',
+					email: profileData?.email || 'Unknown',
+					role: profileData?.role || 'Unknown',
+				},
+				createdDate: reserveData.created_date || '',
+				createdTime: reserveData.created_time || '',
+				modifiedDate: reserveData.modified_date || '',
+				modifiedTime: reserveData.modified_time || '',
+			};
+			if (reserveData.type === 'event') {
+				const { data: eventData } = await supabase
+					.from('event')
+					.select(
+						'name, description, organizer, type, attendee_count, additional_notes'
+					)
+					.eq('reserve_id', reservationId)
+					.single();
+				if (eventData) {
+					reservationDetails.event = {
+						name: eventData.name,
+						description: eventData.description,
+						organizer: eventData.organizer,
+						type: eventData.type,
+						attendeeCount: eventData.attendee_count,
+						additionalNotes: eventData.additional_notes,
+					};
+				}
+			} else if (reserveData.type === 'extra_lecture') {
+				const { data: lectureData } = await supabase
+					.from('extra_lecture')
+					.select(
+						`
+            description,
+            attendee_count,
+            type,
+            additional_notes,
+            course:course_id (
+              char,
+              digit,
+              name
+            )
+          `
+					)
+					.eq('reserve_id', reservationId)
+					.single();
+				if (lectureData) {
+					const course = Array.isArray(lectureData.course)
+						? lectureData.course[0]
+						: lectureData.course;
+					reservationDetails.extraLecture = {
+						description: lectureData.description,
+						attendeeCount: lectureData.attendee_count,
+						type: lectureData.type,
+						additionalNotes: lectureData.additional_notes,
+						course: {
+							char: course?.char || '',
+							digit: course?.digit || '',
+							name: course?.name || '',
+						},
+					};
+				}
+			}
+			setReservation(reservationDetails);
+		} catch (err) {
+			console.error('Error fetching reservation details:', err);
+			setReservation(null);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const formatDate = (dateString: string) => {
+		if (!dateString) return 'N/A';
+		const date = new Date(dateString);
+		const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
+		const day = date.getDate();
+		const month = date.toLocaleDateString('en-US', { month: 'short' });
+		const year = date.getFullYear();
+		return `${weekday}, ${day} ${month} ${year}`;
+	};
+
+	const formatTime = (timeString: string) => {
+		if (!timeString) return 'N/A';
+		return timeString.substring(0, 5);
+	};
+
+	if (loading) {
+		return (
+			<SidebarLayout>
+				<PageHeader title='Review Reservation' />
+				<div className='container mx-auto'>
+					<Loading text='Loading reservation details' pageView />
+				</div>
+			</SidebarLayout>
+		);
+	}
+
+	if (!reservation) {
+		return (
+			<SidebarLayout>
+				<PageHeader title='Review Reservation' />
+				<div className='container mx-auto py-8'>
+					<Card className='max-w-md mx-auto'>
+						<CardContent className='pt-6 flex flex-col items-center'>
+							<XCircle className='h-5 w-5 text-gray-400 mb-3' />
+							<p className='text-sm text-muted-foreground mb-6'>
+								Reservation not found
+							</p>
+							<Button
+								onClick={() => router.push('/my-reservations')}
+								variant='outline'
+								className='flex items-center gap-2 mx-auto'
+							>
+								<ArrowLeft className='h-4 w-4' />
+								Back to My Reservations
+							</Button>
+						</CardContent>
+					</Card>
+				</div>
+			</SidebarLayout>
+		);
+	}
+
+	return (
+		<SidebarLayout>
+			<PageHeader
+				title='Reservation Details'
+				descriptions={[`ID: ${reservation.id}`]}
+			/>
+			<div className='container mx-auto px-0 space-y-6'>
+				<ReservationDetailsCard
+					reservation={reservation}
+					formatDate={formatDate}
+					formatTime={formatTime}
+				/>
+			</div>
+		</SidebarLayout>
+	);
+}

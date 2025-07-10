@@ -15,6 +15,16 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { useRouter } from 'next/navigation';
 import { useWatch } from 'react-hook-form';
 import { useRef } from 'react';
 import {
@@ -27,8 +37,17 @@ import EquipmentSelector from '@/app/reserve/components/EquipmentSelector';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
-export default function ReserveLectureForm() {
+interface ReserveLectureFormProps {
+	onBackToSelection?: () => void;
+}
+
+export default function ReserveLectureForm({
+	onBackToSelection,
+}: ReserveLectureFormProps) {
 	const { handleSubmit, isLoading, error, success } = useBooking();
+	const router = useRouter();
+	const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+	const [isSubmitted, setIsSubmitted] = useState(false);
 
 	const form = useForm<ReserveLectureFormData>({
 		defaultValues: defaultReserveLectureFormData,
@@ -41,7 +60,17 @@ export default function ReserveLectureForm() {
 			alert('Course code is still required to save a draft.');
 			return;
 		}
-		handleSubmit(formData, status);
+
+		handleSubmit(formData, status)
+			.then(() => {
+				if (submissionType.current === 'pending') {
+					setShowSuccessDialog(true);
+					setIsSubmitted(true);
+				}
+			})
+			.catch(() => {
+				// Error is handled by useBooking hook
+			});
 	};
 
 	const submissionType = useRef<SubmissionType>('pending');
@@ -409,7 +438,7 @@ export default function ReserveLectureForm() {
 									<FormControl>
 										<Combobox
 											options={halls}
-											value={field.value}
+											value={field.value || ''}
 											onChange={(val) =>
 												field.onChange(val)
 											}
@@ -477,22 +506,36 @@ export default function ReserveLectureForm() {
 				)}
 
 				<div className='flex gap-4 px-2 py-4 mt-6'>
+					{onBackToSelection && (
+						<Button
+							type='button'
+							variant='outline'
+							onClick={onBackToSelection}
+							disabled={isSubmitted}
+						>
+							← Back to Selection
+						</Button>
+					)}
 					<Button
 						type='submit'
-						disabled={isLoading}
+						disabled={isLoading || isSubmitted}
 						onClick={() => {
 							submissionType.current = 'pending';
 						}}
 					>
 						{isLoading ? 'Submitting...' : 'Submit Booking'}
 					</Button>
-					<Button type='button' variant='secondary'>
+					<Button
+						type='button'
+						variant='secondary'
+						disabled={isSubmitted}
+					>
 						Reset Form
 					</Button>
 					<Button
 						type='submit'
 						variant='secondary'
-						disabled={isLoading}
+						disabled={isLoading || isSubmitted}
 						onClick={() => {
 							submissionType.current = 'draft';
 							onSubmit(form.getValues()); // This bypasses validation
@@ -502,6 +545,34 @@ export default function ReserveLectureForm() {
 					</Button>
 				</div>
 			</form>
+
+			<AlertDialog
+				open={showSuccessDialog}
+				onOpenChange={setShowSuccessDialog}
+			>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle className='flex items-center gap-2 text-green-600'>
+							✓ Booking Submitted Successfully!
+						</AlertDialogTitle>
+						<AlertDialogDescription>
+							Your lecture reservation has been submitted
+							successfully. You will receive a confirmation email
+							shortly.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogAction
+							onClick={() => {
+								setShowSuccessDialog(false);
+								router.push('/reserve');
+							}}
+						>
+							OK
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</Form>
 	);
 }

@@ -22,7 +22,7 @@ function RolesPermissions() {
 	if (loading)
 		return (
 			<SidebarLayout>
-				<Loading reason='Loading Roles & Permissions' pageView={true} />
+				<Loading text='Loading Roles & Permissions' pageView={true} />
 			</SidebarLayout>
 		);
 	if (error) return <p className='text-red-500'>Error: {error}</p>;

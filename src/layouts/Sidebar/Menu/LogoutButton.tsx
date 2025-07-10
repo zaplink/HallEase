@@ -13,6 +13,7 @@ import { DialogTitle } from '@radix-ui/react-dialog';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
 import { clearAuth } from '@/redux/authSlice';
+import Loading from '@/components/custom/Loading';
 
 export default function LogoutButton() {
 	const [open, setOpen] = useState(false);
@@ -52,20 +53,35 @@ export default function LogoutButton() {
 						</p>
 					</DialogHeader>
 					<DialogFooter className='flex justify-end space-x-2'>
-						<DialogClose asChild>
-							<Button
-								variant='outline'
-								onClick={() => setOpen(false)}
-							>
+						{!isPending && (
+							<DialogClose asChild>
+								<Button
+									variant='outline'
+									onClick={() => setOpen(false)}
+									disabled={isPending}
+								>
+									Cancel
+								</Button>
+							</DialogClose>
+						)}
+						{isPending && (
+							<Button variant='outline' disabled={true}>
 								Cancel
 							</Button>
-						</DialogClose>
+						)}
 						<Button
 							variant='destructive'
 							onClick={handleLogout}
 							disabled={isPending}
 						>
-							{isPending ? 'Logging Out...' : 'Logout'}
+							{isPending ? (
+								<>
+									<Loading inline />
+									<span className='ml-2'>Logging Out...</span>
+								</>
+							) : (
+								'Logout'
+							)}
 						</Button>
 					</DialogFooter>
 				</DialogContent>

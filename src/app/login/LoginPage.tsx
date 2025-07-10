@@ -125,7 +125,7 @@ export default function LoginForm() {
 						>
 							{isLoading ? (
 								<>
-									<Loading /> {/* Spinning loader */}
+									<Loading inline /> {/* Spinning loader */}
 									<span>Logging In...</span>
 								</>
 							) : (
