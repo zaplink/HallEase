@@ -12,14 +12,19 @@ import { getUnifiedReservations } from './getUnifiedReservations';
 function Page() {
 	const [data, setData] = useState<UnifiedReservationRow[] | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
 		async function fetchData() {
 			try {
+				setError(null);
 				const unifiedData = await getUnifiedReservations();
 				setData(unifiedData);
 			} catch (err) {
 				console.error('Failed to fetch reservations', err);
+				setError(
+					'Failed to load reservations. Please try again later.'
+				);
 			} finally {
 				setLoading(false);
 			}
@@ -32,10 +37,30 @@ function Page() {
 		<SidebarLayout>
 			<PageHeader title='Reservation History' />
 			<div className='container mx-auto'>
-				{loading || data === null ? (
+				{loading ? (
 					<Loading text='Loading reservations' pageView />
+				) : error ? (
+					<div className='flex items-center justify-center min-h-[200px]'>
+						<div className='text-center'>
+							<p className='text-red-600 mb-4'>{error}</p>
+							<button
+								onClick={() => window.location.reload()}
+								className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700'
+							>
+								Retry
+							</button>
+						</div>
+					</div>
+				) : data?.length === 0 ? (
+					<div className='flex items-center justify-center min-h-[200px]'>
+						<div className='text-center'>
+							<p className='text-gray-600'>
+								No reservations found.
+							</p>
+						</div>
+					</div>
 				) : (
-					<DataTable columns={reservationColumns} data={data} />
+					<DataTable columns={reservationColumns} data={data || []} />
 				)}
 			</div>
 		</SidebarLayout>

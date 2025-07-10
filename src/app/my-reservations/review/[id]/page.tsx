@@ -7,8 +7,9 @@ import PageHeader from '@/components/custom/PageHeader';
 import Loading from '@/components/custom/Loading';
 import { createClient } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, XCircle } from 'lucide-react';
 import { ReservationDetailsCard } from '@/components/custom/ReservationDetailsCard';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface ReservationDetails {
 	id: string;
@@ -94,14 +95,12 @@ export default function MyReservationReviewPage() {
 				.eq('id', reservationId)
 				.single();
 
-			if (reserveError) {
-				throw new Error(
-					`Failed to fetch reservation: ${reserveError.message}`
-				);
+			if (reserveError || !reserveData) {
+				setLoading(false);
+				setReservation(null);
+				return;
 			}
-			if (!reserveData) {
-				throw new Error('Reservation not found');
-			}
+
 			const profileData = Array.isArray(reserveData.profiles)
 				? reserveData.profiles[0]
 				: reserveData.profiles;
@@ -208,32 +207,35 @@ export default function MyReservationReviewPage() {
 	if (loading) {
 		return (
 			<SidebarLayout>
-				<Loading text='Loading reservation details' pageView />
+				<PageHeader title='Review Reservation' />
+				<div className='container mx-auto'>
+					<Loading text='Loading reservation details' pageView />
+				</div>
 			</SidebarLayout>
 		);
 	}
 
-	if (error || !reservation) {
+	if (!reservation) {
 		return (
 			<SidebarLayout>
-				<PageHeader
-					title='Reservation Details'
-					descriptions={['Error loading reservation details']}
-				/>
-				<div className='container mx-auto px-4'>
-					<div className='flex items-center justify-center min-h-[200px]'>
-						<div className='text-center'>
-							<p className='text-destructive mb-4'>
-								{error || 'Reservation not found'}
+				<PageHeader title='Review Reservation' />
+				<div className='container mx-auto py-8'>
+					<Card className='max-w-md mx-auto'>
+						<CardContent className='pt-6 flex flex-col items-center'>
+							<XCircle className='h-5 w-5 text-gray-400 mb-3' />
+							<p className='text-sm text-muted-foreground mb-6'>
+								Reservation not found
 							</p>
 							<Button
 								onClick={() => router.push('/my-reservations')}
+								variant='outline'
+								className='flex items-center gap-2 mx-auto'
 							>
-								<ArrowLeft className='h-4 w-4 mr-2' />
+								<ArrowLeft className='h-4 w-4' />
 								Back to My Reservations
 							</Button>
-						</div>
-					</div>
+						</CardContent>
+					</Card>
 				</div>
 			</SidebarLayout>
 		);

@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { XCircle, ArrowLeft, CheckCircle } from 'lucide-react';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -21,7 +22,6 @@ import {
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
 import { ReservationDetailsCard } from '@/components/custom/ReservationDetailsCard';
 
 interface ReservationDetails {
@@ -113,17 +113,12 @@ export default function ReviewReservationPage() {
 				.eq('id', reservationId)
 				.single();
 
-			if (reserveError) {
-				throw new Error(
-					`Failed to fetch reservation: ${reserveError.message}`
-				);
+			if (reserveError || !reserveData) {
+				setLoading(false);
+				setReservation(null);
+				return;
 			}
 
-			if (!reserveData) {
-				throw new Error('Reservation not found');
-			}
-
-			// Handle profiles which might be an array or single object
 			const profileData = Array.isArray(reserveData.profiles)
 				? reserveData.profiles[0]
 				: reserveData.profiles;
@@ -159,15 +154,21 @@ export default function ReviewReservationPage() {
 					.single();
 
 				if (eventError) {
-					console.error('Event fetch error:', eventError);
+					console.error('Event fetch error:', {
+						message: eventError.message,
+						details: eventError.details,
+						hint: eventError.hint,
+						code: eventError.code,
+					});
+					// Continue without event data
 				} else if (eventData) {
 					reservationDetails.event = {
-						name: eventData.name,
-						description: eventData.description,
-						organizer: eventData.organizer,
-						type: eventData.type,
-						attendeeCount: eventData.attendee_count,
-						additionalNotes: eventData.additional_notes,
+						name: eventData.name || 'N/A',
+						description: eventData.description || '',
+						organizer: eventData.organizer || 'N/A',
+						type: eventData.type || 'N/A',
+						attendeeCount: eventData.attendee_count || 0,
+						additionalNotes: eventData.additional_notes || '',
 					};
 				}
 			} else if (reserveData.type === 'extra_lecture') {
@@ -191,7 +192,12 @@ export default function ReviewReservationPage() {
 						.single();
 
 				if (lectureError) {
-					console.error('Lecture fetch error:', lectureError);
+					console.error('Lecture fetch error:', {
+						message: lectureError.message,
+						details: lectureError.details,
+						hint: lectureError.hint,
+						code: lectureError.code,
+					});
 				} else if (lectureData) {
 					const course = Array.isArray(lectureData.course)
 						? lectureData.course[0]
@@ -213,7 +219,12 @@ export default function ReviewReservationPage() {
 
 			setReservation(reservationDetails);
 		} catch (err) {
-			console.error('Error fetching reservation details:', err);
+			console.error('Error fetching reservation details:', {
+				error: err,
+				message: err instanceof Error ? err.message : String(err),
+				stack: err instanceof Error ? err.stack : undefined,
+				reservationId,
+			});
 			setError(
 				err instanceof Error
 					? err.message
@@ -230,28 +241,82 @@ export default function ReviewReservationPage() {
 		setUpdating(true);
 		try {
 			const supabase = createClient();
-			const { error } = await supabase
+			const { error: updateError } = await supabase
 				.from('reserve')
 				.update({ status: newStatus })
-				.eq('id', reservation.id);
+				.eq('id', reservationId);
 
-			if (error) {
-				throw new Error(`Failed to update status: ${error.message}`);
+			if (updateError) throw updateError;
+
+			// Prepare email data
+			const eventDateTime = reservation.date
+				? `${formatDate(reservation.date)}, ${formatTime(
+						reservation.startTime
+					)} - ${formatTime(reservation.endTime)}`
+				: 'N/A';
+
+			const eventName =
+				reservation.event?.name ||
+				reservation.extraLecture?.course?.name ||
+				'N/A';
+			const eventLocation =
+				reservation.hallOption === 'availability'
+					? 'Notified on Availability'
+					: `Requested Hall: ${reservation.hallOption}`;
+
+			// Send email notification
+			try {
+				const emailRes = await fetch('/api/send-status-mail', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						toEmail: reservation.profile.email,
+						eventName,
+						eventDateTime,
+						eventLocation,
+						reservationId: reservation.id,
+						status,
+						requesterName: reservation.profile.fullName,
+					}),
+				});
+
+				if (!emailRes.ok) {
+					console.error('Failed to send status email:', {
+						status: emailRes.status,
+						statusText: emailRes.statusText,
+						reservationId,
+						newStatus,
+					});
+				}
+			} catch (emailErr) {
+				console.error('Error sending status email:', {
+					error: emailErr,
+					message:
+						emailErr instanceof Error
+							? emailErr.message
+							: String(emailErr),
+					stack:
+						emailErr instanceof Error ? emailErr.stack : undefined,
+					reservationId,
+					newStatus,
+				});
+				// Continue with status update even if email fails
 			}
-
-			toast.success(`Reservation ${newStatus} successfully`);
 
 			// Update local state
 			setReservation((prev) =>
 				prev ? { ...prev, status: newStatus } : null
-			);
+			); // Show success message
+			window.alert(`The reservation has been ${newStatus} successfully.`);
 		} catch (err) {
-			console.error('Error updating status:', err);
-			toast.error(
-				err instanceof Error
-					? err.message
-					: 'Failed to update reservation status'
-			);
+			console.error('Error updating status:', {
+				error: err,
+				message: err instanceof Error ? err.message : String(err),
+				stack: err instanceof Error ? err.stack : undefined,
+				reservationId,
+				newStatus,
+			}); // Show error message
+			window.alert('Failed to update reservation status.');
 		} finally {
 			setUpdating(false);
 			setApproveDialogOpen(false);
@@ -292,32 +357,35 @@ export default function ReviewReservationPage() {
 	if (loading) {
 		return (
 			<SidebarLayout>
-				<Loading text='Loading reservation details' pageView />
+				<PageHeader title='Review Reservation' />
+				<div className='container mx-auto'>
+					<Loading text='Loading reservation details' pageView />
+				</div>
 			</SidebarLayout>
 		);
 	}
 
-	if (error || !reservation) {
+	if (!reservation) {
 		return (
 			<SidebarLayout>
-				<PageHeader
-					title='Review Reservation'
-					descriptions={['Error loading reservation details']}
-				/>
-				<div className='container mx-auto px-4'>
-					<div className='flex items-center justify-center min-h-[200px]'>
-						<div className='text-center'>
-							<p className='text-destructive mb-4'>
-								{error || 'Reservation not found'}
+				<PageHeader title='Review Reservation' />
+				<div className='container mx-auto py-8'>
+					<Card className='max-w-md mx-auto'>
+						<CardContent className='pt-6 flex flex-col items-center'>
+							<XCircle className='h-5 w-5 text-gray-400 mb-3' />
+							<p className='text-sm text-muted-foreground mb-6'>
+								Reservation not found
 							</p>
 							<Button
 								onClick={() => router.push('/all-reservations')}
+								variant='outline'
+								className='flex items-center gap-2 mx-auto'
 							>
-								<ArrowLeft className='h-4 w-4 mr-2' />
+								<ArrowLeft className='h-4 w-4' />
 								Back to All Reservations
 							</Button>
-						</div>
-					</div>
+						</CardContent>
+					</Card>
 				</div>
 			</SidebarLayout>
 		);
