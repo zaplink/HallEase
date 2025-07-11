@@ -75,7 +75,9 @@ export default function ReviewReservationPage() {
 	const [updating, setUpdating] = useState(false);
 	const [approveDialogOpen, setApproveDialogOpen] = useState(false);
 	const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
-	const [halls, setHalls] = useState<Array<{ id: string; code: string }>>([]);
+	const [halls, setHalls] = useState<
+		Array<{ id: string; code: string; energy_consumption: number }>
+	>([]);
 	const [hallsLoading, setHallsLoading] = useState(false);
 
 	useEffect(() => {
@@ -245,7 +247,7 @@ export default function ReviewReservationPage() {
 			const supabase = createClient();
 			const { data, error } = await supabase
 				.from('hall')
-				.select('id, code');
+				.select('id, code, energy_consumption');
 			if (error) {
 				console.error('Error fetching halls:', error);
 				setHalls([]);
@@ -513,7 +515,18 @@ export default function ReviewReservationPage() {
 									</option>
 									{halls.map((hall) => (
 										<option key={hall.id} value={hall.id}>
-											{hall.code}
+											{hall.code} (Energy:{' '}
+											{Number(hall.energy_consumption) &&
+											!isNaN(
+												Number(hall.energy_consumption)
+											)
+												? (
+														Number(
+															hall.energy_consumption
+														) / 100
+													).toFixed(2)
+												: '0.00'}
+											)
 										</option>
 									))}
 								</select>
