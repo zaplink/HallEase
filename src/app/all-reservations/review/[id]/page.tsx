@@ -467,6 +467,16 @@ export default function ReviewReservationPage() {
 	const isActionable =
 		reservation.status !== 'approved' && reservation.status !== 'rejected';
 
+	const filteredHalls =
+		reservation &&
+		reservation.event &&
+		typeof reservation.event.attendeeCount === 'number'
+			? halls.filter(
+					(hall) =>
+						Number(hall.capacity) >= reservation.event.attendeeCount
+				)
+			: halls;
+
 	return (
 		<SidebarLayout>
 			<PageHeader
@@ -518,7 +528,7 @@ export default function ReviewReservationPage() {
 									<option value=''>
 										-- Choose a hall --
 									</option>
-									{halls.map((hall) => (
+									{filteredHalls.map((hall) => (
 										<option key={hall.id} value={hall.id}>
 											{hall.code} (Capacity:{' '}
 											{hall.capacity !== undefined &&
