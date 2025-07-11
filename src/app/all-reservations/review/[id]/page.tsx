@@ -467,6 +467,19 @@ export default function ReviewReservationPage() {
 	const isActionable =
 		reservation.status !== 'approved' && reservation.status !== 'rejected';
 
+	const attendeeCount =
+		reservation?.event?.attendeeCount ??
+		reservation?.extraLecture?.attendeeCount;
+	const hallsWithStatus = halls.map((hall) => {
+		const isEnough =
+			typeof attendeeCount === 'number' &&
+			Number(hall.capacity) >= attendeeCount;
+		return {
+			...hall,
+			isEnough,
+		};
+	});
+
 	const filteredHalls =
 		reservation &&
 		reservation.event &&
@@ -528,16 +541,24 @@ export default function ReviewReservationPage() {
 									<option value=''>
 										-- Choose a hall --
 									</option>
-									{filteredHalls.map((hall) => (
-										<option key={hall.id} value={hall.id}>
-											{hall.code} (Capacity:{' '}
-											{hall.capacity !== undefined &&
+									{halls.map((hall) => {
+										// Determine attendee count for both event and extra_lecture
+										const attendeeCount =
+											reservation.event?.attendeeCount ??
+											reservation.extraLecture
+												?.attendeeCount ??
+											0;
+										const hasLowCapacity =
+											Number(hall.capacity) <
+											attendeeCount;
+										const label = `${hall.code} (Capacity: ${
+											hall.capacity !== undefined &&
 											hall.capacity !== null &&
 											!isNaN(Number(hall.capacity))
 												? Number(hall.capacity)
-												: 'N/A'}
-											, Energy:{' '}
-											{typeof hall.energy_consumption ===
+												: 'N/A'
+										}, Energy: ${
+											typeof hall.energy_consumption ===
 												'number' &&
 											!isNaN(
 												Number(hall.energy_consumption)
@@ -547,16 +568,35 @@ export default function ReviewReservationPage() {
 															hall.energy_consumption
 														) / 100
 													).toFixed(2)
-												: '0.00'}
-											)
-										</option>
-									))}
+												: '0.00'
+										}${hasLowCapacity ? ', capacity is low' : ''})`;
+										return (
+											<option
+												key={hall.id}
+												value={hall.id}
+												className={
+													hasLowCapacity
+														? 'text-red-600'
+														: ''
+												}
+												disabled={false} // All halls selectable, but visually marked
+											>
+												{label}
+											</option>
+										);
+									})}
 								</select>
 								{hallsLoading && (
 									<div className='text-xs text-muted-foreground mt-2'>
 										Loading halls...
 									</div>
 								)}
+								<div className='text-xs mt-2'>
+									<span className='text-red-600'>
+										Halls marked in red have lower capacity
+										than required attendees.
+									</span>
+								</div>
 							</div>
 						)}
 					</CardContent>
