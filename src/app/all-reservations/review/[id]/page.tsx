@@ -75,11 +75,20 @@ export default function ReviewReservationPage() {
 	const [updating, setUpdating] = useState(false);
 	const [approveDialogOpen, setApproveDialogOpen] = useState(false);
 	const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+	const [halls, setHalls] = useState<Array<{ id: string; code: string }>>([]);
+	const [hallsLoading, setHallsLoading] = useState(false);
 
 	useEffect(() => {
 		fetchReservationDetails();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [reservationId]);
+
+	useEffect(() => {
+		if (reservation && reservation.hallOption === 'availability') {
+			fetchAllHalls();
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [reservation]);
 
 	const fetchReservationDetails = async () => {
 		try {
@@ -227,6 +236,27 @@ export default function ReviewReservationPage() {
 			setReservation(null);
 		} finally {
 			setLoading(false);
+		}
+	};
+
+	const fetchAllHalls = async () => {
+		setHallsLoading(true);
+		try {
+			const supabase = createClient();
+			const { data, error } = await supabase
+				.from('hall')
+				.select('id, code');
+			if (error) {
+				console.error('Error fetching halls:', error);
+				setHalls([]);
+			} else {
+				setHalls(Array.isArray(data) ? data : []);
+			}
+		} catch (err) {
+			console.error('Error fetching halls:', err);
+			setHalls([]);
+		} finally {
+			setHallsLoading(false);
 		}
 	};
 
@@ -464,6 +494,36 @@ export default function ReviewReservationPage() {
 							formatDate={formatDate}
 							formatTime={formatTime}
 						/>
+						{/* Show all halls dropdown if hallOption is 'availability' */}
+						{reservation.hallOption === 'availability' && (
+							<div className='mt-4'>
+								<label
+									htmlFor='hall-dropdown'
+									className='block mb-2 text-sm font-medium text-foreground'
+								>
+									Select Hall
+								</label>
+								<select
+									id='hall-dropdown'
+									className='w-full p-2 border rounded focus:outline-none focus:ring focus:border-blue-300 bg-background text-foreground'
+									disabled={hallsLoading}
+								>
+									<option value=''>
+										-- Choose a hall --
+									</option>
+									{halls.map((hall) => (
+										<option key={hall.id} value={hall.id}>
+											{hall.code}
+										</option>
+									))}
+								</select>
+								{hallsLoading && (
+									<div className='text-xs text-muted-foreground mt-2'>
+										Loading halls...
+									</div>
+								)}
+							</div>
+						)}
 					</CardContent>
 				</Card>
 
