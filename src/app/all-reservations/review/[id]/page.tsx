@@ -84,6 +84,9 @@ export default function ReviewReservationPage() {
 		}>
 	>([]);
 	const [hallsLoading, setHallsLoading] = useState(false);
+	const [assignedHallIds, setAssignedHallIds] = useState<Set<string>>(
+		new Set()
+	);
 
 	useEffect(() => {
 		fetchReservationDetails();
@@ -250,18 +253,33 @@ export default function ReviewReservationPage() {
 		setHallsLoading(true);
 		try {
 			const supabase = createClient();
-			const { data, error } = await supabase
+			// Fetch halls
+			const { data: hallsData, error: hallsError } = await supabase
 				.from('hall')
 				.select('id, code, energy_consumption, capacity');
-			if (error) {
-				console.error('Error fetching halls:', error);
+			// Fetch hall assignments
+			const { data: assignData, error: assignError } = await supabase
+				.from('hall_assign')
+				.select('hall_id');
+			if (hallsError) {
+				console.error('Error fetching halls:', hallsError);
 				setHalls([]);
 			} else {
-				setHalls(Array.isArray(data) ? data : []);
+				setHalls(Array.isArray(hallsData) ? hallsData : []);
+			}
+			if (assignError) {
+				console.error('Error fetching hall assignments:', assignError);
+				setAssignedHallIds(new Set());
+			} else {
+				const ids = new Set(
+					(assignData || []).map((row: any) => row.hall_id)
+				);
+				setAssignedHallIds(ids);
 			}
 		} catch (err) {
-			console.error('Error fetching halls:', err);
+			console.error('Error fetching halls or assignments:', err);
 			setHalls([]);
+			setAssignedHallIds(new Set());
 		} finally {
 			setHallsLoading(false);
 		}
@@ -542,7 +560,6 @@ export default function ReviewReservationPage() {
 										-- Choose a hall --
 									</option>
 									{halls.map((hall) => {
-										// Determine attendee count for both event and extra_lecture
 										const attendeeCount =
 											reservation.event?.attendeeCount ??
 											reservation.extraLecture
@@ -551,7 +568,10 @@ export default function ReviewReservationPage() {
 										const hasLowCapacity =
 											Number(hall.capacity) <
 											attendeeCount;
-										const label = `${hall.code} (Capacity: ${
+										const isAssigned = assignedHallIds.has(
+											hall.id
+										);
+										let label = `${hall.code} (Capacity: ${
 											hall.capacity !== undefined &&
 											hall.capacity !== null &&
 											!isNaN(Number(hall.capacity))
@@ -569,7 +589,12 @@ export default function ReviewReservationPage() {
 														) / 100
 													).toFixed(2)
 												: '0.00'
-										}${hasLowCapacity ? ', capacity is low' : ''})`;
+										}`;
+										if (hasLowCapacity)
+											label += ', capacity is low';
+										if (isAssigned)
+											label += ', already assigned';
+										label += ')';
 										return (
 											<option
 												key={hall.id}
@@ -577,9 +602,11 @@ export default function ReviewReservationPage() {
 												className={
 													hasLowCapacity
 														? 'text-red-600'
-														: ''
+														: isAssigned
+															? 'text-orange-500'
+															: ''
 												}
-												disabled={false} // All halls selectable, but visually marked
+												disabled={false}
 											>
 												{label}
 											</option>
@@ -595,6 +622,11 @@ export default function ReviewReservationPage() {
 									<span className='text-red-600'>
 										Halls marked in red have lower capacity
 										than required attendees.
+									</span>
+									<br />
+									<span className='text-orange-500'>
+										Halls marked in orange are already
+										assigned to another reservation.
 									</span>
 								</div>
 							</div>
