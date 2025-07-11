@@ -87,6 +87,9 @@ export default function ReviewReservationPage() {
 	const [assignedHallIds, setAssignedHallIds] = useState<Set<string>>(
 		new Set()
 	);
+	const [assignedHallStatuses, setAssignedHallStatuses] = useState<
+		Record<string, string>
+	>({});
 
 	useEffect(() => {
 		fetchReservationDetails();
@@ -257,10 +260,36 @@ export default function ReviewReservationPage() {
 			const { data: hallsData, error: hallsError } = await supabase
 				.from('hall')
 				.select('id, code, energy_consumption, capacity');
-			// Fetch hall assignments
+			// Fetch hall assignments with reserve_id
 			const { data: assignData, error: assignError } = await supabase
 				.from('hall_assign')
-				.select('hall_id');
+				.select('hall_id, reserve_id');
+			// Fetch statuses for assigned reservations
+			let hallStatuses: Record<string, string> = {};
+			if (assignData && assignData.length > 0) {
+				const reserveIds = Array.from(
+					new Set(assignData.map((row: any) => row.reserve_id))
+				);
+				if (reserveIds.length > 0) {
+					const { data: reserveData, error: reserveError } =
+						await supabase
+							.from('reserve')
+							.select('id, status')
+							.in('id', reserveIds);
+					if (!reserveError && reserveData) {
+						// Map reserve_id to status
+						const reserveStatusMap: Record<string, string> = {};
+						reserveData.forEach((row: any) => {
+							reserveStatusMap[row.id] = row.status;
+						});
+						// Map hall_id to status
+						assignData.forEach((row: any) => {
+							hallStatuses[row.hall_id] =
+								reserveStatusMap[row.reserve_id] || 'unknown';
+						});
+					}
+				}
+			}
 			if (hallsError) {
 				console.error('Error fetching halls:', hallsError);
 				setHalls([]);
@@ -270,16 +299,19 @@ export default function ReviewReservationPage() {
 			if (assignError) {
 				console.error('Error fetching hall assignments:', assignError);
 				setAssignedHallIds(new Set());
+				setAssignedHallStatuses({});
 			} else {
 				const ids = new Set(
 					(assignData || []).map((row: any) => row.hall_id)
 				);
 				setAssignedHallIds(ids);
+				setAssignedHallStatuses(hallStatuses);
 			}
 		} catch (err) {
 			console.error('Error fetching halls or assignments:', err);
 			setHalls([]);
 			setAssignedHallIds(new Set());
+			setAssignedHallStatuses({});
 		} finally {
 			setHallsLoading(false);
 		}
@@ -571,6 +603,9 @@ export default function ReviewReservationPage() {
 										const isAssigned = assignedHallIds.has(
 											hall.id
 										);
+										const assignedStatus = isAssigned
+											? assignedHallStatuses[hall.id]
+											: undefined;
 										let label = `${hall.code} (Capacity: ${
 											hall.capacity !== undefined &&
 											hall.capacity !== null &&
@@ -593,7 +628,7 @@ export default function ReviewReservationPage() {
 										if (hasLowCapacity)
 											label += ', capacity is low';
 										if (isAssigned)
-											label += ', already assigned';
+											label += `, already assigned${assignedStatus ? ': ' + assignedStatus : ''}`;
 										label += ')';
 										return (
 											<option
