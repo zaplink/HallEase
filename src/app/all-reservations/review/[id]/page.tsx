@@ -408,6 +408,14 @@ export default function ReviewReservationPage() {
 
 			if (updateError) throw updateError;
 
+			// If rejected, insert note into reject_review table
+			if (status === 'rejected' && rejectReason.trim()) {
+				await supabase.from('reject_review').insert({
+					reserve_id: reservationId,
+					note: rejectReason.trim(),
+				});
+			}
+
 			// Prepare email data
 			const eventDateTime = reservation.date
 				? `${formatDate(reservation.date)} ${formatTime(reservation.startTime)} - ${formatTime(reservation.endTime)}`
