@@ -18,6 +18,7 @@ import {
 	Lock,
 	Library,
 	SquareLibrary,
+	Newspaper,
 } from 'lucide-react';
 
 export interface SubMenuItem {
@@ -81,6 +82,12 @@ const sidebarMenu = [
 				itemTitle: 'My Reservations',
 				itemUrl: '/my-reservations',
 				itemIcon: SquareLibrary,
+				roleSlugs: [],
+			},
+			{
+				itemTitle: 'Public Reservations',
+				itemUrl: '/public-reservations',
+				itemIcon: Newspaper,
 				roleSlugs: [],
 			},
 			{
