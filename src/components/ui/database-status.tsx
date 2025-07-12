@@ -25,7 +25,12 @@ export function DatabaseStatus({ onDataSourceChange }: DatabaseStatusProps) {
 	const [isConnected, setIsConnected] = React.useState<boolean | null>(null);
 	const [isChecking, setIsChecking] = React.useState(false);
 	const [useRealData, setUseRealData] = React.useState(true);
-	const [tableStats, setTableStats] = React.useState<any>(null);
+	interface TableStats {
+		reserves: number;
+		halls: number;
+		users: number;
+	}
+	const [tableStats, setTableStats] = React.useState<TableStats | null>(null);
 	const [showDebug, setShowDebug] = React.useState(false);
 	const [debugInfo, setDebugInfo] = React.useState<string[]>([]);
 
