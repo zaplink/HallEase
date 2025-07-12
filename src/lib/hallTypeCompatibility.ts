@@ -29,22 +29,7 @@ export function isHallTypeCompatible(
 // In your stepper form (for event and extra_lecture), add a combobox for type selection
 // Example for event form:
 
-const eventTypeOptions = Object.keys(hallTypeCompatibility)
-	.filter((type) =>
-		['conference', 'seminar', 'workshop', 'meeting', 'event'].includes(type)
-	)
-	.map((type) => ({
-		label: type.charAt(0).toUpperCase() + type.slice(1),
-		value: type,
-	}));
-
-// Example for extra_lecture form:
-const extraLectureTypeOptions = Object.keys(hallTypeCompatibility)
-	.filter((type) => ['quiz', 'practical', 'lecture'].includes(type))
-	.map((type) => ({
-		label: type.charAt(0).toUpperCase() + type.slice(1),
-		value: type,
-	}));
+// Removed unused eventTypeOptions and extraLectureTypeOptions
 
 // In your Stepper or relevant step component, use these options for the type combobox:
 // <FormField

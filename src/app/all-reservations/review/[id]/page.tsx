@@ -69,9 +69,7 @@ export default function ReviewReservationPage() {
 	const router = useRouter();
 	const reservationId = params.id as string;
 
-	const [reviewMethod, setReviewMethod] = useState<'approve' | 'reject' | ''>(
-		''
-	);
+	// Removed unused reviewMethod state
 	const [reservation, setReservation] = useState<ReservationDetails | null>(
 		null
 	);
@@ -275,14 +273,18 @@ export default function ReviewReservationPage() {
 				.from('hall_assign')
 				.select('hall_id, reserve_id');
 			// Fetch statuses and times for assigned reservations
-			let hallStatuses: Record<string, string> = {};
-			let hallConflicts: Record<
+			const hallStatuses: Record<string, string> = {};
+			const hallConflicts: Record<
 				string,
 				{ conflict: boolean; time?: string }
 			> = {};
 			if (assignData && assignData.length > 0) {
 				const reserveIds = Array.from(
-					new Set(assignData.map((row: any) => row.reserve_id))
+					new Set(
+						assignData.map(
+							(row: { reserve_id: string }) => row.reserve_id
+						)
+					)
 				);
 				if (reserveIds.length > 0) {
 					const { data: reserveData, error: reserveError } =
@@ -301,67 +303,80 @@ export default function ReviewReservationPage() {
 								end_time: string;
 							}
 						> = {};
-						reserveData.forEach((row: any) => {
-							reserveStatusMap[row.id] = row.status;
-							reserveTimeMap[row.id] = {
-								date: row.date,
-								start_time: row.start_time,
-								end_time: row.end_time,
-							};
-						});
+						reserveData.forEach(
+							(row: {
+								id: string;
+								status: string;
+								date: string;
+								start_time: string;
+								end_time: string;
+							}) => {
+								reserveStatusMap[row.id] = row.status;
+								reserveTimeMap[row.id] = {
+									date: row.date,
+									start_time: row.start_time,
+									end_time: row.end_time,
+								};
+							}
+						);
 						// Get current reservation date/time
 						const currentDate = reservation?.date;
 						const currentStart = reservation?.startTime;
 						const currentEnd = reservation?.endTime;
-						assignData.forEach((row: any) => {
-							hallStatuses[row.hall_id] =
-								reserveStatusMap[row.reserve_id] || 'unknown';
-							// Check for time conflict
-							let conflict = false;
-							let conflictTime = undefined;
-							const assigned = reserveTimeMap[row.reserve_id];
-							if (
-								assigned &&
-								currentDate &&
-								currentStart &&
-								currentEnd
-							) {
-								// Only check if not the same reservation
-								if (row.reserve_id !== reservation?.id) {
-									// Compare date
-									if (assigned.date === currentDate) {
-										// Compare time overlap
-										// Times are in 'HH:MM:SS' format
-										const toMinutes = (t: string) => {
-											const [h, m] = t.split(':');
-											return (
-												parseInt(h) * 60 + parseInt(m)
+						assignData.forEach(
+							(row: { hall_id: string; reserve_id: string }) => {
+								hallStatuses[row.hall_id] =
+									reserveStatusMap[row.reserve_id] ||
+									'unknown';
+								// Check for time conflict
+								let conflict = false;
+								let conflictTime = undefined;
+								const assigned = reserveTimeMap[row.reserve_id];
+								if (
+									assigned &&
+									currentDate &&
+									currentStart &&
+									currentEnd
+								) {
+									// Only check if not the same reservation
+									if (row.reserve_id !== reservation?.id) {
+										// Compare date
+										if (assigned.date === currentDate) {
+											// Compare time overlap
+											// Times are in 'HH:MM:SS' format
+											const toMinutes = (t: string) => {
+												const [h, m] = t.split(':');
+												return (
+													parseInt(h) * 60 +
+													parseInt(m)
+												);
+											};
+											const assignedStart = toMinutes(
+												assigned.start_time
 											);
-										};
-										const assignedStart = toMinutes(
-											assigned.start_time
-										);
-										const assignedEnd = toMinutes(
-											assigned.end_time
-										);
-										const currStart =
-											toMinutes(currentStart);
-										const currEnd = toMinutes(currentEnd);
-										if (
-											currStart < assignedEnd &&
-											currEnd > assignedStart
-										) {
-											conflict = true;
-											conflictTime = `${assigned.start_time.substring(0, 5)} - ${assigned.end_time.substring(0, 5)}`;
+											const assignedEnd = toMinutes(
+												assigned.end_time
+											);
+											const currStart =
+												toMinutes(currentStart);
+											const currEnd =
+												toMinutes(currentEnd);
+											if (
+												currStart < assignedEnd &&
+												currEnd > assignedStart
+											) {
+												conflict = true;
+												conflictTime = `${assigned.start_time.substring(0, 5)} - ${assigned.end_time.substring(0, 5)}`;
+											}
 										}
 									}
 								}
+								hallConflicts[row.hall_id] = {
+									conflict,
+									time: conflictTime,
+								};
 							}
-							hallConflicts[row.hall_id] = {
-								conflict,
-								time: conflictTime,
-							};
-						});
+						);
 					}
 				}
 			}
@@ -378,7 +393,9 @@ export default function ReviewReservationPage() {
 				setAssignedHallConflicts({});
 			} else {
 				const ids = new Set(
-					(assignData || []).map((row: any) => row.hall_id)
+					(assignData || []).map(
+						(row: { hall_id: string }) => row.hall_id
+					)
 				);
 				setAssignedHallIds(ids);
 				setAssignedHallStatuses(hallStatuses);
@@ -416,7 +433,6 @@ export default function ReviewReservationPage() {
 				// Get current user profile id
 				const {
 					data: { user },
-					error: userError,
 				} = await supabase.auth.getUser();
 				const profile_id = user?.id || null;
 				await supabase.from('reject_review').insert({
@@ -618,30 +634,9 @@ export default function ReviewReservationPage() {
 	const attendeeCount =
 		reservation?.event?.attendeeCount ??
 		reservation?.extraLecture?.attendeeCount;
-	const hallsWithStatus = halls.map((hall) => {
-		const isEnough =
-			typeof attendeeCount === 'number' &&
-			Number(hall.capacity) >= attendeeCount;
-		return {
-			...hall,
-			isEnough,
-		};
-	});
+	// Removed unused hallsWithStatus
 
-	const filteredHalls =
-		reservation &&
-		((reservation.event &&
-			typeof reservation.event.attendeeCount === 'number') ||
-			(reservation.extraLecture &&
-				typeof reservation.extraLecture.attendeeCount === 'number'))
-			? halls.filter((hall) => {
-					const attendeeCount =
-						reservation.event?.attendeeCount ??
-						reservation.extraLecture?.attendeeCount ??
-						0;
-					return Number(hall.capacity) >= attendeeCount;
-				})
-			: halls;
+	// Removed unused filteredHalls
 
 	return (
 		<SidebarLayout>
@@ -737,7 +732,7 @@ export default function ReviewReservationPage() {
 										reservationType,
 										hallType
 									);
-									let compatibilityReason = `(${reservationType} ~ ${hallType})`;
+									const compatibilityReason = `(${reservationType} ~ ${hallType})`;
 									let label = `${hall.code} (Capacity: ${hall.capacity !== undefined && hall.capacity !== null && !isNaN(Number(hall.capacity)) ? Number(hall.capacity) : 'N/A'}, Energy: ${typeof hall.energy_consumption === 'number' && !isNaN(Number(hall.energy_consumption)) ? (Number(hall.energy_consumption) / 100).toFixed(2) : '0.00'}`;
 									if (hasLowCapacity)
 										label += ', capacity is low';
