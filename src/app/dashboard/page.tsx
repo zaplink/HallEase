@@ -1,27 +1,265 @@
-import { Input } from '@/components/ui/input';
 import SidebarLayout from '@/layouts/Sidebar/Layout';
 import { createClient } from '@/lib/supabaseServer';
 import { redirect } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-// import { Label } from '@/components/ui/label';
-import BarChartComponet from '@/app/dashboard/component';
+import { Suspense } from 'react';
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from '@/components/ui/card';
-import { MoreHorizontal, ChevronRight } from 'lucide-react';
-// import { Calendar } from '@/components/ui/calendar';
-// import React from 'react';
-import PieChart from './pie-chart';
+	getDashboardStats,
+	getRecentBookings,
+	getBookingTrends,
+	getHallUtilization,
+	getCurrentlyOccupiedHalls,
+} from '@/lib/dashboard-data';
+import { KPICard } from '@/components/custom/KPICard';
+import { AdvancedKPICard } from '@/components/custom/AdvancedKPICard';
+import { RecentBookings } from '@/components/custom/RecentBookings';
+import { RecentActivity } from '@/components/custom/RecentActivity';
+import { BookingTrendsLineChart } from '@/components/custom/BookingTrendsLineChart';
+import { BookingStatusPieChart } from '@/components/custom/BookingStatusPieChart';
+import { HallUtilizationChart } from '@/components/custom/HallUtilizationChart';
+import { HallOccupancyDonut } from '@/components/custom/HallOccupancyDonut';
+import { HallStatus } from '@/components/custom/HallStatus';
+import {
+	Calendar,
+	Users,
+	Building,
+	TrendingUp,
+	Clock,
+	XCircle,
+} from 'lucide-react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
-// import TestComponent from './TestComponent';
+// Loading components
+function DashboardSkeleton() {
+	return (
+		<div className='space-y-6'>
+			{/* Welcome Header */}
+			<div className='mb-6'>
+				<Skeleton className='h-8 w-48 mb-2' />
+				<Skeleton className='h-4 w-96' />
+			</div>
+
+			{/* KPI Cards Skeleton */}
+			<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+				{[...Array(4)].map((_, i) => (
+					<Card key={i}>
+						<CardHeader className='pb-2'>
+							<Skeleton className='h-4 w-24' />
+						</CardHeader>
+						<CardContent>
+							<Skeleton className='h-8 w-16 mb-2' />
+							<Skeleton className='h-3 w-20' />
+						</CardContent>
+					</Card>
+				))}
+			</div>
+
+			{/* Charts Row 1 Skeleton */}
+			<div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+				<Card className='col-span-2'>
+					<CardHeader>
+						<Skeleton className='h-6 w-32' />
+					</CardHeader>
+					<CardContent>
+						<Skeleton className='h-[300px] w-full' />
+					</CardContent>
+				</Card>
+				<Card>
+					<CardHeader>
+						<Skeleton className='h-6 w-32' />
+					</CardHeader>
+					<CardContent>
+						<Skeleton className='h-[300px] w-full' />
+					</CardContent>
+				</Card>
+			</div>
+
+			{/* Charts Row 2 Skeleton */}
+			<div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+				{[...Array(3)].map((_, i) => (
+					<Card key={i}>
+						<CardHeader>
+							<Skeleton className='h-6 w-32' />
+						</CardHeader>
+						<CardContent>
+							<Skeleton className='h-[300px] w-full' />
+						</CardContent>
+					</Card>
+				))}
+			</div>
+
+			{/* Bottom Row Skeleton */}
+			<div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+				{[...Array(2)].map((_, i) => (
+					<Card key={i}>
+						<CardHeader>
+							<Skeleton className='h-6 w-32' />
+						</CardHeader>
+						<CardContent>
+							<Skeleton className='h-[200px] w-full' />
+						</CardContent>
+					</Card>
+				))}
+			</div>
+		</div>
+	);
+}
+
+async function DashboardContent() {
+	// Fetch all dashboard data
+	const [
+		dashboardStats,
+		recentBookings,
+		bookingTrends,
+		hallUtilization,
+		occupiedHalls,
+	] = await Promise.all([
+		getDashboardStats(),
+		getRecentBookings(10),
+		getBookingTrends(),
+		getHallUtilization(),
+		getCurrentlyOccupiedHalls(),
+	]);
+
+	return (
+		<div className='space-y-6'>
+			{/* KPI Cards */}
+			<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+				<AdvancedKPICard
+					title='Total Bookings'
+					value={dashboardStats.totalBookings}
+					change={dashboardStats.totalBookingsChange}
+					changeLabel='vs last month'
+					icon={<Calendar className='w-5 h-5' />}
+					trend={
+						dashboardStats.totalBookingsChange > 0
+							? 'up'
+							: dashboardStats.totalBookingsChange < 0
+								? 'down'
+								: 'neutral'
+					}
+					sparklineData={bookingTrends
+						.slice(-7)
+						.map((t) => t.totalBookings)}
+					color='#3b82f6'
+				/>
+				<AdvancedKPICard
+					title='Pending Approvals'
+					value={dashboardStats.pendingApprovals}
+					changeLabel='require attention'
+					icon={<Clock className='w-5 h-5' />}
+					trend={dashboardStats.pendingApprovals > 0 ? 'down' : 'up'}
+					sparklineData={bookingTrends
+						.slice(-7)
+						.map((t) => t.pendingBookings)}
+					color='#f59e0b'
+				/>
+				<AdvancedKPICard
+					title='Occupancy Rate'
+					value={`${dashboardStats.occupancyRate}%`}
+					changeLabel='today'
+					icon={<Building className='w-5 h-5' />}
+					trend={
+						dashboardStats.occupancyRate > 70
+							? 'up'
+							: dashboardStats.occupancyRate < 30
+								? 'down'
+								: 'neutral'
+					}
+					sparklineData={[
+						45,
+						52,
+						38,
+						67,
+						73,
+						82,
+						dashboardStats.occupancyRate,
+					]}
+					color='#10b981'
+				/>
+				<AdvancedKPICard
+					title='Completed Bookings'
+					value={dashboardStats.completedBookings}
+					changeLabel='approved'
+					icon={<Users className='w-5 h-5' />}
+					trend='up'
+					sparklineData={bookingTrends
+						.slice(-7)
+						.map((t) => t.approvedBookings)}
+					color='#10b981'
+				/>
+			</div>
+
+			{/* Charts Row 1 */}
+			<div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+				{/* Booking Trends Line Chart */}
+				<BookingTrendsLineChart data={bookingTrends} />
+
+				{/* Booking Status Pie Chart */}
+				<BookingStatusPieChart stats={dashboardStats} />
+			</div>
+
+			{/* Charts Row 2 */}
+			<div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+				{/* Hall Occupancy Donut */}
+				<HallOccupancyDonut hallUtilization={hallUtilization} />
+
+				{/* Hall Utilization */}
+				<HallUtilizationChart data={hallUtilization} />
+
+				{/* Recent Activity */}
+				<RecentActivity bookings={recentBookings} />
+			</div>
+
+			{/* Bottom Row */}
+			<div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+				{/* Recent Bookings */}
+				<RecentBookings bookings={recentBookings} />
+
+				{/* Hall Status */}
+				<HallStatus occupiedHalls={occupiedHalls} />
+			</div>
+
+			{/* Additional Stats */}
+			<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+				<KPICard
+					title='Rejected Bookings'
+					value={dashboardStats.rejectedBookings}
+					changeLabel='this month'
+					icon={<XCircle className='w-5 h-5' />}
+					trend={dashboardStats.rejectedBookings > 0 ? 'down' : 'up'}
+				/>
+				<KPICard
+					title='Average Utilization'
+					value={`${Math.round(hallUtilization.reduce((acc, hall) => acc + hall.utilizationRate, 0) / Math.max(hallUtilization.length, 1))}%`}
+					changeLabel='across all halls'
+					icon={<TrendingUp className='w-5 h-5' />}
+					trend='neutral'
+				/>
+				<KPICard
+					title='Available Halls'
+					value={
+						hallUtilization.filter((h) => !h.currentlyOccupied)
+							.length
+					}
+					changeLabel='right now'
+					icon={<Building className='w-5 h-5' />}
+					trend='up'
+				/>
+				<KPICard
+					title='Peak Usage Hours'
+					value='2-4 PM'
+					changeLabel='typical'
+					icon={<Clock className='w-5 h-5' />}
+					trend='neutral'
+				/>
+			</div>
+		</div>
+	);
+}
 
 export default async function Dashboard() {
-	// navigate back to login if user not logged
+	// navigate back to login if user not logged in
 	const supabase = await createClient();
 
 	const { data, error } = await supabase.auth.getUser();
@@ -29,164 +267,11 @@ export default async function Dashboard() {
 		redirect('/');
 	}
 
-	// const [date, setDate] = React.useState<Date | undefined>(new Date());
-
 	return (
 		<SidebarLayout>
-			{/* <TestComponent /> */}
-			{/* Grid Layout */}
-			<div className='grid grid-cols-3 gap-x-4 gap-y-6'>
-				{/* Column-1|2 */}
-				<div className='col-span-2 grid grid-cols-2 gap-x-4 gap-y-6'>
-					{/* HallEase Bot */}
-					<div className='col-span-2 w-full'>
-						<div className='flex flex-row gap-2'>
-							<Input
-								placeholder='Message to HallEase bot'
-								className='w-full'
-							/>
-							<Button>Go</Button>
-						</div>
-					</div>
-					{/* Recent Bookings */}
-					<div className='flex justify-center w-full items-start'>
-						<Card className='w-full'>
-							<CardHeader>
-								<CardTitle>Recent Bookings</CardTitle>
-								<CardDescription>
-									5 pending approvals
-								</CardDescription>
-							</CardHeader>
-							<CardContent className='grid gap-4'>
-								<div className='flex items-center space-x-4 rounded-md border p-4'>
-									<div className='flex-1 space-y-1'>
-										<p className='text-sm font-medium leading-none'>
-											Annual General Meeting
-										</p>
-										<p className='text-sm text-muted-foreground'>
-											Tomorrow
-										</p>
-									</div>
-									<Button variant='ghost'>
-										<MoreHorizontal />
-									</Button>
-								</div>
-								<div className=' flex items-center space-x-4 rounded-md border p-4'>
-									<div className='flex-1 space-y-1'>
-										<p className='text-sm font-medium leading-none'>
-											Business Conference
-										</p>
-										<p className='text-sm text-muted-foreground'>
-											Next Friday
-										</p>
-									</div>
-									<Button variant='ghost'>
-										<MoreHorizontal />
-									</Button>
-								</div>
-								<div className=' flex items-center space-x-4 rounded-md border p-4'>
-									<div className='flex-1 space-y-1'>
-										<p className='text-sm font-medium leading-none'>
-											Networking Event
-										</p>
-										<p className='text-sm text-muted-foreground'>
-											February 20
-										</p>
-									</div>
-									<Button variant='ghost'>
-										<MoreHorizontal />
-									</Button>
-								</div>
-							</CardContent>
-							<CardFooter>
-								<Button variant='outline'>
-									<span>See All</span>
-									<ChevronRight />
-								</Button>
-							</CardFooter>
-						</Card>
-					</div>
-
-					{/* Chart */}
-					<div className=''>
-						<PieChart />
-					</div>
-				</div>
-
-				{/* Column-3 */}
-				<div>
-					<div className='flex items-center justify-center flex-col gap-4'>
-						<div className='flex flex-row gap-1 w-full'>
-							<Card className='w-1/2'>
-								<CardHeader className='pb-1 pt-3 px-4'>
-									<CardTitle className='font-thin'>
-										Total Bookings
-									</CardTitle>
-									<CardDescription>
-										+10% last week
-									</CardDescription>
-								</CardHeader>
-								<CardContent className='pb-2 px-4'>
-									<span className='font-extrabold text-2xl'>
-										+20
-									</span>
-								</CardContent>
-							</Card>
-							<Card className='w-1/2'>
-								<CardHeader className='pb-1 pt-3 px-4'>
-									<CardTitle className='font-thin'>
-										Upcoming Events
-									</CardTitle>
-									<CardDescription>
-										-5% last week
-									</CardDescription>
-								</CardHeader>
-								<CardContent className='pb-2 px-4'>
-									<span className='font-extrabold text-2xl'>
-										+5
-									</span>
-								</CardContent>
-							</Card>
-						</div>
-						<div className='flex flex-row gap-1 w-full'>
-							<Card className='w-1/2'>
-								<CardHeader className='pb-1 pt-3 px-4'>
-									<CardTitle className='font-thin'>
-										Occupied Now
-									</CardTitle>
-									<CardDescription>
-										-50% last hour
-									</CardDescription>
-								</CardHeader>
-								<CardContent className='pb-2 px-4'>
-									<span className='font-extrabold text-2xl'>
-										+10
-									</span>
-								</CardContent>
-							</Card>
-							<Card className='w-1/2'>
-								<CardHeader className='pb-1 pt-3 px-4'>
-									<CardTitle className='font-thin'>
-										Cancellations
-									</CardTitle>
-									<CardDescription>
-										-90% fewer
-									</CardDescription>
-								</CardHeader>
-								<CardContent className='pb-2 px-4'>
-									<span className='font-extrabold text-2xl'>
-										+3
-									</span>
-								</CardContent>
-							</Card>
-						</div>
-
-						<div className='w-full'>
-							<BarChartComponet />
-						</div>
-					</div>
-				</div>
-			</div>
+			<Suspense fallback={<DashboardSkeleton />}>
+				<DashboardContent />
+			</Suspense>
 		</SidebarLayout>
 	);
 }
