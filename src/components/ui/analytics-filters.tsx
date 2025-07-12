@@ -22,7 +22,16 @@ import { Download, Filter, RefreshCw } from 'lucide-react';
 import { DatePickerDemo } from '@/components/ui/DatePicker';
 
 interface AnalyticsFiltersProps {
-	onFilterChange?: (filters: any) => void;
+	onFilterChange?: (
+		filters:
+			| {
+					dateRange: { from: Date | undefined; to: Date | undefined };
+					hall: string;
+					eventType: string;
+					status: string;
+			  }
+			| object
+	) => void;
 	onExport?: (format: 'csv' | 'pdf') => void;
 	onRefresh?: () => void;
 }
