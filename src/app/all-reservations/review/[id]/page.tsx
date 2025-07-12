@@ -79,6 +79,7 @@ export default function ReviewReservationPage() {
 	const [updating, setUpdating] = useState(false);
 	const [approveDialogOpen, setApproveDialogOpen] = useState(false);
 	const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+	const [rejectReason, setRejectReason] = useState('');
 	const [halls, setHalls] = useState<
 		Array<{
 			id: string;
@@ -899,6 +900,26 @@ export default function ReviewReservationPage() {
 												will deny the reservation
 												request and cannot be undone.
 											</AlertDialogDescription>
+											<div className='mt-4'>
+												<label
+													htmlFor='reject-reason'
+													className='block mb-2 text-sm font-medium text-foreground'
+												>
+													Reason / Notes (optional)
+												</label>
+												<textarea
+													id='reject-reason'
+													className='w-full p-2 border rounded focus:outline-none focus:ring focus:border-blue-300 bg-background text-foreground'
+													rows={3}
+													value={rejectReason}
+													onChange={(e) =>
+														setRejectReason(
+															e.target.value
+														)
+													}
+													placeholder='Add a reason or notes for rejection...'
+												/>
+											</div>
 										</AlertDialogHeader>
 										<AlertDialogFooter>
 											<AlertDialogCancel
@@ -907,11 +928,26 @@ export default function ReviewReservationPage() {
 												Cancel
 											</AlertDialogCancel>
 											<AlertDialogAction
-												onClick={() =>
+												onClick={async () => {
+													// You can send the reason to the backend here if needed
+													// For now, just log it and call handleUpdateStatus
+													if (!rejectReason.trim()) {
+														// Optionally require a reason, or just allow empty
+														// toast.error('Please provide a reason for rejection.');
+														// return;
+													}
+													// TODO: send reason to backend if needed
+													// Example: await supabase.from('reserve').update({ reject_reason: rejectReason })
+													// For now, just log
+													console.log(
+														'Reject reason:',
+														rejectReason
+													);
 													handleUpdateStatus(
 														'rejected'
-													)
-												}
+													);
+													setRejectReason('');
+												}}
 												disabled={updating}
 												className='bg-destructive hover:bg-destructive/90'
 											>
