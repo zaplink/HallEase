@@ -90,6 +90,9 @@ export default function ReviewReservationPage() {
 	const [assignedHallStatuses, setAssignedHallStatuses] = useState<
 		Record<string, string>
 	>({});
+	const [assignedHallConflicts, setAssignedHallConflicts] = useState<
+		Record<string, { conflict: boolean; time?: string }>
+	>({});
 
 	useEffect(() => {
 		fetchReservationDetails();
@@ -264,8 +267,12 @@ export default function ReviewReservationPage() {
 			const { data: assignData, error: assignError } = await supabase
 				.from('hall_assign')
 				.select('hall_id, reserve_id');
-			// Fetch statuses for assigned reservations
+			// Fetch statuses and times for assigned reservations
 			let hallStatuses: Record<string, string> = {};
+			let hallConflicts: Record<
+				string,
+				{ conflict: boolean; time?: string }
+			> = {};
 			if (assignData && assignData.length > 0) {
 				const reserveIds = Array.from(
 					new Set(assignData.map((row: any) => row.reserve_id))
@@ -274,18 +281,79 @@ export default function ReviewReservationPage() {
 					const { data: reserveData, error: reserveError } =
 						await supabase
 							.from('reserve')
-							.select('id, status')
+							.select('id, status, date, start_time, end_time')
 							.in('id', reserveIds);
 					if (!reserveError && reserveData) {
-						// Map reserve_id to status
+						// Map reserve_id to status and time
 						const reserveStatusMap: Record<string, string> = {};
+						const reserveTimeMap: Record<
+							string,
+							{
+								date: string;
+								start_time: string;
+								end_time: string;
+							}
+						> = {};
 						reserveData.forEach((row: any) => {
 							reserveStatusMap[row.id] = row.status;
+							reserveTimeMap[row.id] = {
+								date: row.date,
+								start_time: row.start_time,
+								end_time: row.end_time,
+							};
 						});
-						// Map hall_id to status
+						// Get current reservation date/time
+						const currentDate = reservation?.date;
+						const currentStart = reservation?.startTime;
+						const currentEnd = reservation?.endTime;
 						assignData.forEach((row: any) => {
 							hallStatuses[row.hall_id] =
 								reserveStatusMap[row.reserve_id] || 'unknown';
+							// Check for time conflict
+							let conflict = false;
+							let conflictTime = undefined;
+							const assigned = reserveTimeMap[row.reserve_id];
+							if (
+								assigned &&
+								currentDate &&
+								currentStart &&
+								currentEnd
+							) {
+								// Only check if not the same reservation
+								if (row.reserve_id !== reservation?.id) {
+									// Compare date
+									if (assigned.date === currentDate) {
+										// Compare time overlap
+										// Times are in 'HH:MM:SS' format
+										const toMinutes = (t: string) => {
+											const [h, m] = t.split(':');
+											return (
+												parseInt(h) * 60 + parseInt(m)
+											);
+										};
+										const assignedStart = toMinutes(
+											assigned.start_time
+										);
+										const assignedEnd = toMinutes(
+											assigned.end_time
+										);
+										const currStart =
+											toMinutes(currentStart);
+										const currEnd = toMinutes(currentEnd);
+										if (
+											currStart < assignedEnd &&
+											currEnd > assignedStart
+										) {
+											conflict = true;
+											conflictTime = `${assigned.start_time.substring(0, 5)} - ${assigned.end_time.substring(0, 5)}`;
+										}
+									}
+								}
+							}
+							hallConflicts[row.hall_id] = {
+								conflict,
+								time: conflictTime,
+							};
 						});
 					}
 				}
@@ -300,18 +368,21 @@ export default function ReviewReservationPage() {
 				console.error('Error fetching hall assignments:', assignError);
 				setAssignedHallIds(new Set());
 				setAssignedHallStatuses({});
+				setAssignedHallConflicts({});
 			} else {
 				const ids = new Set(
 					(assignData || []).map((row: any) => row.hall_id)
 				);
 				setAssignedHallIds(ids);
 				setAssignedHallStatuses(hallStatuses);
+				setAssignedHallConflicts(hallConflicts);
 			}
 		} catch (err) {
 			console.error('Error fetching halls or assignments:', err);
 			setHalls([]);
 			setAssignedHallIds(new Set());
 			setAssignedHallStatuses({});
+			setAssignedHallConflicts({});
 		} finally {
 			setHallsLoading(false);
 		}
@@ -532,12 +603,17 @@ export default function ReviewReservationPage() {
 
 	const filteredHalls =
 		reservation &&
-		reservation.event &&
-		typeof reservation.event.attendeeCount === 'number'
-			? halls.filter(
-					(hall) =>
-						Number(hall.capacity) >= reservation.event.attendeeCount
-				)
+		((reservation.event &&
+			typeof reservation.event.attendeeCount === 'number') ||
+			(reservation.extraLecture &&
+				typeof reservation.extraLecture.attendeeCount === 'number'))
+			? halls.filter((hall) => {
+					const attendeeCount =
+						reservation.event?.attendeeCount ??
+						reservation.extraLecture?.attendeeCount ??
+						0;
+					return Number(hall.capacity) >= attendeeCount;
+				})
 			: halls;
 
 	return (
@@ -606,6 +682,9 @@ export default function ReviewReservationPage() {
 										const assignedStatus = isAssigned
 											? assignedHallStatuses[hall.id]
 											: undefined;
+										const conflictInfo = isAssigned
+											? assignedHallConflicts[hall.id]
+											: undefined;
 										let label = `${hall.code} (Capacity: ${
 											hall.capacity !== undefined &&
 											hall.capacity !== null &&
@@ -629,6 +708,8 @@ export default function ReviewReservationPage() {
 											label += ', capacity is low';
 										if (isAssigned)
 											label += `, already assigned${assignedStatus ? ': ' + assignedStatus : ''}`;
+										if (conflictInfo?.conflict)
+											label += `, conflict: ${conflictInfo.time}`;
 										label += ')';
 										return (
 											<option
@@ -638,7 +719,9 @@ export default function ReviewReservationPage() {
 													hasLowCapacity
 														? 'text-red-600'
 														: isAssigned
-															? 'text-orange-500'
+															? conflictInfo?.conflict
+																? 'text-yellow-600'
+																: 'text-orange-500'
 															: ''
 												}
 												disabled={false}
