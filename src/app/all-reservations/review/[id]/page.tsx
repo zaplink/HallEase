@@ -772,160 +772,159 @@ export default function ReviewReservationPage() {
 
 				{/* Action Buttons */}
 				{isActionable && (
-					<Card className='border border-muted bg-background rounded-md shadow-none'>
-						<CardHeader className='pb-2'>
-							<CardTitle className='text-lg font-semibold tracking-tight text-foreground'>
-								Review Actions
-							</CardTitle>
-						</CardHeader>
-						<CardContent className='pt-0'>
-							<div className='flex flex-col gap-4'>
-								{/* Approve Section */}
-								<div>
-									<AlertDialog
-										open={approveDialogOpen}
-										onOpenChange={setApproveDialogOpen}
-									>
-										<AlertDialogTrigger asChild>
-											<Button
+					<>
+						{/* Approve Card */}
+						<Card className='border border-muted bg-background rounded-md shadow-none mb-4'>
+							<CardHeader className='pb-2'>
+								<CardTitle className='text-lg font-semibold tracking-tight text-foreground'>
+									Review: Approve
+								</CardTitle>
+							</CardHeader>
+							<CardContent className='pt-0'>
+								<AlertDialog
+									open={approveDialogOpen}
+									onOpenChange={setApproveDialogOpen}
+								>
+									<AlertDialogTrigger asChild>
+										<Button
+											disabled={updating}
+											className='bg-green-600 hover:bg-green-700'
+										>
+											<CheckCircle className='h-4 w-4 mr-2' />
+											Approve Reservation
+										</Button>
+									</AlertDialogTrigger>
+									<AlertDialogContent>
+										<AlertDialogHeader>
+											<AlertDialogTitle>
+												Approve Reservation
+											</AlertDialogTitle>
+											<AlertDialogDescription>
+												Please select a hall to assign
+												before approving. This will
+												confirm the reservation and
+												allocate the selected hall.
+											</AlertDialogDescription>
+										</AlertDialogHeader>
+										<AlertDialogFooter>
+											<AlertDialogCancel
 												disabled={updating}
+											>
+												Cancel
+											</AlertDialogCancel>
+											<AlertDialogAction
+												onClick={async () => {
+													if (!selectedHallId) {
+														toast.error(
+															'Please select a hall to assign before approving.'
+														);
+														return;
+													}
+													setUpdating(true);
+													try {
+														const supabase =
+															createClient();
+														// Assign hall in hall_assign table
+														const {
+															error: assignError,
+														} = await supabase
+															.from('hall_assign')
+															.insert({
+																hall_id:
+																	selectedHallId,
+																reserve_id:
+																	reservationId,
+															});
+														if (assignError)
+															throw assignError;
+														// Update reservation status
+														await handleUpdateStatus(
+															'approved'
+														);
+													} catch (err) {
+														console.error(
+															'Failed to assign hall or approve:',
+															err
+														);
+														toast.error(
+															'Failed to assign hall or approve reservation.'
+														);
+													} finally {
+														setUpdating(false);
+													}
+												}}
+												disabled={
+													updating || !selectedHallId
+												}
 												className='bg-green-600 hover:bg-green-700'
 											>
-												<CheckCircle className='h-4 w-4 mr-2' />
-												Approve Reservation
-											</Button>
-										</AlertDialogTrigger>
-										<AlertDialogContent>
-											<AlertDialogHeader>
-												<AlertDialogTitle>
-													Approve Reservation
-												</AlertDialogTitle>
-												<AlertDialogDescription>
-													Please select a hall to
-													assign before approving.
-													This will confirm the
-													reservation and allocate the
-													selected hall.
-												</AlertDialogDescription>
-											</AlertDialogHeader>
-											{/* Hall dropdown removed as requested */}
-											<AlertDialogFooter>
-												<AlertDialogCancel
-													disabled={updating}
-												>
-													Cancel
-												</AlertDialogCancel>
-												<AlertDialogAction
-													onClick={async () => {
-														if (!selectedHallId) {
-															toast.error(
-																'Please select a hall to assign before approving.'
-															);
-															return;
-														}
-														setUpdating(true);
-														try {
-															const supabase =
-																createClient();
-															// Assign hall in hall_assign table
-															const {
-																error: assignError,
-															} = await supabase
-																.from(
-																	'hall_assign'
-																)
-																.insert({
-																	hall_id:
-																		selectedHallId,
-																	reserve_id:
-																		reservationId,
-																});
-															if (assignError)
-																throw assignError;
-															// Update reservation status
-															await handleUpdateStatus(
-																'approved'
-															);
-														} catch (err) {
-															console.error(
-																'Failed to assign hall or approve:',
-																err
-															);
-															toast.error(
-																'Failed to assign hall or approve reservation.'
-															);
-														} finally {
-															setUpdating(false);
-														}
-													}}
-													disabled={
-														updating ||
-														!selectedHallId
-													}
-													className='bg-green-600 hover:bg-green-700'
-												>
-													{updating
-														? 'Approving...'
-														: 'Approve'}
-												</AlertDialogAction>
-											</AlertDialogFooter>
-										</AlertDialogContent>
-									</AlertDialog>
-								</div>
-								{/* Reject Section */}
-								<div>
-									<AlertDialog
-										open={rejectDialogOpen}
-										onOpenChange={setRejectDialogOpen}
-									>
-										<AlertDialogTrigger asChild>
-											<Button
-												disabled={updating}
-												variant='destructive'
-											>
-												<XCircle className='h-4 w-4 mr-2' />
+												{updating
+													? 'Approving...'
+													: 'Approve'}
+											</AlertDialogAction>
+										</AlertDialogFooter>
+									</AlertDialogContent>
+								</AlertDialog>
+							</CardContent>
+						</Card>
+						{/* Reject Card */}
+						<Card className='border border-muted bg-background rounded-md shadow-none'>
+							<CardHeader className='pb-2'>
+								<CardTitle className='text-lg font-semibold tracking-tight text-foreground'>
+									Review: Reject
+								</CardTitle>
+							</CardHeader>
+							<CardContent className='pt-0'>
+								<AlertDialog
+									open={rejectDialogOpen}
+									onOpenChange={setRejectDialogOpen}
+								>
+									<AlertDialogTrigger asChild>
+										<Button
+											disabled={updating}
+											variant='destructive'
+										>
+											<XCircle className='h-4 w-4 mr-2' />
+											Reject Reservation
+										</Button>
+									</AlertDialogTrigger>
+									<AlertDialogContent>
+										<AlertDialogHeader>
+											<AlertDialogTitle>
 												Reject Reservation
-											</Button>
-										</AlertDialogTrigger>
-										<AlertDialogContent>
-											<AlertDialogHeader>
-												<AlertDialogTitle>
-													Reject Reservation
-												</AlertDialogTitle>
-												<AlertDialogDescription>
-													Are you sure you want to
-													reject this reservation?
-													This action will deny the
-													reservation request and
-													cannot be undone.
-												</AlertDialogDescription>
-											</AlertDialogHeader>
-											<AlertDialogFooter>
-												<AlertDialogCancel
-													disabled={updating}
-												>
-													Cancel
-												</AlertDialogCancel>
-												<AlertDialogAction
-													onClick={() =>
-														handleUpdateStatus(
-															'rejected'
-														)
-													}
-													disabled={updating}
-													className='bg-destructive hover:bg-destructive/90'
-												>
-													{updating
-														? 'Rejecting...'
-														: 'Reject'}
-												</AlertDialogAction>
-											</AlertDialogFooter>
-										</AlertDialogContent>
-									</AlertDialog>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
+											</AlertDialogTitle>
+											<AlertDialogDescription>
+												Are you sure you want to reject
+												this reservation? This action
+												will deny the reservation
+												request and cannot be undone.
+											</AlertDialogDescription>
+										</AlertDialogHeader>
+										<AlertDialogFooter>
+											<AlertDialogCancel
+												disabled={updating}
+											>
+												Cancel
+											</AlertDialogCancel>
+											<AlertDialogAction
+												onClick={() =>
+													handleUpdateStatus(
+														'rejected'
+													)
+												}
+												disabled={updating}
+												className='bg-destructive hover:bg-destructive/90'
+											>
+												{updating
+													? 'Rejecting...'
+													: 'Reject'}
+											</AlertDialogAction>
+										</AlertDialogFooter>
+									</AlertDialogContent>
+								</AlertDialog>
+							</CardContent>
+						</Card>
+					</>
 				)}
 
 				{!isActionable && (
