@@ -139,30 +139,8 @@ async function processAnalyticsData(
 		hallLookup.set(hall.id, hall);
 	});
 
-	// Process hall usage by month
-	const hallUsage = processHallUsageByMonth(reservations);
-
-	// Process event types
-	const eventTypes = processEventTypes(reservations);
-
-	// Process popular halls
-	const popularHalls = await processPopularHalls(reservations, hallLookup);
-
-	// Process daily usage patterns
-	const dailyUsage = processDailyUsage(reservations);
-
-	// Process status distribution
-	const statusDistribution = processStatusDistribution(reservations);
-
-	// Process user roles
-	const userRoles = processUserRoles(users, reservations);
-
-	// Process building usage
-	const buildingUsage = processBuildingUsage(reservations, hallLookup);
-
-	// Calculate key metrics
+	// Only calculate metrics for return
 	const rawMetrics = calculateKeyMetrics(reservations, halls, users, drafts);
-
 	const metrics = {
 		totalReservations: rawMetrics.totalReserves,
 		activeUsers: rawMetrics.activeUsers,
