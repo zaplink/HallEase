@@ -631,9 +631,7 @@ export default function ReviewReservationPage() {
 	const isActionable =
 		reservation.status !== 'approved' && reservation.status !== 'rejected';
 
-	const attendeeCount =
-		reservation?.event?.attendeeCount ??
-		reservation?.extraLecture?.attendeeCount;
+	// Removed unused attendeeCount
 	// Removed unused hallsWithStatus
 
 	// Removed unused filteredHalls
