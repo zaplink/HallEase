@@ -408,11 +408,16 @@ export default function ReviewReservationPage() {
 
 			if (updateError) throw updateError;
 
-			// If rejected, insert note into reject_review table
+			// If rejected, insert note and rejected_date/rejected_time into reject_review table
 			if (status === 'rejected' && rejectReason.trim()) {
+				const now = new Date();
+				const rejected_date = now.toISOString().split('T')[0];
+				const rejected_time = now.toTimeString().split(' ')[0];
 				await supabase.from('reject_review').insert({
 					reserve_id: reservationId,
 					note: rejectReason.trim(),
+					rejected_date,
+					rejected_time,
 				});
 			}
 
