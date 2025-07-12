@@ -23,6 +23,7 @@ import {
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { ReservationDetailsCard } from '@/components/custom/ReservationDetailsCard';
+import { isHallTypeCompatible } from '@/lib/hallTypeCompatibility';
 
 interface ReservationDetails {
 	id: string;
@@ -259,10 +260,10 @@ export default function ReviewReservationPage() {
 		setHallsLoading(true);
 		try {
 			const supabase = createClient();
-			// Fetch halls
+			// Fetch halls with type
 			const { data: hallsData, error: hallsError } = await supabase
 				.from('hall')
-				.select('id, code, energy_consumption, capacity');
+				.select('id, code, energy_consumption, capacity, type');
 			// Fetch hall assignments with reserve_id
 			const { data: assignData, error: assignError } = await supabase
 				.from('hall_assign')
@@ -685,31 +686,35 @@ export default function ReviewReservationPage() {
 										const conflictInfo = isAssigned
 											? assignedHallConflicts[hall.id]
 											: undefined;
-										let label = `${hall.code} (Capacity: ${
-											hall.capacity !== undefined &&
-											hall.capacity !== null &&
-											!isNaN(Number(hall.capacity))
-												? Number(hall.capacity)
-												: 'N/A'
-										}, Energy: ${
-											typeof hall.energy_consumption ===
-												'number' &&
-											!isNaN(
-												Number(hall.energy_consumption)
-											)
-												? (
-														Number(
-															hall.energy_consumption
-														) / 100
-													).toFixed(2)
-												: '0.00'
-										}`;
+										// Get hall type from hall.type (assume hall.type exists)
+										const hallType = hall.type;
+										// Get reservation type (event or extra_lecture)
+										let reservationType = '';
+										if (reservation.type === 'event') {
+											reservationType =
+												reservation.event?.type ?? '';
+										} else if (
+											reservation.type === 'extra_lecture'
+										) {
+											reservationType =
+												reservation.extraLecture
+													?.type ?? '';
+										}
+										const isCompatible =
+											isHallTypeCompatible(
+												reservationType,
+												hallType
+											);
+										let label = `${hall.code} (Capacity: ${hall.capacity !== undefined && hall.capacity !== null && !isNaN(Number(hall.capacity)) ? Number(hall.capacity) : 'N/A'}, Energy: ${typeof hall.energy_consumption === 'number' && !isNaN(Number(hall.energy_consumption)) ? (Number(hall.energy_consumption) / 100).toFixed(2) : '0.00'}`;
 										if (hasLowCapacity)
 											label += ', capacity is low';
 										if (isAssigned)
 											label += `, already assigned${assignedStatus ? ': ' + assignedStatus : ''}`;
 										if (conflictInfo?.conflict)
 											label += `, conflict: ${conflictInfo.time}`;
+										label += isCompatible
+											? ', compatible'
+											: ', not compatible';
 										label += ')';
 										return (
 											<option
@@ -722,7 +727,9 @@ export default function ReviewReservationPage() {
 															? conflictInfo?.conflict
 																? 'text-yellow-600'
 																: 'text-orange-500'
-															: ''
+															: isCompatible
+																? 'text-green-600'
+																: 'text-gray-400'
 												}
 												disabled={false}
 											>
