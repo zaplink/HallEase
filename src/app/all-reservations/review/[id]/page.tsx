@@ -705,6 +705,7 @@ export default function ReviewReservationPage() {
 												reservationType,
 												hallType
 											);
+										let compatibilityReason = `(${reservationType} ~ ${hallType})`;
 										let label = `${hall.code} (Capacity: ${hall.capacity !== undefined && hall.capacity !== null && !isNaN(Number(hall.capacity)) ? Number(hall.capacity) : 'N/A'}, Energy: ${typeof hall.energy_consumption === 'number' && !isNaN(Number(hall.energy_consumption)) ? (Number(hall.energy_consumption) / 100).toFixed(2) : '0.00'}`;
 										if (hasLowCapacity)
 											label += ', capacity is low';
@@ -713,8 +714,8 @@ export default function ReviewReservationPage() {
 										if (conflictInfo?.conflict)
 											label += `, conflict: ${conflictInfo.time}`;
 										label += isCompatible
-											? ', compatible'
-											: ', not compatible';
+											? `, compatible ${compatibilityReason}`
+											: `, not compatible ${compatibilityReason}`;
 										label += ')';
 										return (
 											<option
