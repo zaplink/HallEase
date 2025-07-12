@@ -656,117 +656,119 @@ export default function ReviewReservationPage() {
 							formatDate={formatDate}
 							formatTime={formatTime}
 						/>
-						{/* Show all halls dropdown if hallOption is 'availability' */}
-						{/* Dropdown moved to approve dialog below */}
-						{reservation.hallOption === 'availability' && (
-							<div className='mt-4'>
-								<label
-									htmlFor='hall-dropdown-dialog'
-									className='block mb-2 text-sm font-medium text-foreground'
-								>
-									Select Hall
-								</label>
-								<select
-									id='hall-dropdown-dialog'
-									className='w-full p-2 border rounded focus:outline-none focus:ring focus:border-blue-300 bg-background text-foreground'
-									disabled={hallsLoading}
-									value={selectedHallId}
-									onChange={(e) =>
-										setSelectedHallId(e.target.value)
-									}
-								>
-									<option value=''>
-										-- Choose a hall --
-									</option>
-									{halls.map((hall) => {
-										const attendeeCount =
-											reservation.event?.attendeeCount ??
-											reservation.extraLecture
-												?.attendeeCount ??
-											0;
-										const hasLowCapacity =
-											Number(hall.capacity) <
-											attendeeCount;
-										const isAssigned = assignedHallIds.has(
-											hall.id
-										);
-										const assignedStatus = isAssigned
-											? assignedHallStatuses[hall.id]
-											: undefined;
-										const conflictInfo = isAssigned
-											? assignedHallConflicts[hall.id]
-											: undefined;
-										const hallType = hall.type ?? '';
-										let reservationType = '';
-										if (reservation.type === 'event') {
-											reservationType =
-												reservation.event?.type ?? '';
-										} else if (
-											reservation.type === 'extra_lecture'
-										) {
-											reservationType =
-												reservation.extraLecture
-													?.type ?? '';
-										}
-										const isCompatible =
-											isHallTypeCompatible(
-												reservationType,
-												hallType
-											);
-										let compatibilityReason = `(${reservationType} ~ ${hallType})`;
-										let label = `${hall.code} (Capacity: ${hall.capacity !== undefined && hall.capacity !== null && !isNaN(Number(hall.capacity)) ? Number(hall.capacity) : 'N/A'}, Energy: ${typeof hall.energy_consumption === 'number' && !isNaN(Number(hall.energy_consumption)) ? (Number(hall.energy_consumption) / 100).toFixed(2) : '0.00'}`;
-										if (hasLowCapacity)
-											label += ', capacity is low';
-										if (isAssigned)
-											label += `, already assigned${assignedStatus ? ': ' + assignedStatus : ''}`;
-										if (conflictInfo?.conflict)
-											label += `, conflict: ${conflictInfo.time}`;
-										label += isCompatible
-											? `, compatible ${compatibilityReason}`
-											: `, not compatible ${compatibilityReason}`;
-										label += ')';
-										return (
-											<option
-												key={hall.id}
-												value={hall.id}
-												className={
-													hasLowCapacity
-														? 'text-red-600'
-														: isAssigned
-															? conflictInfo?.conflict
-																? 'text-yellow-600'
-																: 'text-orange-500'
-															: isCompatible
-																? 'text-green-600'
-																: 'text-gray-400'
-												}
-												disabled={false}
-											>
-												{label}
-											</option>
-										);
-									})}
-								</select>
-								{hallsLoading && (
-									<div className='text-xs text-muted-foreground mt-2'>
-										Loading halls...
-									</div>
-								)}
-								<div className='text-xs mt-2'>
-									<span className='text-red-600'>
-										Halls marked in red have lower capacity
-										than required attendees.
-									</span>
-									<br />
-									<span className='text-orange-500'>
-										Halls marked in orange are already
-										assigned to another reservation.
-									</span>
-								</div>
-							</div>
-						)}
 					</CardContent>
 				</Card>
+				{/* Suggested Halls Card */}
+				{reservation.hallOption === 'availability' && (
+					<Card className='border border-muted bg-background rounded-md shadow-none mt-6'>
+						<CardHeader className='pb-2'>
+							<CardTitle className='text-lg font-semibold tracking-tight text-foreground'>
+								Assign from Suggested Halls
+							</CardTitle>
+						</CardHeader>
+						<CardContent className='pt-0'>
+							<label
+								htmlFor='hall-dropdown-dialog'
+								className='block mb-2 text-sm font-medium text-foreground'
+							>
+								Select Hall
+							</label>
+							<select
+								id='hall-dropdown-dialog'
+								className='w-full p-2 border rounded focus:outline-none focus:ring focus:border-blue-300 bg-background text-foreground'
+								disabled={hallsLoading}
+								value={selectedHallId}
+								onChange={(e) =>
+									setSelectedHallId(e.target.value)
+								}
+							>
+								<option value=''>-- Choose a hall --</option>
+								{halls.map((hall) => {
+									const attendeeCount =
+										reservation.event?.attendeeCount ??
+										reservation.extraLecture
+											?.attendeeCount ??
+										0;
+									const hasLowCapacity =
+										Number(hall.capacity) < attendeeCount;
+									const isAssigned = assignedHallIds.has(
+										hall.id
+									);
+									const assignedStatus = isAssigned
+										? assignedHallStatuses[hall.id]
+										: undefined;
+									const conflictInfo = isAssigned
+										? assignedHallConflicts[hall.id]
+										: undefined;
+									const hallType = hall.type ?? '';
+									let reservationType = '';
+									if (reservation.type === 'event') {
+										reservationType =
+											reservation.event?.type ?? '';
+									} else if (
+										reservation.type === 'extra_lecture'
+									) {
+										reservationType =
+											reservation.extraLecture?.type ??
+											'';
+									}
+									const isCompatible = isHallTypeCompatible(
+										reservationType,
+										hallType
+									);
+									let compatibilityReason = `(${reservationType} ~ ${hallType})`;
+									let label = `${hall.code} (Capacity: ${hall.capacity !== undefined && hall.capacity !== null && !isNaN(Number(hall.capacity)) ? Number(hall.capacity) : 'N/A'}, Energy: ${typeof hall.energy_consumption === 'number' && !isNaN(Number(hall.energy_consumption)) ? (Number(hall.energy_consumption) / 100).toFixed(2) : '0.00'}`;
+									if (hasLowCapacity)
+										label += ', capacity is low';
+									if (isAssigned)
+										label += `, already assigned${assignedStatus ? ': ' + assignedStatus : ''}`;
+									if (conflictInfo?.conflict)
+										label += `, conflict: ${conflictInfo.time}`;
+									label += isCompatible
+										? `, compatible ${compatibilityReason}`
+										: `, not compatible ${compatibilityReason}`;
+									label += ')';
+									return (
+										<option
+											key={hall.id}
+											value={hall.id}
+											className={
+												hasLowCapacity
+													? 'text-red-600'
+													: isAssigned
+														? conflictInfo?.conflict
+															? 'text-yellow-600'
+															: 'text-orange-500'
+														: isCompatible
+															? 'text-green-600'
+															: 'text-gray-400'
+											}
+											disabled={false}
+										>
+											{label}
+										</option>
+									);
+								})}
+							</select>
+							{hallsLoading && (
+								<div className='text-xs text-muted-foreground mt-2'>
+									Loading halls...
+								</div>
+							)}
+							<div className='text-xs mt-2'>
+								<span className='text-red-600'>
+									Halls marked in red have lower capacity than
+									required attendees.
+								</span>
+								<br />
+								<span className='text-orange-500'>
+									Halls marked in orange are already assigned
+									to another reservation.
+								</span>
+							</div>
+						</CardContent>
+					</Card>
+				)}
 
 				{/* Action Buttons */}
 				{isActionable && (
@@ -777,37 +779,9 @@ export default function ReviewReservationPage() {
 							</CardTitle>
 						</CardHeader>
 						<CardContent className='pt-0'>
-							{/* Review Method Combobox */}
-							<div className='mb-4'>
-								<label
-									htmlFor='review-method'
-									className='block mb-2 text-sm font-medium text-foreground'
-								>
-									Review Method
-								</label>
-								<select
-									id='review-method'
-									className='w-full p-2 border rounded focus:outline-none focus:ring focus:border-blue-300 bg-background text-foreground'
-									value={reviewMethod}
-									onChange={(e) =>
-										setReviewMethod(
-											e.target.value as
-												| 'approve'
-												| 'reject'
-												| ''
-										)
-									}
-								>
-									<option value=''>
-										-- Select method --
-									</option>
-									<option value='approve'>Approve</option>
-									<option value='reject'>Reject</option>
-								</select>
-							</div>
-							<div className='flex space-x-4'>
-								{/* Only show approve button if 'approve' is selected */}
-								{reviewMethod === 'approve' && (
+							<div className='flex flex-col gap-4'>
+								{/* Approve Section */}
+								<div>
 									<AlertDialog
 										open={approveDialogOpen}
 										onOpenChange={setApproveDialogOpen}
@@ -834,159 +808,7 @@ export default function ReviewReservationPage() {
 													selected hall.
 												</AlertDialogDescription>
 											</AlertDialogHeader>
-											{/* Hall dropdown here */}
-											{reservation.hallOption ===
-												'availability' && (
-												<div className='mt-4'>
-													<label
-														htmlFor='hall-dropdown-dialog'
-														className='block mb-2 text-sm font-medium text-foreground'
-													>
-														Select Hall
-													</label>
-													<select
-														id='hall-dropdown-dialog'
-														className='w-full p-2 border rounded focus:outline-none focus:ring focus:border-blue-300 bg-background text-foreground'
-														disabled={
-															hallsLoading ||
-															updating
-														}
-														value={selectedHallId}
-														onChange={(e) =>
-															setSelectedHallId(
-																e.target.value
-															)
-														}
-													>
-														<option value=''>
-															-- Choose a hall --
-														</option>
-														{halls.map((hall) => {
-															const attendeeCount =
-																reservation
-																	.event
-																	?.attendeeCount ??
-																reservation
-																	.extraLecture
-																	?.attendeeCount ??
-																0;
-															const hasLowCapacity =
-																Number(
-																	hall.capacity
-																) <
-																attendeeCount;
-															const isAssigned =
-																assignedHallIds.has(
-																	hall.id
-																);
-															const assignedStatus =
-																isAssigned
-																	? assignedHallStatuses[
-																			hall
-																				.id
-																		]
-																	: undefined;
-															const conflictInfo =
-																isAssigned
-																	? assignedHallConflicts[
-																			hall
-																				.id
-																		]
-																	: undefined;
-															const hallType =
-																hall.type;
-															let reservationType =
-																'';
-															if (
-																reservation.type ===
-																'event'
-															) {
-																reservationType =
-																	reservation
-																		.event
-																		?.type ??
-																	'';
-															} else if (
-																reservation.type ===
-																'extra_lecture'
-															) {
-																reservationType =
-																	reservation
-																		.extraLecture
-																		?.type ??
-																	'';
-															}
-															const isCompatible =
-																isHallTypeCompatible(
-																	reservationType,
-																	hallType
-																);
-															let compatibilityReason = `(${reservationType} ~ ${hallType})`;
-															let label = `${hall.code} (Capacity: ${hall.capacity !== undefined && hall.capacity !== null && !isNaN(Number(hall.capacity)) ? Number(hall.capacity) : 'N/A'}, Energy: ${typeof hall.energy_consumption === 'number' && !isNaN(Number(hall.energy_consumption)) ? (Number(hall.energy_consumption) / 100).toFixed(2) : '0.00'}`;
-															if (hasLowCapacity)
-																label +=
-																	', capacity is low';
-															if (isAssigned)
-																label += `, already assigned${assignedStatus ? ': ' + assignedStatus : ''}`;
-															if (
-																conflictInfo?.conflict
-															)
-																label += `, conflict: ${conflictInfo.time}`;
-															label +=
-																isCompatible
-																	? `, compatible ${compatibilityReason}`
-																	: `, not compatible ${compatibilityReason}`;
-															label += ')';
-															return (
-																<option
-																	key={
-																		hall.id
-																	}
-																	value={
-																		hall.id
-																	}
-																	className={
-																		hasLowCapacity
-																			? 'text-red-600'
-																			: isAssigned
-																				? conflictInfo?.conflict
-																					? 'text-yellow-600'
-																					: 'text-orange-500'
-																				: isCompatible
-																					? 'text-green-600'
-																					: 'text-gray-400'
-																	}
-																	disabled={
-																		false
-																	}
-																>
-																	{label}
-																</option>
-															);
-														})}
-													</select>
-													{hallsLoading && (
-														<div className='text-xs text-muted-foreground mt-2'>
-															Loading halls...
-														</div>
-													)}
-													<div className='text-xs mt-2'>
-														<span className='text-red-600'>
-															Halls marked in red
-															have lower capacity
-															than required
-															attendees.
-														</span>
-														<br />
-														<span className='text-orange-500'>
-															Halls marked in
-															orange are already
-															assigned to another
-															reservation.
-														</span>
-													</div>
-												</div>
-											)}
+											{/* Hall dropdown removed as requested */}
 											<AlertDialogFooter>
 												<AlertDialogCancel
 													disabled={updating}
@@ -1049,10 +871,9 @@ export default function ReviewReservationPage() {
 											</AlertDialogFooter>
 										</AlertDialogContent>
 									</AlertDialog>
-								)}
-
-								{/* Only show reject button if 'reject' is selected */}
-								{reviewMethod === 'reject' && (
+								</div>
+								{/* Reject Section */}
+								<div>
 									<AlertDialog
 										open={rejectDialogOpen}
 										onOpenChange={setRejectDialogOpen}
@@ -1101,7 +922,7 @@ export default function ReviewReservationPage() {
 											</AlertDialogFooter>
 										</AlertDialogContent>
 									</AlertDialog>
-								)}
+								</div>
 							</div>
 						</CardContent>
 					</Card>
