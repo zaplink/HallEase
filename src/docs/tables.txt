@@ -69,3 +69,8 @@ hall
     type : string (EW | LCH, ...)
     is_available : boolean
     energy consumption :  integer (example: 80 means 80 out of 100)
+
+hall_assign
+    id : uuid
+    reserve_id : uuid : FK(reserve, id)
+    hall_id : uuid : FK(hall, id)
