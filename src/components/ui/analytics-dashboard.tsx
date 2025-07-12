@@ -128,7 +128,6 @@ export function AnalyticsDashboard() {
 							metric.current,
 							metric.previous
 						);
-						const isPositive = changePercentage > 0;
 						const isImprovement =
 							metric.title === 'Response Time'
 								? changePercentage < 0
