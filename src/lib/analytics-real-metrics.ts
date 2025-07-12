@@ -54,8 +54,7 @@ export async function fetchRealMetricsData(filters?: AnalyticsFilters) {
 			lastMonthQuery = lastMonthQuery.eq('is_submitted', true);
 		}
 
-		const { data: lastMonthReservations, error: lastMonthError } =
-			await lastMonthQuery;
+		const { error: lastMonthError } = await lastMonthQuery;
 		if (lastMonthError) throw lastMonthError;
 
 		// Fetch active users (users who made reservations in the last month)
