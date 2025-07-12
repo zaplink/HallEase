@@ -35,6 +35,8 @@ export default function AnalyticsPage() {
 	>('all');
 	const [chartData, setChartData] = useState<any[]>([]);
 	const [hallUtilizationData, setHallUtilizationData] = useState<any[]>([]);
+	const [timeSlotData, setTimeSlotData] = useState<any[]>([]);
+	const [recentActivity, setRecentActivity] = useState<any[]>([]);
 
 	// Get current date
 	const currentDate = new Date().toLocaleDateString('en-US', {
@@ -187,6 +189,14 @@ export default function AnalyticsPage() {
 				// Fetch hall utilization data
 				const hallUtilizationData = await fetchHallUtilizationData();
 				setHallUtilizationData(hallUtilizationData);
+
+				// Fetch time slot popularity data
+				const timeSlotData = await fetchTimeSlotData(selectedFilter);
+				setTimeSlotData(timeSlotData);
+
+				// Fetch recent activity data
+				const recentActivityData = await fetchRecentActivity();
+				setRecentActivity(recentActivityData);
 			} catch (error) {
 				console.error('Error fetching analytics data:', error);
 			} finally {
@@ -336,6 +346,153 @@ export default function AnalyticsPage() {
 		}
 
 		return months;
+	};
+
+	// Function to fetch recent activity data
+	const fetchRecentActivity = async () => {
+		try {
+			// Fetch recent reservations with profile information
+			const { data: reservations, error } = await supabase
+				.from('reserve')
+				.select(
+					`
+					id,
+					status,
+					type,
+					created_date,
+					created_time,
+					modified_date,
+					modified_time,
+					profiles (
+						full_name
+					)
+				`
+				)
+				.order('created_date', { ascending: false })
+				.order('created_time', { ascending: false })
+				.limit(10);
+
+			if (error) {
+				console.error('Error fetching recent activity:', error);
+				return [];
+			}
+
+			// Format the data for display
+			const activities =
+				reservations?.map((reservation) => {
+					const createdDateTime = new Date(
+						`${reservation.created_date}T${reservation.created_time}`
+					);
+					const modifiedDateTime = reservation.modified_date
+						? new Date(
+								`${reservation.modified_date}T${reservation.modified_time}`
+							)
+						: null;
+
+					// Use modified time if available, otherwise created time
+					const activityTime = modifiedDateTime || createdDateTime;
+					const timeAgo = getTimeAgo(activityTime);
+
+					// Determine activity type and description
+					let activityDescription = '';
+					let activityType = 'reserved';
+
+					if (reservation.status === 'approved') {
+						activityType = 'completed';
+						activityDescription = `Completed ${reservation.type === 'event' ? 'Event' : 'Extra Lecture'} booking`;
+					} else if (reservation.status === 'rejected') {
+						activityType = 'cancelled';
+						activityDescription = `Cancelled ${reservation.type === 'event' ? 'Event' : 'Extra Lecture'}`;
+					} else if (reservation.status === 'pending') {
+						activityType = 'pending';
+						activityDescription = `Reserved ${reservation.type === 'event' ? 'Event Hall' : 'Lecture Hall'}`;
+					} else {
+						activityDescription = `Reserved ${reservation.type === 'event' ? 'Event Hall' : 'Lecture Hall'}`;
+					}
+
+					return {
+						id: reservation.id,
+						userName:
+							(reservation.profiles as any)?.full_name ||
+							'Unknown User',
+						description: activityDescription,
+						status: reservation.status,
+						timeAgo: timeAgo,
+						type: activityType,
+					};
+				}) || [];
+
+			return activities;
+		} catch (error) {
+			console.error('Error fetching recent activity:', error);
+			return [];
+		}
+	};
+
+	// Helper function to calculate time ago
+	const getTimeAgo = (date: Date) => {
+		const now = new Date();
+		const diffInSeconds = Math.floor(
+			(now.getTime() - date.getTime()) / 1000
+		);
+
+		if (diffInSeconds < 60) {
+			return 'Just now';
+		} else if (diffInSeconds < 3600) {
+			const minutes = Math.floor(diffInSeconds / 60);
+			return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+		} else if (diffInSeconds < 86400) {
+			const hours = Math.floor(diffInSeconds / 3600);
+			return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+		} else {
+			const days = Math.floor(diffInSeconds / 86400);
+			return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+		}
+	};
+
+	// Function to fetch time slot popularity data
+	const fetchTimeSlotData = async (
+		filter: 'all' | 'extra_lecture' | 'event'
+	) => {
+		try {
+			// Define time slots (2-hour intervals)
+			const timeSlots = [
+				{ time: '8:00', start: '08:00', end: '10:00' },
+				{ time: '10:00', start: '10:00', end: '12:00' },
+				{ time: '12:00', start: '12:00', end: '14:00' },
+				{ time: '14:00', start: '14:00', end: '16:00' },
+				{ time: '16:00', start: '16:00', end: '18:00' },
+				{ time: '18:00', start: '18:00', end: '20:00' },
+				{ time: '20:00', start: '20:00', end: '22:00' },
+			];
+
+			const slotData = [];
+
+			for (const slot of timeSlots) {
+				// Query reservations for this time slot
+				let query = supabase
+					.from('reserve')
+					.select('*', { count: 'exact', head: true })
+					.gte('start_time', slot.start)
+					.lt('start_time', slot.end);
+
+				if (filter !== 'all') {
+					query = query.eq('type', filter);
+				}
+
+				const { count } = await query;
+
+				slotData.push({
+					time: slot.time,
+					reservations: count || 0,
+				});
+			}
+
+			return slotData;
+		} catch (error) {
+			console.error('Error fetching time slot data:', error);
+			return [];
+		}
 	};
 
 	return (
@@ -607,6 +764,135 @@ export default function AnalyticsPage() {
 											</div>
 										</div>
 									))}
+								</div>
+							)}
+						</div>
+					</div>
+				</div>
+
+				{/* Time Slot Popularity Chart and Additional Chart */}
+				<div className='grid gap-4 md:grid-cols-2'>
+					{/* Time Slot Popularity Chart */}
+					<div className='rounded-lg border bg-card text-card-foreground shadow-sm p-6'>
+						<div className='mb-4'>
+							<h3 className='text-lg font-semibold'>
+								Time Slot Popularity
+							</h3>
+							<p className='text-sm text-muted-foreground'>
+								Reservations by time of day
+							</p>
+						</div>
+						<div className='h-[250px]'>
+							{loading ? (
+								<div className='h-full flex items-center justify-center'>
+									<div className='animate-pulse text-muted-foreground'>
+										Loading chart...
+									</div>
+								</div>
+							) : (
+								<ResponsiveContainer width='100%' height='100%'>
+									<BarChart data={timeSlotData}>
+										<CartesianGrid
+											strokeDasharray='3 3'
+											stroke='#e2e8f0'
+										/>
+										<XAxis
+											dataKey='time'
+											axisLine={false}
+											tickLine={false}
+											tick={{
+												fill: '#64748b',
+												fontSize: 12,
+											}}
+										/>
+										<YAxis
+											axisLine={false}
+											tickLine={false}
+											tick={{
+												fill: '#64748b',
+												fontSize: 12,
+											}}
+										/>
+										<Bar
+											dataKey='reservations'
+											fill='#a78bfa'
+											radius={[4, 4, 0, 0]}
+										/>
+									</BarChart>
+								</ResponsiveContainer>
+							)}
+						</div>
+					</div>
+
+					{/* Recent Activity */}
+					<div className='rounded-lg border bg-card text-card-foreground shadow-sm p-6'>
+						<div className='mb-4'>
+							<h3 className='text-lg font-semibold'>
+								Recent Activity
+							</h3>
+							<p className='text-sm text-muted-foreground'>
+								Latest reservation activities
+							</p>
+						</div>
+						<div className='h-[250px] overflow-y-auto'>
+							{loading ? (
+								<div className='h-full flex items-center justify-center'>
+									<div className='animate-pulse text-muted-foreground'>
+										Loading activities...
+									</div>
+								</div>
+							) : recentActivity.length > 0 ? (
+								<div className='space-y-4'>
+									{recentActivity.map((activity) => (
+										<div
+											key={activity.id}
+											className='flex items-center justify-between py-2'
+										>
+											<div className='flex-1'>
+												<div className='font-medium text-sm text-foreground'>
+													{activity.userName}
+												</div>
+												<div className='text-sm text-muted-foreground'>
+													{activity.description}
+												</div>
+												<div className='text-xs text-muted-foreground'>
+													{activity.timeAgo}
+												</div>
+											</div>
+											<div className='flex-shrink-0 ml-4'>
+												{activity.status ===
+													'approved' && (
+													<span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-black text-white'>
+														completed
+													</span>
+												)}
+												{activity.status ===
+													'rejected' && (
+													<span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-500 text-white'>
+														cancelled
+													</span>
+												)}
+												{activity.status ===
+													'pending' && (
+													<span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-500 text-white'>
+														pending
+													</span>
+												)}
+												{activity.status ===
+													'waiting' && (
+													<span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-500 text-white'>
+														waiting
+													</span>
+												)}
+											</div>
+										</div>
+									))}
+								</div>
+							) : (
+								<div className='h-full flex items-center justify-center'>
+									<div className='text-muted-foreground text-sm'>
+										No recent activity found
+									</div>
 								</div>
 							)}
 						</div>
