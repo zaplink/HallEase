@@ -82,8 +82,10 @@ export default function ReviewReservationPage() {
 			code: string;
 			energy_consumption: number;
 			capacity: number;
+			type?: string;
 		}>
 	>([]);
+	const [selectedHallId, setSelectedHallId] = useState<string>('');
 	const [hallsLoading, setHallsLoading] = useState(false);
 	const [assignedHallIds, setAssignedHallIds] = useState<Set<string>>(
 		new Set()
@@ -652,18 +654,23 @@ export default function ReviewReservationPage() {
 							formatTime={formatTime}
 						/>
 						{/* Show all halls dropdown if hallOption is 'availability' */}
+						{/* Dropdown moved to approve dialog below */}
 						{reservation.hallOption === 'availability' && (
 							<div className='mt-4'>
 								<label
-									htmlFor='hall-dropdown'
+									htmlFor='hall-dropdown-dialog'
 									className='block mb-2 text-sm font-medium text-foreground'
 								>
 									Select Hall
 								</label>
 								<select
-									id='hall-dropdown'
+									id='hall-dropdown-dialog'
 									className='w-full p-2 border rounded focus:outline-none focus:ring focus:border-blue-300 bg-background text-foreground'
 									disabled={hallsLoading}
+									value={selectedHallId}
+									onChange={(e) =>
+										setSelectedHallId(e.target.value)
+									}
 								>
 									<option value=''>
 										-- Choose a hall --
@@ -686,9 +693,7 @@ export default function ReviewReservationPage() {
 										const conflictInfo = isAssigned
 											? assignedHallConflicts[hall.id]
 											: undefined;
-										// Get hall type from hall.type (assume hall.type exists)
-										const hallType = hall.type;
-										// Get reservation type (event or extra_lecture)
+										const hallType = hall.type ?? '';
 										let reservationType = '';
 										if (reservation.type === 'event') {
 											reservationType =
@@ -789,12 +794,151 @@ export default function ReviewReservationPage() {
 												Approve Reservation
 											</AlertDialogTitle>
 											<AlertDialogDescription>
-												Are you sure you want to approve
-												this reservation? This action
-												will confirm the reservation and
-												allocate the requested hall.
+												Please select a hall to assign
+												before approving. This will
+												confirm the reservation and
+												allocate the selected hall.
 											</AlertDialogDescription>
 										</AlertDialogHeader>
+										{/* Hall dropdown here */}
+										{reservation.hallOption ===
+											'availability' && (
+											<div className='mt-4'>
+												<label
+													htmlFor='hall-dropdown-dialog'
+													className='block mb-2 text-sm font-medium text-foreground'
+												>
+													Select Hall
+												</label>
+												<select
+													id='hall-dropdown-dialog'
+													className='w-full p-2 border rounded focus:outline-none focus:ring focus:border-blue-300 bg-background text-foreground'
+													disabled={
+														hallsLoading || updating
+													}
+													value={selectedHallId}
+													onChange={(e) =>
+														setSelectedHallId(
+															e.target.value
+														)
+													}
+												>
+													<option value=''>
+														-- Choose a hall --
+													</option>
+													{halls.map((hall) => {
+														const attendeeCount =
+															reservation.event
+																?.attendeeCount ??
+															reservation
+																.extraLecture
+																?.attendeeCount ??
+															0;
+														const hasLowCapacity =
+															Number(
+																hall.capacity
+															) < attendeeCount;
+														const isAssigned =
+															assignedHallIds.has(
+																hall.id
+															);
+														const assignedStatus =
+															isAssigned
+																? assignedHallStatuses[
+																		hall.id
+																	]
+																: undefined;
+														const conflictInfo =
+															isAssigned
+																? assignedHallConflicts[
+																		hall.id
+																	]
+																: undefined;
+														const hallType =
+															hall.type;
+														let reservationType =
+															'';
+														if (
+															reservation.type ===
+															'event'
+														) {
+															reservationType =
+																reservation
+																	.event
+																	?.type ??
+																'';
+														} else if (
+															reservation.type ===
+															'extra_lecture'
+														) {
+															reservationType =
+																reservation
+																	.extraLecture
+																	?.type ??
+																'';
+														}
+														const isCompatible =
+															isHallTypeCompatible(
+																reservationType,
+																hallType
+															);
+														let compatibilityReason = `(${reservationType} ~ ${hallType})`;
+														let label = `${hall.code} (Capacity: ${hall.capacity !== undefined && hall.capacity !== null && !isNaN(Number(hall.capacity)) ? Number(hall.capacity) : 'N/A'}, Energy: ${typeof hall.energy_consumption === 'number' && !isNaN(Number(hall.energy_consumption)) ? (Number(hall.energy_consumption) / 100).toFixed(2) : '0.00'}`;
+														if (hasLowCapacity)
+															label +=
+																', capacity is low';
+														if (isAssigned)
+															label += `, already assigned${assignedStatus ? ': ' + assignedStatus : ''}`;
+														if (
+															conflictInfo?.conflict
+														)
+															label += `, conflict: ${conflictInfo.time}`;
+														label += isCompatible
+															? `, compatible ${compatibilityReason}`
+															: `, not compatible ${compatibilityReason}`;
+														label += ')';
+														return (
+															<option
+																key={hall.id}
+																value={hall.id}
+																className={
+																	hasLowCapacity
+																		? 'text-red-600'
+																		: isAssigned
+																			? conflictInfo?.conflict
+																				? 'text-yellow-600'
+																				: 'text-orange-500'
+																			: isCompatible
+																				? 'text-green-600'
+																				: 'text-gray-400'
+																}
+																disabled={false}
+															>
+																{label}
+															</option>
+														);
+													})}
+												</select>
+												{hallsLoading && (
+													<div className='text-xs text-muted-foreground mt-2'>
+														Loading halls...
+													</div>
+												)}
+												<div className='text-xs mt-2'>
+													<span className='text-red-600'>
+														Halls marked in red have
+														lower capacity than
+														required attendees.
+													</span>
+													<br />
+													<span className='text-orange-500'>
+														Halls marked in orange
+														are already assigned to
+														another reservation.
+													</span>
+												</div>
+											</div>
+										)}
 										<AlertDialogFooter>
 											<AlertDialogCancel
 												disabled={updating}
@@ -802,12 +946,49 @@ export default function ReviewReservationPage() {
 												Cancel
 											</AlertDialogCancel>
 											<AlertDialogAction
-												onClick={() =>
-													handleUpdateStatus(
-														'approved'
-													)
+												onClick={async () => {
+													if (!selectedHallId) {
+														toast.error(
+															'Please select a hall to assign before approving.'
+														);
+														return;
+													}
+													setUpdating(true);
+													try {
+														const supabase =
+															createClient();
+														// Assign hall in hall_assign table
+														const {
+															error: assignError,
+														} = await supabase
+															.from('hall_assign')
+															.insert({
+																hall_id:
+																	selectedHallId,
+																reserve_id:
+																	reservationId,
+															});
+														if (assignError)
+															throw assignError;
+														// Update reservation status
+														await handleUpdateStatus(
+															'approved'
+														);
+													} catch (err) {
+														console.error(
+															'Failed to assign hall or approve:',
+															err
+														);
+														toast.error(
+															'Failed to assign hall or approve reservation.'
+														);
+													} finally {
+														setUpdating(false);
+													}
+												}}
+												disabled={
+													updating || !selectedHallId
 												}
-												disabled={updating}
 												className='bg-green-600 hover:bg-green-700'
 											>
 												{updating
