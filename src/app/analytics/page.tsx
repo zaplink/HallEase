@@ -33,10 +33,38 @@ export default function AnalyticsPage() {
 	const [selectedFilter, setSelectedFilter] = useState<
 		'all' | 'extra_lecture' | 'event'
 	>('all');
-	const [chartData, setChartData] = useState<any[]>([]);
-	const [hallUtilizationData, setHallUtilizationData] = useState<any[]>([]);
-	const [timeSlotData, setTimeSlotData] = useState<any[]>([]);
-	const [recentActivity, setRecentActivity] = useState<any[]>([]);
+	interface ChartData {
+		month: string;
+		total: number;
+		extraLectures?: number;
+		events?: number;
+	}
+
+	interface HallUtilization {
+		name: string;
+		utilization: number;
+	}
+
+	interface TimeSlotData {
+		time: string;
+		reservations: number;
+	}
+
+	interface RecentActivity {
+		id: string | number;
+		userName: string;
+		description: string;
+		status: string;
+		timeAgo: string;
+		type: string;
+	}
+
+	const [chartData, setChartData] = useState<ChartData[]>([]);
+	const [hallUtilizationData, setHallUtilizationData] = useState<
+		HallUtilization[]
+	>([]);
+	const [timeSlotData, setTimeSlotData] = useState<TimeSlotData[]>([]);
+	const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
 
 	// Get current date
 	const currentDate = new Date().toLocaleDateString('en-US', {
@@ -51,8 +79,7 @@ export default function AnalyticsPage() {
 		const fetchAnalyticsData = async () => {
 			try {
 				// Apply filter for queries
-				const filterQuery =
-					selectedFilter === 'all' ? {} : { type: selectedFilter };
+				// Removed unused filterQuery
 
 				// Fetch total reservations count (with filter)
 				let reservationQuery = supabase
@@ -195,6 +222,105 @@ export default function AnalyticsPage() {
 				setTimeSlotData(timeSlotData);
 
 				// Fetch recent activity data
+				const fetchRecentActivity = async () => {
+					try {
+						// Fetch recent reservations with profile information
+						const { data: reservations, error } = await supabase
+							.from('reserve')
+							.select(
+								`
+			id,
+			status,
+			type,
+			created_date,
+			created_time,
+			modified_date,
+			modified_time,
+			profiles (
+			  full_name
+			)
+		  `
+							)
+							.order('created_date', { ascending: false })
+							.order('created_time', { ascending: false })
+							.limit(10);
+
+						if (error) {
+							console.error(
+								'Error fetching recent activity:',
+								error
+							);
+							return [];
+						}
+
+						// Format the data for display
+						const activities =
+							reservations?.map(
+								(reservation: {
+									id: string | number;
+									status: string;
+									type: string;
+									created_date: string;
+									created_time: string;
+									modified_date?: string;
+									modified_time?: string;
+									profiles?: { full_name?: string };
+								}) => {
+									const createdDateTime = new Date(
+										`${reservation.created_date}T${reservation.created_time}`
+									);
+									const modifiedDateTime =
+										reservation.modified_date
+											? new Date(
+													`${reservation.modified_date}T${reservation.modified_time}`
+												)
+											: null;
+
+									// Use modified time if available, otherwise created time
+									const activityTime =
+										modifiedDateTime || createdDateTime;
+									const timeAgo = getTimeAgo(activityTime);
+
+									// Determine activity type and description
+									let activityDescription = '';
+									let activityType = 'reserved';
+
+									if (reservation.status === 'approved') {
+										activityType = 'completed';
+										activityDescription = `Completed ${reservation.type === 'event' ? 'Event' : 'Extra Lecture'} booking`;
+									} else if (
+										reservation.status === 'rejected'
+									) {
+										activityType = 'cancelled';
+										activityDescription = `Cancelled ${reservation.type === 'event' ? 'Event' : 'Extra Lecture'}`;
+									} else if (
+										reservation.status === 'pending'
+									) {
+										activityType = 'pending';
+										activityDescription = `Reserved ${reservation.type === 'event' ? 'Event Hall' : 'Lecture Hall'}`;
+									} else {
+										activityDescription = `Reserved ${reservation.type === 'event' ? 'Event Hall' : 'Lecture Hall'}`;
+									}
+
+									return {
+										id: reservation.id,
+										userName:
+											reservation.profiles?.full_name ||
+											'Unknown User',
+										description: activityDescription,
+										status: reservation.status,
+										timeAgo: timeAgo,
+										type: activityType,
+									};
+								}
+							) || [];
+
+						return activities;
+					} catch (error) {
+						console.error('Error fetching recent activity:', error);
+						return [];
+					}
+				};
 				const recentActivityData = await fetchRecentActivity();
 				setRecentActivity(recentActivityData);
 			} catch (error) {
@@ -349,85 +475,7 @@ export default function AnalyticsPage() {
 	};
 
 	// Function to fetch recent activity data
-	const fetchRecentActivity = async () => {
-		try {
-			// Fetch recent reservations with profile information
-			const { data: reservations, error } = await supabase
-				.from('reserve')
-				.select(
-					`
-					id,
-					status,
-					type,
-					created_date,
-					created_time,
-					modified_date,
-					modified_time,
-					profiles (
-						full_name
-					)
-				`
-				)
-				.order('created_date', { ascending: false })
-				.order('created_time', { ascending: false })
-				.limit(10);
-
-			if (error) {
-				console.error('Error fetching recent activity:', error);
-				return [];
-			}
-
-			// Format the data for display
-			const activities =
-				reservations?.map((reservation) => {
-					const createdDateTime = new Date(
-						`${reservation.created_date}T${reservation.created_time}`
-					);
-					const modifiedDateTime = reservation.modified_date
-						? new Date(
-								`${reservation.modified_date}T${reservation.modified_time}`
-							)
-						: null;
-
-					// Use modified time if available, otherwise created time
-					const activityTime = modifiedDateTime || createdDateTime;
-					const timeAgo = getTimeAgo(activityTime);
-
-					// Determine activity type and description
-					let activityDescription = '';
-					let activityType = 'reserved';
-
-					if (reservation.status === 'approved') {
-						activityType = 'completed';
-						activityDescription = `Completed ${reservation.type === 'event' ? 'Event' : 'Extra Lecture'} booking`;
-					} else if (reservation.status === 'rejected') {
-						activityType = 'cancelled';
-						activityDescription = `Cancelled ${reservation.type === 'event' ? 'Event' : 'Extra Lecture'}`;
-					} else if (reservation.status === 'pending') {
-						activityType = 'pending';
-						activityDescription = `Reserved ${reservation.type === 'event' ? 'Event Hall' : 'Lecture Hall'}`;
-					} else {
-						activityDescription = `Reserved ${reservation.type === 'event' ? 'Event Hall' : 'Lecture Hall'}`;
-					}
-
-					return {
-						id: reservation.id,
-						userName:
-							(reservation.profiles as any)?.full_name ||
-							'Unknown User',
-						description: activityDescription,
-						status: reservation.status,
-						timeAgo: timeAgo,
-						type: activityType,
-					};
-				}) || [];
-
-			return activities;
-		} catch (error) {
-			console.error('Error fetching recent activity:', error);
-			return [];
-		}
-	};
+	// Removed unused fetchRecentActivity function
 
 	// Helper function to calculate time ago
 	const getTimeAgo = (date: Date) => {

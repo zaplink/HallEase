@@ -9,7 +9,7 @@ import {
 	CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import {
 	TrendingUp,
@@ -18,8 +18,8 @@ import {
 	Users,
 	Building,
 	Clock,
-	BarChart3,
-	PieChart,
+	// BarChart3,
+	// PieChart,
 	Activity,
 	Zap,
 } from 'lucide-react';

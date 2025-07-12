@@ -15,7 +15,7 @@ export async function testDatabaseConnection() {
 		];
 
 		for (const table of tables) {
-			const { data, error, count } = await supabase
+			const { error, count } = await supabase
 				.from(table)
 				.select('*', { count: 'exact', head: true });
 
