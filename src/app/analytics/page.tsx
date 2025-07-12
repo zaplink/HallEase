@@ -264,7 +264,7 @@ export default function AnalyticsPage() {
 									created_time: string;
 									modified_date?: string;
 									modified_time?: string;
-									profiles?: { full_name?: string };
+									profiles: { full_name?: string }[];
 								}) => {
 									const createdDateTime = new Date(
 										`${reservation.created_date}T${reservation.created_time}`
@@ -305,8 +305,8 @@ export default function AnalyticsPage() {
 									return {
 										id: reservation.id,
 										userName:
-											reservation.profiles?.full_name ||
-											'Unknown User',
+											reservation.profiles?.[0]
+												?.full_name || 'Unknown User',
 										description: activityDescription,
 										status: reservation.status,
 										timeAgo: timeAgo,
