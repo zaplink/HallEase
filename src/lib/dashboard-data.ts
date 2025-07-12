@@ -51,7 +51,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 	const lastMonthYear = currentMonth === 1 ? currentYear - 1 : currentYear;
 
 	// Total bookings this month
-	const { data: currentMonthBookings, error: currentError } = await supabase
+	const { data: currentMonthBookings } = await supabase
 		.from('reserve')
 		.select('*')
 		.eq('is_submitted', true)
@@ -65,7 +65,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 		);
 
 	// Last month bookings for comparison
-	const { data: lastMonthBookings, error: lastError } = await supabase
+	const { data: lastMonthBookings } = await supabase
 		.from('reserve')
 		.select('*')
 		.eq('is_submitted', true)
@@ -79,21 +79,21 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 		);
 
 	// Pending approvals
-	const { data: pendingBookings, error: pendingError } = await supabase
+	const { data: pendingBookings } = await supabase
 		.from('reserve')
 		.select('*')
 		.eq('status', 'pending')
 		.eq('is_submitted', true);
 
 	// Approved bookings
-	const { data: approvedBookings, error: approvedError } = await supabase
+	const { data: approvedBookings } = await supabase
 		.from('reserve')
 		.select('*')
 		.eq('status', 'approved')
 		.eq('is_submitted', true);
 
 	// Rejected bookings
-	const { data: rejectedBookings, error: rejectedError } = await supabase
+	const { data: rejectedBookings } = await supabase
 		.from('reserve')
 		.select('*')
 		.eq('status', 'rejected')
@@ -111,13 +111,13 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 
 	// Calculate occupancy rate (simplified - based on today's bookings)
 	const today = new Date().toISOString().split('T')[0];
-	const { data: todayBookings, error: todayError } = await supabase
+	const { data: todayBookings } = await supabase
 		.from('reserve')
 		.select('*')
 		.eq('date', today)
 		.eq('status', 'approved');
 
-	const { data: totalHalls, error: hallsError } = await supabase
+	const { data: totalHalls } = await supabase
 		.from('hall')
 		.select('*')
 		.eq('is_available', true);
@@ -195,7 +195,7 @@ export async function getHallUtilization(): Promise<HallUtilization[]> {
 	// For each hall, get booking count (simplified version)
 	const hallUtilization = await Promise.all(
 		halls.map(async (hall) => {
-			const { data: bookings, error: bookingError } = await supabase
+			const { data: bookings } = await supabase
 				.from('reserve')
 				.select('*')
 				.eq('status', 'approved')
@@ -205,14 +205,13 @@ export async function getHallUtilization(): Promise<HallUtilization[]> {
 			const today = new Date().toISOString().split('T')[0];
 			const currentTime = new Date().toTimeString().slice(0, 5);
 
-			const { data: currentBookings, error: currentError } =
-				await supabase
-					.from('reserve')
-					.select('*')
-					.eq('date', today)
-					.eq('status', 'approved')
-					.lte('start_time', currentTime)
-					.gte('end_time', currentTime);
+			const { data: currentBookings } = await supabase
+				.from('reserve')
+				.select('*')
+				.eq('date', today)
+				.eq('status', 'approved')
+				.lte('start_time', currentTime)
+				.gte('end_time', currentTime);
 
 			return {
 				hallCode: hall.code,

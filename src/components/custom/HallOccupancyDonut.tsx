@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { HallUtilization } from '@/lib/dashboard-data';
-import { Building, TrendingUp } from 'lucide-react';
+import { Building } from 'lucide-react';
 
 interface HallOccupancyDonutProps {
 	hallUtilization: HallUtilization[];

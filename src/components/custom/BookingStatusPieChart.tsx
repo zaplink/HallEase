@@ -1,16 +1,9 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-	PieChart,
-	Pie,
-	Cell,
-	ResponsiveContainer,
-	Tooltip,
-	Legend,
-} from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { DashboardStats } from '@/lib/dashboard-data';
-import { CheckCircle, Clock, XCircle } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 
 interface BookingStatusPieChartProps {
 	stats: DashboardStats;
@@ -47,8 +40,14 @@ export function BookingStatusPieChart({ stats }: BookingStatusPieChartProps) {
 		innerRadius,
 		outerRadius,
 		percent,
-		index,
-	}: any) => {
+	}: {
+		cx: number;
+		cy: number;
+		midAngle: number;
+		innerRadius: number;
+		outerRadius: number;
+		percent: number;
+	}) => {
 		const RADIAN = Math.PI / 180;
 		const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
 		const x = cx + radius * Math.cos(-midAngle * RADIAN);

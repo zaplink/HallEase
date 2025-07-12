@@ -13,7 +13,6 @@ import { KPICard } from '@/components/custom/KPICard';
 import { AdvancedKPICard } from '@/components/custom/AdvancedKPICard';
 import { RecentBookings } from '@/components/custom/RecentBookings';
 import { RecentActivity } from '@/components/custom/RecentActivity';
-import { BookingTrendsChart } from '@/components/custom/BookingTrendsChart';
 import { BookingTrendsLineChart } from '@/components/custom/BookingTrendsLineChart';
 import { BookingStatusPieChart } from '@/components/custom/BookingStatusPieChart';
 import { HallUtilizationChart } from '@/components/custom/HallUtilizationChart';
@@ -27,7 +26,7 @@ import {
 	Clock,
 	XCircle,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // Loading components

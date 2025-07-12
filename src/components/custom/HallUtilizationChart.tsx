@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Building2, Users, TrendingUp } from 'lucide-react';
+import { Building2, Users } from 'lucide-react';
 import { HallUtilization } from '@/lib/dashboard-data';
 
 interface HallUtilizationChartProps {
@@ -14,13 +14,6 @@ export function HallUtilizationChart({ data }: HallUtilizationChartProps) {
 	const sortedData = data.sort(
 		(a, b) => b.utilizationRate - a.utilizationRate
 	);
-
-	const getUtilizationColor = (rate: number) => {
-		if (rate >= 80) return 'bg-red-500';
-		if (rate >= 60) return 'bg-yellow-500';
-		if (rate >= 40) return 'bg-blue-500';
-		return 'bg-green-500';
-	};
 
 	const getUtilizationBadge = (rate: number, isOccupied: boolean) => {
 		if (isOccupied)
