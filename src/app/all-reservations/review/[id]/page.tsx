@@ -69,6 +69,9 @@ export default function ReviewReservationPage() {
 	const router = useRouter();
 	const reservationId = params.id as string;
 
+	const [reviewMethod, setReviewMethod] = useState<'approve' | 'reject' | ''>(
+		''
+	);
 	const [reservation, setReservation] = useState<ReservationDetails | null>(
 		null
 	);
@@ -774,278 +777,331 @@ export default function ReviewReservationPage() {
 							</CardTitle>
 						</CardHeader>
 						<CardContent className='pt-0'>
-							<div className='flex space-x-4'>
-								<AlertDialog
-									open={approveDialogOpen}
-									onOpenChange={setApproveDialogOpen}
+							{/* Review Method Combobox */}
+							<div className='mb-4'>
+								<label
+									htmlFor='review-method'
+									className='block mb-2 text-sm font-medium text-foreground'
 								>
-									<AlertDialogTrigger asChild>
-										<Button
-											disabled={updating}
-											className='bg-green-600 hover:bg-green-700'
-										>
-											<CheckCircle className='h-4 w-4 mr-2' />
-											Approve Reservation
-										</Button>
-									</AlertDialogTrigger>
-									<AlertDialogContent>
-										<AlertDialogHeader>
-											<AlertDialogTitle>
-												Approve Reservation
-											</AlertDialogTitle>
-											<AlertDialogDescription>
-												Please select a hall to assign
-												before approving. This will
-												confirm the reservation and
-												allocate the selected hall.
-											</AlertDialogDescription>
-										</AlertDialogHeader>
-										{/* Hall dropdown here */}
-										{reservation.hallOption ===
-											'availability' && (
-											<div className='mt-4'>
-												<label
-													htmlFor='hall-dropdown-dialog'
-													className='block mb-2 text-sm font-medium text-foreground'
-												>
-													Select Hall
-												</label>
-												<select
-													id='hall-dropdown-dialog'
-													className='w-full p-2 border rounded focus:outline-none focus:ring focus:border-blue-300 bg-background text-foreground'
-													disabled={
-														hallsLoading || updating
-													}
-													value={selectedHallId}
-													onChange={(e) =>
-														setSelectedHallId(
-															e.target.value
-														)
-													}
-												>
-													<option value=''>
-														-- Choose a hall --
-													</option>
-													{halls.map((hall) => {
-														const attendeeCount =
-															reservation.event
-																?.attendeeCount ??
-															reservation
-																.extraLecture
-																?.attendeeCount ??
-															0;
-														const hasLowCapacity =
-															Number(
-																hall.capacity
-															) < attendeeCount;
-														const isAssigned =
-															assignedHallIds.has(
-																hall.id
-															);
-														const assignedStatus =
-															isAssigned
-																? assignedHallStatuses[
-																		hall.id
-																	]
-																: undefined;
-														const conflictInfo =
-															isAssigned
-																? assignedHallConflicts[
-																		hall.id
-																	]
-																: undefined;
-														const hallType =
-															hall.type;
-														let reservationType =
-															'';
-														if (
-															reservation.type ===
-															'event'
-														) {
-															reservationType =
-																reservation
-																	.event
-																	?.type ??
-																'';
-														} else if (
-															reservation.type ===
-															'extra_lecture'
-														) {
-															reservationType =
-																reservation
-																	.extraLecture
-																	?.type ??
-																'';
-														}
-														const isCompatible =
-															isHallTypeCompatible(
-																reservationType,
-																hallType
-															);
-														let compatibilityReason = `(${reservationType} ~ ${hallType})`;
-														let label = `${hall.code} (Capacity: ${hall.capacity !== undefined && hall.capacity !== null && !isNaN(Number(hall.capacity)) ? Number(hall.capacity) : 'N/A'}, Energy: ${typeof hall.energy_consumption === 'number' && !isNaN(Number(hall.energy_consumption)) ? (Number(hall.energy_consumption) / 100).toFixed(2) : '0.00'}`;
-														if (hasLowCapacity)
-															label +=
-																', capacity is low';
-														if (isAssigned)
-															label += `, already assigned${assignedStatus ? ': ' + assignedStatus : ''}`;
-														if (
-															conflictInfo?.conflict
-														)
-															label += `, conflict: ${conflictInfo.time}`;
-														label += isCompatible
-															? `, compatible ${compatibilityReason}`
-															: `, not compatible ${compatibilityReason}`;
-														label += ')';
-														return (
-															<option
-																key={hall.id}
-																value={hall.id}
-																className={
-																	hasLowCapacity
-																		? 'text-red-600'
-																		: isAssigned
-																			? conflictInfo?.conflict
-																				? 'text-yellow-600'
-																				: 'text-orange-500'
-																			: isCompatible
-																				? 'text-green-600'
-																				: 'text-gray-400'
-																}
-																disabled={false}
-															>
-																{label}
-															</option>
-														);
-													})}
-												</select>
-												{hallsLoading && (
-													<div className='text-xs text-muted-foreground mt-2'>
-														Loading halls...
-													</div>
-												)}
-												<div className='text-xs mt-2'>
-													<span className='text-red-600'>
-														Halls marked in red have
-														lower capacity than
-														required attendees.
-													</span>
-													<br />
-													<span className='text-orange-500'>
-														Halls marked in orange
-														are already assigned to
-														another reservation.
-													</span>
-												</div>
-											</div>
-										)}
-										<AlertDialogFooter>
-											<AlertDialogCancel
+									Review Method
+								</label>
+								<select
+									id='review-method'
+									className='w-full p-2 border rounded focus:outline-none focus:ring focus:border-blue-300 bg-background text-foreground'
+									value={reviewMethod}
+									onChange={(e) =>
+										setReviewMethod(
+											e.target.value as
+												| 'approve'
+												| 'reject'
+												| ''
+										)
+									}
+								>
+									<option value=''>
+										-- Select method --
+									</option>
+									<option value='approve'>Approve</option>
+									<option value='reject'>Reject</option>
+								</select>
+							</div>
+							<div className='flex space-x-4'>
+								{/* Only show approve button if 'approve' is selected */}
+								{reviewMethod === 'approve' && (
+									<AlertDialog
+										open={approveDialogOpen}
+										onOpenChange={setApproveDialogOpen}
+									>
+										<AlertDialogTrigger asChild>
+											<Button
 												disabled={updating}
-											>
-												Cancel
-											</AlertDialogCancel>
-											<AlertDialogAction
-												onClick={async () => {
-													if (!selectedHallId) {
-														toast.error(
-															'Please select a hall to assign before approving.'
-														);
-														return;
-													}
-													setUpdating(true);
-													try {
-														const supabase =
-															createClient();
-														// Assign hall in hall_assign table
-														const {
-															error: assignError,
-														} = await supabase
-															.from('hall_assign')
-															.insert({
-																hall_id:
-																	selectedHallId,
-																reserve_id:
-																	reservationId,
-															});
-														if (assignError)
-															throw assignError;
-														// Update reservation status
-														await handleUpdateStatus(
-															'approved'
-														);
-													} catch (err) {
-														console.error(
-															'Failed to assign hall or approve:',
-															err
-														);
-														toast.error(
-															'Failed to assign hall or approve reservation.'
-														);
-													} finally {
-														setUpdating(false);
-													}
-												}}
-												disabled={
-													updating || !selectedHallId
-												}
 												className='bg-green-600 hover:bg-green-700'
 											>
-												{updating
-													? 'Approving...'
-													: 'Approve'}
-											</AlertDialogAction>
-										</AlertDialogFooter>
-									</AlertDialogContent>
-								</AlertDialog>
+												<CheckCircle className='h-4 w-4 mr-2' />
+												Approve Reservation
+											</Button>
+										</AlertDialogTrigger>
+										<AlertDialogContent>
+											<AlertDialogHeader>
+												<AlertDialogTitle>
+													Approve Reservation
+												</AlertDialogTitle>
+												<AlertDialogDescription>
+													Please select a hall to
+													assign before approving.
+													This will confirm the
+													reservation and allocate the
+													selected hall.
+												</AlertDialogDescription>
+											</AlertDialogHeader>
+											{/* Hall dropdown here */}
+											{reservation.hallOption ===
+												'availability' && (
+												<div className='mt-4'>
+													<label
+														htmlFor='hall-dropdown-dialog'
+														className='block mb-2 text-sm font-medium text-foreground'
+													>
+														Select Hall
+													</label>
+													<select
+														id='hall-dropdown-dialog'
+														className='w-full p-2 border rounded focus:outline-none focus:ring focus:border-blue-300 bg-background text-foreground'
+														disabled={
+															hallsLoading ||
+															updating
+														}
+														value={selectedHallId}
+														onChange={(e) =>
+															setSelectedHallId(
+																e.target.value
+															)
+														}
+													>
+														<option value=''>
+															-- Choose a hall --
+														</option>
+														{halls.map((hall) => {
+															const attendeeCount =
+																reservation
+																	.event
+																	?.attendeeCount ??
+																reservation
+																	.extraLecture
+																	?.attendeeCount ??
+																0;
+															const hasLowCapacity =
+																Number(
+																	hall.capacity
+																) <
+																attendeeCount;
+															const isAssigned =
+																assignedHallIds.has(
+																	hall.id
+																);
+															const assignedStatus =
+																isAssigned
+																	? assignedHallStatuses[
+																			hall
+																				.id
+																		]
+																	: undefined;
+															const conflictInfo =
+																isAssigned
+																	? assignedHallConflicts[
+																			hall
+																				.id
+																		]
+																	: undefined;
+															const hallType =
+																hall.type;
+															let reservationType =
+																'';
+															if (
+																reservation.type ===
+																'event'
+															) {
+																reservationType =
+																	reservation
+																		.event
+																		?.type ??
+																	'';
+															} else if (
+																reservation.type ===
+																'extra_lecture'
+															) {
+																reservationType =
+																	reservation
+																		.extraLecture
+																		?.type ??
+																	'';
+															}
+															const isCompatible =
+																isHallTypeCompatible(
+																	reservationType,
+																	hallType
+																);
+															let compatibilityReason = `(${reservationType} ~ ${hallType})`;
+															let label = `${hall.code} (Capacity: ${hall.capacity !== undefined && hall.capacity !== null && !isNaN(Number(hall.capacity)) ? Number(hall.capacity) : 'N/A'}, Energy: ${typeof hall.energy_consumption === 'number' && !isNaN(Number(hall.energy_consumption)) ? (Number(hall.energy_consumption) / 100).toFixed(2) : '0.00'}`;
+															if (hasLowCapacity)
+																label +=
+																	', capacity is low';
+															if (isAssigned)
+																label += `, already assigned${assignedStatus ? ': ' + assignedStatus : ''}`;
+															if (
+																conflictInfo?.conflict
+															)
+																label += `, conflict: ${conflictInfo.time}`;
+															label +=
+																isCompatible
+																	? `, compatible ${compatibilityReason}`
+																	: `, not compatible ${compatibilityReason}`;
+															label += ')';
+															return (
+																<option
+																	key={
+																		hall.id
+																	}
+																	value={
+																		hall.id
+																	}
+																	className={
+																		hasLowCapacity
+																			? 'text-red-600'
+																			: isAssigned
+																				? conflictInfo?.conflict
+																					? 'text-yellow-600'
+																					: 'text-orange-500'
+																				: isCompatible
+																					? 'text-green-600'
+																					: 'text-gray-400'
+																	}
+																	disabled={
+																		false
+																	}
+																>
+																	{label}
+																</option>
+															);
+														})}
+													</select>
+													{hallsLoading && (
+														<div className='text-xs text-muted-foreground mt-2'>
+															Loading halls...
+														</div>
+													)}
+													<div className='text-xs mt-2'>
+														<span className='text-red-600'>
+															Halls marked in red
+															have lower capacity
+															than required
+															attendees.
+														</span>
+														<br />
+														<span className='text-orange-500'>
+															Halls marked in
+															orange are already
+															assigned to another
+															reservation.
+														</span>
+													</div>
+												</div>
+											)}
+											<AlertDialogFooter>
+												<AlertDialogCancel
+													disabled={updating}
+												>
+													Cancel
+												</AlertDialogCancel>
+												<AlertDialogAction
+													onClick={async () => {
+														if (!selectedHallId) {
+															toast.error(
+																'Please select a hall to assign before approving.'
+															);
+															return;
+														}
+														setUpdating(true);
+														try {
+															const supabase =
+																createClient();
+															// Assign hall in hall_assign table
+															const {
+																error: assignError,
+															} = await supabase
+																.from(
+																	'hall_assign'
+																)
+																.insert({
+																	hall_id:
+																		selectedHallId,
+																	reserve_id:
+																		reservationId,
+																});
+															if (assignError)
+																throw assignError;
+															// Update reservation status
+															await handleUpdateStatus(
+																'approved'
+															);
+														} catch (err) {
+															console.error(
+																'Failed to assign hall or approve:',
+																err
+															);
+															toast.error(
+																'Failed to assign hall or approve reservation.'
+															);
+														} finally {
+															setUpdating(false);
+														}
+													}}
+													disabled={
+														updating ||
+														!selectedHallId
+													}
+													className='bg-green-600 hover:bg-green-700'
+												>
+													{updating
+														? 'Approving...'
+														: 'Approve'}
+												</AlertDialogAction>
+											</AlertDialogFooter>
+										</AlertDialogContent>
+									</AlertDialog>
+								)}
 
-								<AlertDialog
-									open={rejectDialogOpen}
-									onOpenChange={setRejectDialogOpen}
-								>
-									<AlertDialogTrigger asChild>
-										<Button
-											disabled={updating}
-											variant='destructive'
-										>
-											<XCircle className='h-4 w-4 mr-2' />
-											Reject Reservation
-										</Button>
-									</AlertDialogTrigger>
-									<AlertDialogContent>
-										<AlertDialogHeader>
-											<AlertDialogTitle>
+								{/* Only show reject button if 'reject' is selected */}
+								{reviewMethod === 'reject' && (
+									<AlertDialog
+										open={rejectDialogOpen}
+										onOpenChange={setRejectDialogOpen}
+									>
+										<AlertDialogTrigger asChild>
+											<Button
+												disabled={updating}
+												variant='destructive'
+											>
+												<XCircle className='h-4 w-4 mr-2' />
 												Reject Reservation
-											</AlertDialogTitle>
-											<AlertDialogDescription>
-												Are you sure you want to reject
-												this reservation? This action
-												will deny the reservation
-												request and cannot be undone.
-											</AlertDialogDescription>
-										</AlertDialogHeader>
-										<AlertDialogFooter>
-											<AlertDialogCancel
-												disabled={updating}
-											>
-												Cancel
-											</AlertDialogCancel>
-											<AlertDialogAction
-												onClick={() =>
-													handleUpdateStatus(
-														'rejected'
-													)
-												}
-												disabled={updating}
-												className='bg-destructive hover:bg-destructive/90'
-											>
-												{updating
-													? 'Rejecting...'
-													: 'Reject'}
-											</AlertDialogAction>
-										</AlertDialogFooter>
-									</AlertDialogContent>
-								</AlertDialog>
+											</Button>
+										</AlertDialogTrigger>
+										<AlertDialogContent>
+											<AlertDialogHeader>
+												<AlertDialogTitle>
+													Reject Reservation
+												</AlertDialogTitle>
+												<AlertDialogDescription>
+													Are you sure you want to
+													reject this reservation?
+													This action will deny the
+													reservation request and
+													cannot be undone.
+												</AlertDialogDescription>
+											</AlertDialogHeader>
+											<AlertDialogFooter>
+												<AlertDialogCancel
+													disabled={updating}
+												>
+													Cancel
+												</AlertDialogCancel>
+												<AlertDialogAction
+													onClick={() =>
+														handleUpdateStatus(
+															'rejected'
+														)
+													}
+													disabled={updating}
+													className='bg-destructive hover:bg-destructive/90'
+												>
+													{updating
+														? 'Rejecting...'
+														: 'Reject'}
+												</AlertDialogAction>
+											</AlertDialogFooter>
+										</AlertDialogContent>
+									</AlertDialog>
+								)}
 							</div>
 						</CardContent>
 					</Card>
