@@ -699,7 +699,7 @@ export default function GeneralLecturesTimetable() {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{timetableData.map((slot) => (
+								{timetableData.map((slot, rowIdx) => (
 									<TableRow
 										key={slot.time}
 										className='hover:bg-gray-50'
@@ -707,21 +707,51 @@ export default function GeneralLecturesTimetable() {
 										<TableCell className='font-medium bg-gray-50 border-r'>
 											{slot.time}
 										</TableCell>
-										<TableCell className='p-2'>
-											{renderLectureCell(slot.monday)}
-										</TableCell>
-										<TableCell className='p-2'>
-											{renderLectureCell(slot.tuesday)}
-										</TableCell>
-										<TableCell className='p-2'>
-											{renderLectureCell(slot.wednesday)}
-										</TableCell>
-										<TableCell className='p-2'>
-											{renderLectureCell(slot.thursday)}
-										</TableCell>
-										<TableCell className='p-2'>
-											{renderLectureCell(slot.friday)}
-										</TableCell>
+										{days.map((day) => {
+											const dayKey = day.toLowerCase();
+											const slotMap =
+												(timetableData as any)
+													.slotMap?.[dayKey] || {};
+											// Is this the start of a merged cell?
+											if (slotMap[rowIdx]) {
+												const { lecture, span } =
+													slotMap[rowIdx];
+												return (
+													<TableCell
+														key={day}
+														rowSpan={span}
+														className='p-2 align-middle'
+													>
+														{renderLectureCell(
+															lecture
+														)}
+													</TableCell>
+												);
+											}
+											// Is this slot covered by a merged cell above? If so, skip rendering
+											const isCovered = Object.entries(
+												slotMap
+											).some(
+												([startIdx, { span }]) =>
+													rowIdx > Number(startIdx) &&
+													rowIdx <
+														Number(startIdx) + span
+											);
+											if (isCovered) return null;
+											// Otherwise, render a normal cell
+											return (
+												<TableCell
+													key={day}
+													className='p-2'
+												>
+													{renderLectureCell(
+														slot[
+															dayKey as keyof TimetableSlot
+														]
+													)}
+												</TableCell>
+											);
+										})}
 									</TableRow>
 								))}
 							</TableBody>
