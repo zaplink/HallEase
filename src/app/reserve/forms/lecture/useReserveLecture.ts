@@ -41,6 +41,35 @@ export function useBooking() {
 				// If submitted successfully, mark as submitted and keep the ID
 				setDraftId(result.reserveId);
 				setIsSubmitted(true); // Prevent further submissions
+
+				// Send email notification after successful submission
+				const toEmail = result.requesterEmail;
+				// Format date and time for email
+				const eventDateTime = formData.date
+					? `${formData.date.toLocaleDateString()}, ${formData.startHour?.padStart(2, '0')}:${formData.startMinute?.padStart(2, '0')} - ${formData.endHour?.padStart(2, '0')}:${formData.endMinute?.padStart(2, '0')}`
+					: 'N/A';
+
+				const emailRes = await fetch('/api/send-test-mail', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						toEmail,
+						eventName: formData.course,
+						reservationType: formData.hallOpt || 'availability',
+						hall: formData.hall || '',
+						eventDateTime,
+						reservationId: result.reserveId,
+						reservationLink:
+							typeof window !== 'undefined'
+								? `${window.location.origin}/reservation/${result.reserveId}`
+								: '',
+					}),
+				});
+
+				if (!emailRes.ok) {
+					const errText = await emailRes.text();
+					throw new Error('Failed to send email: ' + errText);
+				}
 			}
 
 			setSuccess(true);
