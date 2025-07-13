@@ -63,7 +63,7 @@ const sidebarMenu = [
 		sectionMenu: [
 			{
 				itemTitle: 'General Lectures', // changed from 'View Events'
-				itemUrl: '/events',
+				itemUrl: '/general-lectures',
 				itemIcon: Airplay,
 				roleSlugs: [],
 			},
