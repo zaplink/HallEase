@@ -1,4 +1,4 @@
-'use client'; // <-- THIS IS CRUCIAL! It tells Next.js this is a client component.
+'use client';
 
 import SidebarLayout from '@/layouts/Sidebar/Layout';
 import React, { useState, useRef, useEffect } from 'react';
@@ -94,7 +94,7 @@ export default function ChatbotPage() {
 				<Card className='w-full'>
 					<CardHeader>
 						<CardTitle className='text-3xl font-bold text-center text-blue-700'>
-							Hall Chat Assistant
+							HallEase Chat Assistant
 						</CardTitle>
 					</CardHeader>
 					<CardContent className='p-4'>
