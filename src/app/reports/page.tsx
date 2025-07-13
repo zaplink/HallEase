@@ -390,6 +390,13 @@ export default function ReportsPage() {
 				{/* Navigation Actions */}
 				<div className='flex flex-wrap gap-3'>
 					<Button
+						onClick={() => router.push('/reports/generate')}
+						className='bg-green-600 hover:bg-green-700 text-white'
+					>
+						<FileText className='w-4 h-4 mr-2' />
+						Generate Hall Usage Report
+					</Button>
+					<Button
 						onClick={() => router.push('/report-issue')}
 						className='bg-blue-600 hover:bg-blue-700 text-white'
 					>
