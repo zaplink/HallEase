@@ -502,7 +502,9 @@ export default function GeneralLecturesTimetable() {
 	const renderLectureCell = (lecture?: GeneralLecture) => {
 		if (!lecture) {
 			console.log('[RENDER] Empty lecture cell');
-			return <div className='text-center text-gray-400 p-2'>-</div>;
+			return (
+				<div className='text-center text-gray-400 p-2 h-full'>-</div>
+			);
 		}
 		console.log('[RENDER] Rendering lecture cell:', lecture);
 		const course = Array.isArray(lecture.course)
@@ -526,7 +528,7 @@ export default function GeneralLecturesTimetable() {
 		}
 		const timeRange = `${lecture.start_time.substring(0, 5)} - ${lecture.end_time.substring(0, 5)}`;
 		return (
-			<div className='p-2 bg-blue-50 border border-blue-200 rounded-md min-h-[60px]'>
+			<div className='p-2 bg-blue-50 border border-blue-200 rounded-md h-full flex flex-col justify-center'>
 				<div className='font-semibold text-blue-900 text-sm'>
 					{courseCode}
 				</div>
@@ -702,9 +704,9 @@ export default function GeneralLecturesTimetable() {
 								{timetableData.map((slot, rowIdx) => (
 									<TableRow
 										key={slot.time}
-										className='hover:bg-gray-50'
+										className='hover:bg-gray-50 h-[60px]'
 									>
-										<TableCell className='font-medium bg-gray-50 border-r'>
+										<TableCell className='font-medium bg-gray-50 border-r h-[60px]'>
 											{slot.time}
 										</TableCell>
 										{days.map((day) => {
@@ -721,33 +723,55 @@ export default function GeneralLecturesTimetable() {
 														key={day}
 														rowSpan={span}
 														className='p-2 align-middle'
+														style={{
+															height:
+																span * 60 +
+																'px',
+															verticalAlign:
+																'middle',
+															padding: '0.5rem',
+														}}
 													>
-														{renderLectureCell(
-															lecture
-														)}
+														<div
+															style={{
+																height: '100%',
+															}}
+															className='h-full flex flex-col justify-center'
+														>
+															{renderLectureCell(
+																lecture
+															)}
+														</div>
 													</TableCell>
 												);
 											}
 											// Is this slot covered by a merged cell above? If so, skip rendering
 											const isCovered = Object.entries(
 												slotMap
-											).some(
-												([startIdx, { span }]) =>
+											).some(([startIdx, value]) => {
+												const s = value as {
+													span: number;
+												};
+												return (
 													rowIdx > Number(startIdx) &&
 													rowIdx <
-														Number(startIdx) + span
-											);
+														Number(startIdx) +
+															s.span
+												);
+											});
 											if (isCovered) return null;
 											// Otherwise, render a normal cell
 											return (
 												<TableCell
 													key={day}
-													className='p-2'
+													className='p-2 h-[60px]'
 												>
 													{renderLectureCell(
 														slot[
 															dayKey as keyof TimetableSlot
-														]
+														] as
+															| GeneralLecture
+															| undefined
 													)}
 												</TableCell>
 											);
