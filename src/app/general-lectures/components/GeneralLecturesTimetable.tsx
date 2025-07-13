@@ -439,20 +439,17 @@ export default function GeneralLecturesTimetable() {
 		const timetableData: TimetableSlot[] = timeSlots.map((time) => ({
 			time,
 		}));
-		console.log(
-			'[TIMETABLE] Creating timetable data with lectures:',
-			lectures
-		);
+		// New: Track which slots are the start of a lecture and how many slots it spans
+		const slotMap: Record<
+			string,
+			Record<number, { lecture: GeneralLecture; span: number }>
+		> = {};
 		lectures.forEach((lecture, idx) => {
-			const startTime = lecture.start_time.substring(0, 5); // Get HH:MM format
-			const slotIndex = timeSlots.findIndex((slot) => slot === startTime);
-			console.log(
-				`[TIMETABLE] [${idx}] Processing lecture:`,
-				lecture,
-				`at ${startTime}, slot index: ${slotIndex}`
-			);
-			if (slotIndex !== -1) {
-				// Normalize day name to match our keys
+			const startTime = lecture.start_time.substring(0, 5);
+			const endTime = lecture.end_time.substring(0, 5);
+			const startIdx = timeSlots.findIndex((slot) => slot === startTime);
+			const endIdx = timeSlots.findIndex((slot) => slot === endTime);
+			if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
 				const dayLower = lecture.day.toLowerCase();
 				let dayKey: keyof Omit<TimetableSlot, 'time'>;
 				switch (dayLower) {
@@ -480,16 +477,22 @@ export default function GeneralLecturesTimetable() {
 						dayKey = 'friday';
 						break;
 					default:
-						console.warn(`[TIMETABLE] Unknown day: ${lecture.day}`);
 						return;
 				}
-				timetableData[slotIndex][dayKey] = lecture;
-				console.log(
-					`[TIMETABLE] Assigned lecture to ${dayKey} at slot ${slotIndex}`
-				);
+				// Mark the start slot with the lecture and span
+				if (!slotMap[dayKey]) slotMap[dayKey] = {};
+				slotMap[dayKey][startIdx] = {
+					lecture,
+					span: endIdx - startIdx,
+				};
+				// Mark all covered slots so we can skip them in rendering
+				for (let i = startIdx; i < endIdx; i++) {
+					timetableData[i][dayKey] = lecture;
+				}
 			}
 		});
-		console.log('[TIMETABLE] Final timetable data:', timetableData);
+		// Attach slotMap for rendering
+		(timetableData as any).slotMap = slotMap;
 		return timetableData;
 	};
 
