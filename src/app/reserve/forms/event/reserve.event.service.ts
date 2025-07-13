@@ -1,3 +1,76 @@
+// Fetch a single event draft by reserve (draft) ID, joining reserve and event tables
+export async function getReserveDraftById(draftId: string) {
+	if (!draftId) throw new Error('No draftId provided');
+	// Fetch reserve row
+	const { data: reserve, error: reserveError } = await supabase
+		.from('reserve')
+		.select(
+			`
+	  id,
+	  date,
+	  start_time,
+	  end_time,
+	  hall_option,
+	  status,
+	  type,
+	  profile_id,
+	  modified_date,
+	  modified_time,
+	  is_submitted,
+	  is_consented,
+	  created_date,
+	  created_time,
+	  event (
+		id,
+		name,
+		description,
+		organizer,
+		type,
+		attendee_count,
+		additional_notes,
+		additional_file,
+		equipment
+	  )
+	`
+		)
+		.eq('id', draftId)
+		.eq('type', 'event')
+		.eq('is_submitted', false)
+		.single();
+
+	if (reserveError) throw new Error(reserveError.message);
+	if (!reserve) throw new Error('Draft not found');
+
+	// Flatten event fields into top-level object for easier form mapping
+	const event = Array.isArray(reserve.event)
+		? reserve.event[0] || {}
+		: reserve.event || {};
+	return {
+		id: reserve.id,
+		date: reserve.date,
+		start_time: reserve.start_time,
+		end_time: reserve.end_time,
+		hall_option: reserve.hall_option,
+		status: reserve.status,
+		type: reserve.type,
+		profile_id: reserve.profile_id,
+		modified_date: reserve.modified_date,
+		modified_time: reserve.modified_time,
+		is_submitted: reserve.is_submitted,
+		is_consented: reserve.is_consented,
+		created_date: reserve.created_date,
+		created_time: reserve.created_time,
+		// Event-specific fields
+		name: event.name || '',
+		description: event.description || '',
+		organizer: event.organizer || '',
+		event_type: event.type || '',
+		attendee_count: event.attendee_count || 0,
+		additional_notes: event.additional_notes || '',
+		additional_file: event.additional_file || '',
+		equipment: event.equipment || '',
+	};
+}
 import { supabase } from '@/lib/supabaseClient';
 import {
 	ReserveEventFormData,

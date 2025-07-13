@@ -1227,6 +1227,9 @@ export default function ReserveEventForm({
 	const { handleSubmit, isLoading, isSubmitted, error } = useBooking();
 	const router = useRouter();
 
+	// --- DRAFT LOADING LOGIC ---
+	// Get draftId from URL
+	const [draftLoaded, setDraftLoaded] = useState(false);
 	const form = useForm<FormData>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -1249,6 +1252,67 @@ export default function ReserveEventForm({
 			acceptTerms: false,
 		},
 	});
+
+	React.useEffect(() => {
+		// Only run on client
+		if (typeof window === 'undefined' || draftLoaded) return;
+		const params = new URLSearchParams(window.location.search);
+		const draftId = params.get('draftId');
+		if (!draftId) return;
+
+		// Fetch draft data from backend
+		async function fetchDraft() {
+			try {
+				// Import the service dynamically to avoid SSR issues
+				const service = await import('./reserve.event.service');
+				if (service.getReserveDraftById) {
+					const draft = await service.getReserveDraftById(draftId);
+					if (draft) {
+						// Map draft data to form fields
+						form.setValue('name', draft.name || '');
+						form.setValue('description', draft.description || '');
+						form.setValue('type', draft.type || '');
+						form.setValue(
+							'date',
+							draft.date ? new Date(draft.date) : undefined
+						);
+						if (draft.start_time) {
+							const [startHour, startMinute] =
+								draft.start_time.split(':');
+							form.setValue('startHour', startHour);
+							form.setValue('startMinute', startMinute);
+						}
+						if (draft.end_time) {
+							const [endHour, endMinute] =
+								draft.end_time.split(':');
+							form.setValue('endHour', endHour);
+							form.setValue('endMinute', endMinute);
+						}
+						form.setValue('organizer', draft.organizer || '');
+						form.setValue(
+							'attendeeCount',
+							draft.attendee_count || 60
+						);
+						form.setValue(
+							'hallOpt',
+							draft.hall_option || 'availability'
+						);
+						form.setValue('hall', draft.hall || '');
+						form.setValue('equipment', draft.equipment || []);
+						form.setValue(
+							'additionalNotes',
+							draft.additional_notes || ''
+						);
+						// additionalDocuments, attendeeList, acceptTerms can be handled as needed
+						setDraftLoaded(true);
+					}
+				}
+			} catch (err) {
+				console.error('Failed to load draft:', err);
+			}
+		}
+		fetchDraft();
+	}, [draftLoaded, form]);
 
 	const validateCurrentStep = async () => {
 		const fieldsToValidate = getFieldsForStep(currentStep);
@@ -1330,7 +1394,6 @@ export default function ReserveEventForm({
 	const onSaveDraft = async () => {
 		try {
 			const currentData = form.getValues();
-
 			// Check if event name is provided (minimum requirement)
 			if (!currentData.name || currentData.name.trim().length < 2) {
 				toast.error('Event name is required to save draft', {
@@ -1339,7 +1402,6 @@ export default function ReserveEventForm({
 				});
 				return;
 			}
-
 			// Convert FormData to ReserveEventFormData for draft
 			const { equipment, ...eventData } = currentData;
 			const formData: ReserveEventFormData = {
@@ -1353,15 +1415,19 @@ export default function ReserveEventForm({
 						count: 1,
 					})) || [],
 			};
-
-			const result = await handleSubmit(formData, 'draft');
+			// Pass draftId if present
+			let draftId: string | undefined = undefined;
+			if (typeof window !== 'undefined') {
+				const params = new URLSearchParams(window.location.search);
+				draftId = params.get('draftId') || undefined;
+			}
+			const result = await handleSubmit(formData, 'draft', draftId);
 			// Success handled by the hook
 			if (result) {
 				toast.success('Draft saved successfully!', {
 					description: `Your event reservation draft has been saved with ID: ${result.reserveId}`,
 				});
 				console.log('Draft saved with result:', result);
-
 				// Trigger draft refresh across the app
 				if (typeof window !== 'undefined') {
 					window.dispatchEvent(new CustomEvent('refreshDrafts'));
