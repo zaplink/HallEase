@@ -50,9 +50,7 @@ export default function ReservePage() {
 	}, []);
 
 	// Listen for custom refresh events
-	useEffect(() => {
-		return useDraftRefreshListener(fetchDrafts);
-	}, []);
+	useDraftRefreshListener(fetchDrafts);
 
 	const purposes = [
 		{
