@@ -684,8 +684,8 @@ export default function GeneralLecturesTimetable() {
 
 			{/* Timetable */}
 			{selectedHall ? (
-				<div className='bg-white rounded-lg shadow-sm border overflow-hidden'>
-					<div className='p-4 bg-gray-50 border-b'>
+				<div className='bg-white rounded-lg shadow-sm border overflow-hidden w-full max-w-full'>
+					<div className='p-4 bg-gray-50 border-b w-full'>
 						<h3 className='text-lg font-semibold text-gray-900'>
 							Weekly Timetable -{' '}
 							{halls.find((h) => h.id === selectedHall)?.code}
@@ -709,17 +709,17 @@ export default function GeneralLecturesTimetable() {
 						)}
 					</div>
 
-					<div className='overflow-x-auto'>
-						<Table>
+					<div className='overflow-x-auto w-full max-w-full'>
+						<Table className='w-full max-w-full table-fixed'>
 							<TableHeader>
 								<TableRow className='bg-gray-50'>
-									<TableHead className='w-20 font-semibold'>
+									<TableHead className='font-semibold w-1/7'>
 										Time
 									</TableHead>
 									{days.map((day) => (
 										<TableHead
 											key={day}
-											className='text-center font-semibold min-w-[150px]'
+											className='text-center font-semibold w-1/7'
 										>
 											{day}
 										</TableHead>
@@ -732,7 +732,7 @@ export default function GeneralLecturesTimetable() {
 										key={slot.time}
 										className='hover:bg-gray-50 h-[60px]'
 									>
-										<TableCell className='font-medium bg-gray-50 border-r h-[60px]'>
+										<TableCell className='font-medium bg-gray-50 border-r h-[60px] w-1/7'>
 											{slot.time}
 										</TableCell>
 										{days.map((day) => {
@@ -748,7 +748,7 @@ export default function GeneralLecturesTimetable() {
 													<TableCell
 														key={day}
 														rowSpan={span}
-														className='p-2 align-middle'
+														className='p-2 align-middle w-1/7'
 														style={{
 															height:
 																span * 60 +
@@ -790,7 +790,7 @@ export default function GeneralLecturesTimetable() {
 											return (
 												<TableCell
 													key={day}
-													className='p-2 h-[30px]'
+													className='p-2 h-[30px] w-1/7'
 												>
 													{renderLectureCell(
 														slot[
