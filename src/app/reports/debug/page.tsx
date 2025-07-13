@@ -5,8 +5,12 @@ import SidebarLayout from '@/layouts/Sidebar/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { DebugReportsService } from '@/lib/debug-reports';
-import { ReportsService } from '@/lib/reports';
+import {
+	DebugReportsService,
+	DebugInfo,
+	BasicMetrics,
+	BasicReport,
+} from '@/lib/debug-reports';
 import { toast } from 'sonner';
 import {
 	FileText,
@@ -38,9 +42,9 @@ const TYPE_COLORS = {
 };
 
 export default function ReportsDebugPage() {
-	const [debugInfo, setDebugInfo] = useState<any>(null);
-	const [metrics, setMetrics] = useState<any>(null);
-	const [reports, setReports] = useState<any[]>([]);
+	const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
+	const [metrics, setMetrics] = useState<BasicMetrics | null>(null);
+	const [reports, setReports] = useState<BasicReport[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [showDebug, setShowDebug] = useState(false);
 
@@ -83,8 +87,8 @@ export default function ReportsDebugPage() {
 		try {
 			setLoading(true);
 			const [metricsData, reportsData] = await Promise.all([
-				ReportsService.getReportMetrics(),
-				ReportsService.getDetailedReports(),
+				DebugReportsService.getBasicMetrics(),
+				DebugReportsService.getBasicReports(),
 			]);
 			setMetrics(metricsData);
 			setReports(reportsData);
@@ -356,13 +360,18 @@ export default function ReportsDebugPage() {
 													<td className='p-2'>
 														<div className='text-sm text-gray-600'>
 															{formatDate(
-																report.created_date
+																String(
+																	report.created_date
+																)
 															)}
 														</div>
 													</td>
 													<td className='p-2'>
 														<Badge variant='outline'>
-															{report.hall_option}
+															{String(
+																report.hall_option ||
+																	''
+															)}
 														</Badge>
 													</td>
 												</tr>

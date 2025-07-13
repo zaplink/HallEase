@@ -88,8 +88,8 @@ export interface AuditReport {
 	action: string;
 	resource_type: string;
 	resource_id: string;
-	old_values?: any;
-	new_values?: any;
+	old_values?: Record<string, unknown>;
+	new_values?: Record<string, unknown>;
 	timestamp: string;
 	ip_address?: string;
 	admin?: {
@@ -196,7 +196,7 @@ export class ReportsServiceNew {
 		resolutionNotes?: string
 	): Promise<void> {
 		try {
-			const updateData: any = {
+			const updateData: Record<string, unknown> = {
 				status,
 				updated_date: new Date().toISOString().split('T')[0],
 				updated_time: new Date().toTimeString().split(' ')[0],
@@ -612,9 +612,15 @@ export class ReportsServiceNew {
 	static async exportReports(
 		type: string,
 		format: 'csv' | 'json',
-		filters?: any
+		filters?: Record<string, unknown>
 	): Promise<string> {
-		let data: any[] = [];
+		let data: (
+			| IssueReport
+			| SystemReport
+			| ComplianceReport
+			| UserActivityReport
+			| PerformanceReport
+		)[] = [];
 
 		switch (type) {
 			case 'issues':
@@ -642,12 +648,14 @@ export class ReportsServiceNew {
 			// CSV format
 			if (data.length === 0) return '';
 
-			const headers = Object.keys(data[0]).filter(
-				(key) => typeof data[0][key] !== 'object'
+			// Cast to Record<string, unknown> for CSV processing
+			const typedData = data as unknown as Record<string, unknown>[];
+			const headers = Object.keys(typedData[0]).filter(
+				(key) => typeof typedData[0][key] !== 'object'
 			);
 			const csv = [
 				headers.join(','),
-				...data.map((row) =>
+				...typedData.map((row) =>
 					headers
 						.map((header) => {
 							const value = row[header];
@@ -692,13 +700,13 @@ export class ReportsServiceNew {
 							const total = data?.length || 0;
 							const open =
 								data?.filter(
-									(r: any) =>
+									(r: { status: string }) =>
 										r.status === 'open' ||
 										r.status === 'in_progress'
 								).length || 0;
 							const resolved =
 								data?.filter(
-									(r: any) =>
+									(r: { status: string }) =>
 										r.status === 'resolved' ||
 										r.status === 'closed'
 								).length || 0;
@@ -716,11 +724,14 @@ export class ReportsServiceNew {
 								.select('resolved, level');
 							const total = data?.length || 0;
 							const unresolved =
-								data?.filter((r: any) => !r.resolved).length ||
-								0;
+								data?.filter(
+									(r: { resolved: boolean }) => !r.resolved
+								).length || 0;
 							const critical =
-								data?.filter((r: any) => r.level === 'critical')
-									.length || 0;
+								data?.filter(
+									(r: { level: string }) =>
+										r.level === 'critical'
+								).length || 0;
 							return { total, unresolved, critical };
 						} catch {
 							return { total: 0, unresolved: 0, critical: 0 };
@@ -735,11 +746,14 @@ export class ReportsServiceNew {
 								.select('status, severity');
 							const total = data?.length || 0;
 							const open =
-								data?.filter((r: any) => r.status === 'open')
-									.length || 0;
+								data?.filter(
+									(r: { status: string }) =>
+										r.status === 'open'
+								).length || 0;
 							const critical =
 								data?.filter(
-									(r: any) => r.severity === 'critical'
+									(r: { severity: string }) =>
+										r.severity === 'critical'
 								).length || 0;
 							return { total, open, critical };
 						} catch {
@@ -760,12 +774,12 @@ export class ReportsServiceNew {
 							const totalToday = data?.length || 0;
 							const failedLogins =
 								data?.filter(
-									(r: any) =>
+									(r: { action: string; success: boolean }) =>
 										r.action === 'login' && !r.success
 								).length || 0;
 							const suspiciousActivity =
 								data?.filter(
-									(r: any) =>
+									(r: { action: string }) =>
 										r.action.includes('unauthorized') ||
 										r.action.includes('suspicious')
 								).length || 0;

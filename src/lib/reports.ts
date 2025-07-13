@@ -155,13 +155,16 @@ export class ReportsService {
 			// Filter to only include submitted reports
 			const submittedReportIds = new Set(reports.map((r) => r.id));
 			const filteredAssignments = hallAssignments.filter(
-				(assignment: any) =>
-					submittedReportIds.has(assignment.reserve_id)
+				(assignment: unknown) => {
+					const ass = assignment as { reserve_id: string };
+					return submittedReportIds.has(ass.reserve_id);
+				}
 			);
 
 			const hallCounts: Record<string, number> = {};
-			filteredAssignments.forEach((assignment: any) => {
-				const hallCode = assignment.hall?.code;
+			filteredAssignments.forEach((assignment: unknown) => {
+				const ass = assignment as { hall?: { code?: string } };
+				const hallCode = ass.hall?.code;
 				if (hallCode) {
 					hallCounts[hallCode] = (hallCounts[hallCode] || 0) + 1;
 				}
@@ -244,12 +247,12 @@ export class ReportsService {
 			throw new Error('Failed to fetch detailed reports');
 		}
 
-		let reports = data || [];
+		const reports = data || [];
 
 		// Get additional data for each report
 		const enrichedReports = await Promise.all(
 			reports.map(async (report) => {
-				let enrichedReport = { ...report, profile: report.profiles };
+				const enrichedReport = { ...report, profile: report.profiles };
 
 				// Get event data if type is event
 				if (report.type === 'event') {
@@ -292,7 +295,7 @@ export class ReportsService {
 
 				if (hallAssignments) {
 					enrichedReport.halls = hallAssignments
-						.map((assignment: any) => assignment.hall)
+						.map((assignment: { hall: unknown }) => assignment.hall)
 						.filter(Boolean);
 				}
 
@@ -320,7 +323,9 @@ export class ReportsService {
 		// Apply hall filter
 		if (filters.hall) {
 			filteredReports = filteredReports.filter((report) =>
-				report.halls?.some((hall: any) => hall?.code === filters.hall)
+				report.halls?.some(
+					(hall: { code?: string }) => hall?.code === filters.hall
+				)
 			);
 		}
 

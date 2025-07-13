@@ -2,17 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import SidebarLayout from '@/layouts/Sidebar/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -25,28 +16,17 @@ import {
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import {
-	AlertTriangle,
 	Shield,
-	Users,
 	Activity,
 	FileText,
 	Download,
 	Eye,
-	Search,
-	Filter,
 	Clock,
 	CheckCircle,
 	XCircle,
-	AlertCircle,
 	Loader2,
 	Bug,
-	UserX,
-	Lock,
 	Zap,
-	Database,
-	Globe,
-	Calendar,
-	MessageSquare,
 	Flag,
 	Settings,
 	Plus,
@@ -126,13 +106,13 @@ export default function ReportsPage() {
 		UserActivityReport[]
 	>([]);
 	const [loading, setLoading] = useState(true);
-	const [filters, setFilters] = useState({
+	const filters = {
 		status: '',
 		priority: '',
 		dateFrom: '',
 		dateTo: '',
 		search: '',
-	});
+	};
 
 	// Load data from database or fallback to mock data
 	const loadData = useCallback(async () => {
@@ -241,13 +221,6 @@ export default function ReportsPage() {
 		loadData();
 	}, [loadData]);
 
-	const handleFilterChange = (key: string, value: string) => {
-		setFilters((prev) => ({
-			...prev,
-			[key]: value === 'all' ? '' : value,
-		}));
-	};
-
 	// Action handlers for reports
 	const handleUpdateIssueStatus = async (
 		reportId: string,
@@ -267,18 +240,21 @@ export default function ReportsPage() {
 	};
 
 	const handleViewReport = (
-		report:
+		_report:
 			| IssueReport
 			| SystemReport
 			| ComplianceReport
 			| UserActivityReport
 	) => {
 		// Set the selected report for viewing in a modal or sidebar
-		console.log('Viewing report:', report);
+		console.log('Viewing report:', _report);
 		toast.info('Report view functionality - coming soon');
 	};
 
-	const handleDeleteIssueReport = async (reportId: string) => {
+	const handleDeleteIssueReport = async (
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		_reportId: string
+	) => {
 		if (!confirm('Are you sure you want to delete this report?')) {
 			return;
 		}
@@ -324,7 +300,7 @@ export default function ReportsPage() {
 		} catch (error) {
 			console.error('Export error:', error);
 			// Fallback to local data export
-			let data: any[] = [];
+			let data: unknown[] = [];
 			let filename = '';
 
 			switch (type) {
@@ -347,9 +323,10 @@ export default function ReportsPage() {
 			}
 
 			if (data.length > 0) {
+				const typedData = data as Record<string, unknown>[];
 				const csv = [
-					Object.keys(data[0] || {}).join(','),
-					...data.map((row) =>
+					Object.keys(typedData[0] || {}).join(','),
+					...typedData.map((row: Record<string, unknown>) =>
 						Object.values(row)
 							.map((val) =>
 								typeof val === 'object'

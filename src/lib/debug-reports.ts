@@ -1,12 +1,72 @@
 import { createClient } from '@/lib/supabaseClient';
 
+export interface BasicMetrics {
+	totalReports: number;
+	pendingReports: number;
+	approvedReports: number;
+	rejectedReports: number;
+	waitingReports: number;
+	reportsByType: {
+		extra_lecture: number;
+		event: number;
+	};
+	reportsByStatus: {
+		pending: number;
+		approved: number;
+		waiting: number;
+		rejected: number;
+	};
+	reportsByHall: unknown[];
+	recentActivity: Array<{
+		date: string;
+		count: number;
+	}>;
+}
+
+export interface BasicReport {
+	id: string;
+	date: string;
+	start_time: string;
+	end_time: string;
+	status: string;
+	type: string;
+	[key: string]: unknown;
+}
+
+export interface DebugInfo {
+	auth: {
+		user?: string;
+		error?: unknown;
+	};
+	reserve: {
+		count: unknown;
+		error?: unknown;
+	};
+	sample: {
+		data: unknown;
+		error?: unknown;
+	};
+	profiles: {
+		data: unknown;
+		error?: unknown;
+	};
+	hall: {
+		data: unknown;
+		error?: unknown;
+	};
+	hallAssign: {
+		data: unknown;
+		error?: unknown;
+	};
+}
+
 export class DebugReportsService {
 	private static supabase = createClient();
 
 	/**
 	 * Test basic database connection and table access
 	 */
-	static async testConnection(): Promise<any> {
+	static async testConnection(): Promise<DebugInfo> {
 		const supabase = this.supabase;
 
 		try {
@@ -84,7 +144,7 @@ export class DebugReportsService {
 	/**
 	 * Get basic report metrics without complex joins
 	 */
-	static async getBasicMetrics(): Promise<any> {
+	static async getBasicMetrics(): Promise<BasicMetrics> {
 		const supabase = this.supabase;
 
 		try {
@@ -166,7 +226,7 @@ export class DebugReportsService {
 	/**
 	 * Get basic reports without complex joins
 	 */
-	static async getBasicReports(): Promise<any[]> {
+	static async getBasicReports(): Promise<BasicReport[]> {
 		const supabase = this.supabase;
 
 		try {
