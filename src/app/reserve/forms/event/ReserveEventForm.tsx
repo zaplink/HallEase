@@ -1263,19 +1263,19 @@ export default function ReserveEventForm({
 		// Fetch draft data from backend
 		async function fetchDraft() {
 			try {
-				// Import the service dynamically to avoid SSR issues
 				const service = await import('./reserve.event.service');
-				if (service.getReserveDraftById) {
+				if (
+					service.getReserveDraftById &&
+					typeof draftId === 'string'
+				) {
 					const draft = await service.getReserveDraftById(draftId);
 					if (draft) {
-						// Map draft data to form fields
 						form.setValue('name', draft.name || '');
 						form.setValue('description', draft.description || '');
 						form.setValue('type', draft.type || '');
-						form.setValue(
-							'date',
-							draft.date ? new Date(draft.date) : undefined
-						);
+						if (draft.date) {
+							form.setValue('date', new Date(draft.date));
+						}
 						if (draft.start_time) {
 							const [startHour, startMinute] =
 								draft.start_time.split(':');
@@ -1297,7 +1297,6 @@ export default function ReserveEventForm({
 							'hallOpt',
 							draft.hall_option || 'availability'
 						);
-						form.setValue('hall', draft.hall || '');
 						form.setValue('equipment', draft.equipment || []);
 						form.setValue(
 							'additionalNotes',
@@ -1421,7 +1420,7 @@ export default function ReserveEventForm({
 				const params = new URLSearchParams(window.location.search);
 				draftId = params.get('draftId') || undefined;
 			}
-			const result = await handleSubmit(formData, 'draft', draftId);
+			const result = await handleSubmit(formData, 'draft');
 			// Success handled by the hook
 			if (result) {
 				toast.success('Draft saved successfully!', {
