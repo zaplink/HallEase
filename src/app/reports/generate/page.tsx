@@ -65,6 +65,15 @@ interface UsageReport {
 	reservations: ReservationData[];
 }
 
+interface DailyUsage {
+	date: string;
+	totalHours: number;
+	totalReservations: number;
+	events: number;
+	lectures: number;
+	generalLectures: number;
+}
+
 // Time period options
 const TIME_PERIODS = [
 	{ value: '1week', label: '1 Week', days: 7 },
@@ -96,7 +105,6 @@ export default function GenerateReportPage() {
 	const [useCustomDates, setUseCustomDates] = useState<boolean>(false);
 	const [fromDate, setFromDate] = useState<string>('');
 	const [toDate, setToDate] = useState<string>('');
-	const [loading, setLoading] = useState(false);
 	const [loadingHalls, setLoadingHalls] = useState(true);
 	const [report, setReport] = useState<UsageReport | null>(null);
 	const [generating, setGenerating] = useState(false);
@@ -706,7 +714,7 @@ export default function GenerateReportPage() {
 						acc[date].generalLectures += 1;
 					return acc;
 				},
-				{} as Record<string, any>
+				{} as Record<string, DailyUsage>
 			);
 
 			const dailyUsageData = [
@@ -718,7 +726,7 @@ export default function GenerateReportPage() {
 					'Extra Lectures',
 					'General Lectures',
 				],
-				...Object.values(dailyUsage).map((day: any) => [
+				...Object.values(dailyUsage).map((day: DailyUsage) => [
 					day.date,
 					Math.round(day.totalHours * 100) / 100,
 					day.totalReservations,
