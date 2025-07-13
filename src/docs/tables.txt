@@ -74,3 +74,21 @@ hall_assign
     id : uuid
     reserve_id : uuid : FK(reserve, id)
     hall_id : uuid : FK(hall, id)
+
+issue_reports
+    id : uuid
+    issue_type : string (booking | technical | other)
+    title : string
+    description : string
+    screenshot_url : string
+    status : string (open | in_progress | resolved | closed)
+    priority : string (low | medium | high | critical)
+    reporter_id : uuid : FK(profiles, id)
+    assigned_to : uuid : FK(profiles, id)
+    created_date : date
+    created_time : time
+    updated_date : date
+    updated_time : time
+    resolved_date : date
+    resolved_time : time
+    resolution_notes : string

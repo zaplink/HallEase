@@ -200,6 +200,12 @@ const sidebarMenu = [
 				itemIcon: Flag,
 				roleSlugs: [],
 			},
+			{
+				itemTitle: 'Manage Issues',
+				itemUrl: '/admin/issues',
+				itemIcon: Flag,
+				roleSlugs: ['ADMIN', 'SYSTEM'],
+			},
 		],
 	},
 ];
