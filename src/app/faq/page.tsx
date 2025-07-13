@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import SidebarLayout from '@/layouts/Sidebar/Layout';
 import {
 	Accordion,
@@ -6,7 +8,6 @@ import {
 	AccordionTrigger,
 	AccordionContent,
 } from '@/components/ui/accordion';
-import { ChevronDown } from 'lucide-react';
 
 const faqs = [
 	{
@@ -44,27 +45,39 @@ const faqs = [
 ];
 
 export default function FAQPage() {
+	const [searchTerm, setSearchTerm] = useState('');
+
+	// Filter FAQs based on the search term
+	const filteredFaqs = faqs.filter(
+		(faq) =>
+			faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			faq.answer.toLowerCase().includes(searchTerm.toLowerCase())
+	);
+
 	return (
 		<SidebarLayout>
 			<div className='flex flex-col items-center justify-center py-10 px-4'>
-				<h1 className='text-2xl font-bold mb-6'>
+				<h1 className='text-xl font-bold mb-4'>
 					FAQ - Frequently Asked Questions
 				</h1>
+				{/* Search Bar */}
+				<div className='w-full max-w-4xl mb-4'>
+					<input
+						type='text'
+						placeholder='Search FAQs...'
+						value={searchTerm}
+						onChange={(e) => setSearchTerm(e.target.value)}
+						className='w-full p-2 border border-gray-300 rounded-md text-sm'
+					/>
+				</div>
 				<div className='w-full max-w-4xl'>
-					<Accordion type='single' collapsible className='space-y-4'>
-						{faqs.map((faq, index) => (
-							<AccordionItem
-								key={index}
-								value={`faq-${index}`}
-								className='border border-gray-200 rounded-xl px-6 py-4 shadow-md'
-							>
-								<AccordionTrigger className='flex justify-between items-center w-full text-left cursor-pointer'>
-									<span className='text-lg font-medium'>
-										{faq.question}
-									</span>
-									<ChevronDown className='w-5 h-5' />
+					<Accordion type='single' collapsible className='space-y-2'>
+						{filteredFaqs.map((faq, index) => (
+							<AccordionItem key={index} value={`faq-${index}`}>
+								<AccordionTrigger className='text-base font-medium'>
+									{faq.question}
 								</AccordionTrigger>
-								<AccordionContent className='mt-2 text-gray-600'>
+								<AccordionContent className='text-sm text-muted-foreground'>
 									{faq.answer}
 								</AccordionContent>
 							</AccordionItem>
