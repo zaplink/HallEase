@@ -1415,11 +1415,7 @@ export default function ReserveEventForm({
 					})) || [],
 			};
 			// Pass draftId if present
-			let draftId: string | undefined = undefined;
-			if (typeof window !== 'undefined') {
-				const params = new URLSearchParams(window.location.search);
-				draftId = params.get('draftId') || undefined;
-			}
+			// Removed unused draftId assignment
 			const result = await handleSubmit(formData, 'draft');
 			// Success handled by the hook
 			if (result) {
