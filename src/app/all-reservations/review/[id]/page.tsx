@@ -456,7 +456,7 @@ export default function ReviewReservationPage() {
 
 			const eventLocation =
 				reservation.hallOption === 'availability'
-					? 'Preferred Hall: Any Available'
+					? 'Notified on Availability'
 					: `Requested Hall: ${reservation.hallOption}`;
 
 			// Send email notification
