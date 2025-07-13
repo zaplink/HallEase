@@ -2,95 +2,213 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useRouter } from 'next/navigation';
 
 export default function ResetPasswordPage() {
 	const [password, setPassword] = useState('');
+	const [confirmPassword, setConfirmPassword] = useState('');
 	const [message, setMessage] = useState('');
-	const [isSessionSet, setIsSessionSet] = useState(false);
+	const [isReady, setIsReady] = useState(false);
+	const [isUpdating, setIsUpdating] = useState(false);
+	const router = useRouter();
 
 	useEffect(() => {
-		async function handleSession() {
-			// Supabase returns access_token and refresh_token in the URL hash (#) after password reset
-			const hash = window.location.hash.substring(1); // remove '#'
-			const params = new URLSearchParams(hash);
+		async function handlePasswordReset() {
+			try {
+				// Log the URL for debugging
+				console.log('Current URL:', window.location.href);
 
-			const access_token = params.get('access_token');
-			const refresh_token = params.get('refresh_token');
+				// Check if we already have a session
+				const { data: sessionData, error: sessionError } =
+					await supabase.auth.getSession();
 
-			if (access_token) {
-				const { error } = await supabase.auth.setSession({
-					access_token,
-					refresh_token: refresh_token || '',
-				});
+				if (sessionError) {
+					console.error('Session error:', sessionError);
+				}
+
+				if (sessionData?.session) {
+					console.log('Existing session found');
+					setIsReady(true);
+					setMessage('Ready to reset password');
+					return;
+				}
+
+				// Handle Supabase auth callback automatically
+				// This will process any auth tokens in the URL
+				const { data, error } = await supabase.auth.getSession();
 
 				if (error) {
-					setMessage('Session error: ' + error.message);
-				} else {
-					setIsSessionSet(true);
+					console.error('Auth error:', error);
+					setMessage(
+						'Invalid or expired reset link. Please request a new one.'
+					);
+					return;
 				}
-			} else {
-				setMessage('Invalid or missing token in the reset link.');
+
+				if (data.session) {
+					console.log('Session established from URL');
+					setIsReady(true);
+					setMessage('Ready to reset password');
+				} else {
+					// If no session, this might be an invalid link
+					setMessage(
+						'Invalid or expired reset link. Please request a new one.'
+					);
+				}
+			} catch (error) {
+				console.error('Error handling reset:', error);
+				setMessage(
+					'An error occurred. Please request a new reset link.'
+				);
 			}
 		}
 
-		handleSession();
+		// Add a small delay to ensure the page is fully loaded
+		const timer = setTimeout(handlePasswordReset, 100);
+
+		return () => clearTimeout(timer);
 	}, []);
 
-	const handleReset = async () => {
+	const handlePasswordUpdate = async () => {
 		if (!password) {
 			setMessage('Please enter a new password.');
 			return;
 		}
 
-		const { error } = await supabase.auth.updateUser({ password });
-		if (error) {
-			setMessage(error.message);
-		} else {
-			setMessage('✅ Password updated successfully! You can now log in.');
+		if (password.length < 6) {
+			setMessage('Password must be at least 6 characters long.');
+			return;
+		}
+
+		if (password !== confirmPassword) {
+			setMessage('Passwords do not match.');
+			return;
+		}
+
+		setIsUpdating(true);
+
+		try {
+			const { error } = await supabase.auth.updateUser({
+				password: password,
+			});
+
+			if (error) {
+				setMessage('Error updating password: ' + error.message);
+			} else {
+				setMessage(
+					'✅ Password updated successfully! Redirecting to login...'
+				);
+				setTimeout(() => {
+					router.push('/login');
+				}, 2000);
+			}
+		} catch (error) {
+			console.error('Password update error:', error);
+			setMessage('Failed to update password. Please try again.');
+		} finally {
+			setIsUpdating(false);
 		}
 	};
 
 	return (
-		<div className='max-w-md mx-auto mt-20 px-4'>
-			<h1 className='text-xl font-bold mb-4 text-center'>
-				Reset Your Password
-			</h1>
+		<div className='min-h-screen flex items-center justify-center bg-gray-50 px-4'>
+			<Card className='w-full max-w-md shadow-md bg-white/80'>
+				<CardHeader>
+					<CardTitle className='text-center'>
+						Reset Your Password
+					</CardTitle>
+				</CardHeader>
 
-			{!isSessionSet && !message && (
-				<p className='text-center text-gray-500 mb-4'>
-					Validating session...
-				</p>
-			)}
+				<CardContent className='space-y-4'>
+					{!isReady && !message && (
+						<p className='text-center text-gray-500'>
+							Processing reset link...
+						</p>
+					)}
 
-			{message && (
-				<p
-					className={`text-center mb-4 ${
-						message.includes('successfully')
-							? 'text-green-600'
-							: 'text-red-600'
-					}`}
-				>
-					{message}
-				</p>
-			)}
+					{message && (
+						<p
+							className={`text-center text-sm ${
+								message.includes('successfully') ||
+								message.includes('Ready')
+									? 'text-green-600'
+									: 'text-red-600'
+							}`}
+						>
+							{message}
+						</p>
+					)}
 
-			{isSessionSet && (
-				<>
-					<input
-						type='password'
-						placeholder='New password'
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						className='border p-2 w-full mb-4 rounded'
-					/>
-					<button
-						onClick={handleReset}
-						className='bg-black text-white px-4 py-2 w-full rounded'
-					>
-						Update Password
-					</button>
-				</>
-			)}
+					{isReady && (
+						<div className='space-y-4'>
+							<div>
+								<label className='block text-sm font-medium mb-2'>
+									New Password
+								</label>
+								<Input
+									type='password'
+									placeholder='Enter new password (min 6 characters)'
+									value={password}
+									onChange={(e) =>
+										setPassword(e.target.value)
+									}
+									disabled={isUpdating}
+								/>
+							</div>
+
+							<div>
+								<label className='block text-sm font-medium mb-2'>
+									Confirm Password
+								</label>
+								<Input
+									type='password'
+									placeholder='Confirm new password'
+									value={confirmPassword}
+									onChange={(e) =>
+										setConfirmPassword(e.target.value)
+									}
+									disabled={isUpdating}
+								/>
+							</div>
+
+							<Button
+								onClick={handlePasswordUpdate}
+								disabled={
+									isUpdating || !password || !confirmPassword
+								}
+								className='w-full bg-black text-white hover:bg-gray-800'
+							>
+								{isUpdating
+									? 'Updating Password...'
+									: 'Update Password'}
+							</Button>
+						</div>
+					)}
+
+					{!isReady && message && !message.includes('Processing') && (
+						<div className='text-center space-y-2'>
+							<Button
+								onClick={() => router.push('/lost-password')}
+								variant='outline'
+								className='w-full'
+							>
+								Request New Reset Link
+							</Button>
+
+							<Button
+								onClick={() => router.push('/login')}
+								variant='ghost'
+								className='w-full text-sm'
+							>
+								Back to Login
+							</Button>
+						</div>
+					)}
+				</CardContent>
+			</Card>
 		</div>
 	);
 }

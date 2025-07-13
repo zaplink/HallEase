@@ -1,5 +1,9 @@
 import LostPasswordForm from '@/components/ui/LostPasswordForm';
 
 export default function LostPasswordPage() {
-	return <LostPasswordForm />;
+	return (
+		<div className='min-h-screen flex items-center justify-center bg-gray-50 px-4'>
+			<LostPasswordForm />
+		</div>
+	);
 }

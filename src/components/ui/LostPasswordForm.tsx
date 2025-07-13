@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { supabase } from '@/lib/supabaseClient'; // 👈 required for calling Supabase
+import { getBaseUrl } from '@/utils/getBaseUrl';
 
 import {
 	Form,
@@ -56,7 +57,7 @@ export default function LostPasswordForm() {
 			const { error } = await supabase.auth.resetPasswordForEmail(
 				data.email,
 				{
-					redirectTo: 'http://localhost:3000/reset-password', // Use your deployed site URL in production
+					redirectTo: `${getBaseUrl()}/reset-password`,
 				}
 			);
 
