@@ -552,7 +552,7 @@ function VenueStep({ form }: { form: UseFormReturn<FormData> }) {
 						}))
 					);
 				}
-			} catch (err) {
+			} catch {
 				setHalls([]);
 			} finally {
 				setLoadingHalls(false);
