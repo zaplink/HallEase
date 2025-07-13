@@ -74,7 +74,7 @@ const sidebarMenu = [
 		sectionTitle: 'Reservations',
 		sectionMenu: [
 			{
-				itemTitle: 'All Reservations',
+				itemTitle: 'Manage Reservations',
 				itemUrl: '/all-reservations',
 				itemIcon: Library,
 				roleSlugs: [],
