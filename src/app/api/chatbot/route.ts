@@ -115,7 +115,7 @@ IMPORTANT: If generating SQL, ensure it's a simple SELECT query. Do NOT generate
 Return the response as raw JSON, without Markdown code fences `;
 
 		const result = await geminiModel.generateContent(initialPrompt);
-		const responseText = result.response.text();
+		const responseText = await result.response.text();
 
 		console.log('Gemini Raw Response (Initial):', responseText);
 
@@ -182,7 +182,7 @@ Return the response as raw JSON, without Markdown code fences `;
 
 				const summaryResult =
 					await geminiModel.generateContent(summarizationPrompt);
-				finalBotResponse = summaryResult.response.text();
+				finalBotResponse = await summaryResult.response.text();
 				console.log('Gemini Raw Response (Summary):', finalBotResponse);
 			} else {
 				finalBotResponse =
