@@ -70,9 +70,8 @@ export default function ReservePage() {
 	};
 
 	const handleEditDraft = (draft: DraftSummary) => {
-		// Navigate to the appropriate form based on draft type
-		router.push(`/reserve/${draft.type}`);
-		// In a real implementation, you would also load the draft data into the form
+		// Navigate to the appropriate form based on draft type, passing draftId as query param
+		router.push(`/reserve/${draft.type}?draftId=${draft.id}`);
 		console.log('Editing draft:', draft);
 	};
 
