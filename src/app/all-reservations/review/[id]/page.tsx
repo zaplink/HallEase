@@ -469,6 +469,8 @@ export default function ReviewReservationPage() {
 					reservationId: reservation.id,
 					status,
 					requesterName: reservation.profile.fullName,
+					rejectReason:
+						status === 'rejected' ? rejectReason.trim() : undefined,
 				};
 
 				const emailRes = await fetch('/api/send-status-mail', {
