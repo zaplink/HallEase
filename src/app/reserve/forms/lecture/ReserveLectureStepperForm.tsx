@@ -1241,6 +1241,43 @@ function ExtrasStep({ form }: { form: UseFormReturn<StepperFormData> }) {
 	);
 }
 
+// Dynamically fetch attendee count for review step
+function AttendeeCountReview({ courseId }: { courseId?: string }) {
+	const [attendeeCount, setAttendeeCount] = React.useState<number | null>(
+		null
+	);
+	React.useEffect(() => {
+		async function fetchCourseCapacity(id: string | undefined) {
+			if (!id) {
+				setAttendeeCount(null);
+				return;
+			}
+			try {
+				const { data, error } = await supabase
+					.from('course')
+					.select('capacity')
+					.eq('id', id)
+					.single();
+				if (error || !data) {
+					setAttendeeCount(null);
+				} else {
+					setAttendeeCount(data.capacity ?? null);
+				}
+			} catch {
+				setAttendeeCount(null);
+			}
+		}
+		fetchCourseCapacity(courseId);
+	}, [courseId]);
+	return (
+		<p className='text-sm text-muted-foreground mt-1'>
+			{attendeeCount !== null
+				? `${attendeeCount} people (Course capacity)`
+				: '—'}
+		</p>
+	);
+}
+
 function ReviewStep({
 	form,
 	watchedValues,
@@ -1359,9 +1396,9 @@ function ReviewStep({
 							<Label className='text-sm font-medium'>
 								Attendee Count
 							</Label>
-							<p className='text-sm text-muted-foreground mt-1'>
-								35 people (Course capacity)
-							</p>
+							<AttendeeCountReview
+								courseId={watchedValues.course}
+							/>
 						</div>
 
 						<div>
