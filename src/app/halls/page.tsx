@@ -16,7 +16,9 @@ export default function Hall() {
 	useEffect(() => {
 		async function fetchHalls() {
 			try {
+				console.log('Starting to fetch halls...');
 				const data = await getHalls();
+				console.log('Received halls data:', data);
 				setHalls(data);
 			} catch (error) {
 				console.error('Failed to fetch halls:', error);
