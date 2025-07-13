@@ -336,9 +336,14 @@ export default function ReserveLectureStepperForm({
 	const saveDraft = async () => {
 		const currentData = form.getValues();
 
-		// For draft, only require course code
+		// For draft, require course code and date
 		if (!currentData.course?.trim()) {
 			toast.error('Course code is required to save a draft');
+			return;
+		}
+
+		if (!currentData.date) {
+			toast.error('Date must be selected to save a draft');
 			return;
 		}
 

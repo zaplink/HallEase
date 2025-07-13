@@ -7,26 +7,50 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { DraftSummary, getRecentDrafts } from './getRecentDrafts';
 import Loading from '@/components/custom/Loading';
+import { useDraftRefreshListener } from './refreshDrafts';
 
 export default function ReservePage() {
 	const router = useRouter();
 	const [drafts, setDrafts] = useState<DraftSummary[]>([]);
 	const [loading, setLoading] = useState(true);
 
-	useEffect(() => {
-		async function fetchDrafts() {
-			try {
-				const recentDrafts = await getRecentDrafts(5); // Get most recent 5 drafts
-				setDrafts(recentDrafts);
-			} catch (error) {
-				console.error('Failed to fetch drafts:', error);
-			} finally {
-				setLoading(false);
-			}
+	const fetchDrafts = async () => {
+		console.log('Reserve page - Fetching drafts...');
+		try {
+			const recentDrafts = await getRecentDrafts(5); // Get most recent 5 drafts
+			console.log('Reserve page - Fetched drafts:', recentDrafts);
+			setDrafts(recentDrafts);
+		} catch (error) {
+			console.error('Failed to fetch drafts:', error);
+		} finally {
+			setLoading(false);
 		}
+	};
 
+	useEffect(() => {
 		fetchDrafts();
+
+		// Listen for focus events to refresh when user returns to the page
+		const handleFocus = () => {
+			fetchDrafts();
+		};
+
+		window.addEventListener('focus', handleFocus);
+
+		// Set up an interval to periodically refresh drafts
+		const refreshInterval = setInterval(() => {
+			fetchDrafts();
+		}, 30000); // Refresh every 30 seconds
+
+		// Cleanup on component unmount
+		return () => {
+			window.removeEventListener('focus', handleFocus);
+			clearInterval(refreshInterval);
+		};
 	}, []);
+
+	// Listen for custom refresh events
+	useDraftRefreshListener(fetchDrafts);
 
 	const purposes = [
 		{

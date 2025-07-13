@@ -56,9 +56,27 @@ export default function ReserveLectureForm({
 	const onSubmit = (formData: ReserveLectureFormData) => {
 		const status = submissionType.current === 'draft' ? 'draft' : 'pending';
 
-		if (status === 'draft' && !formData.course?.trim()) {
-			alert('Course code is still required to save a draft.');
-			return;
+		// Enhanced validation for drafts
+		if (status === 'draft') {
+			if (!formData.course?.trim()) {
+				alert('Course code is required to save a draft.');
+				return;
+			}
+
+			if (!formData.date) {
+				alert('Date must be selected to save a draft.');
+				return;
+			}
+
+			// If time fields are incomplete, warn but allow saving
+			if (
+				!formData.startHour ||
+				!formData.startMinute ||
+				!formData.endHour ||
+				!formData.endMinute
+			) {
+				console.log('Saving draft with incomplete time fields');
+			}
 		}
 
 		handleSubmit(formData, status)

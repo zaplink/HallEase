@@ -11,6 +11,13 @@ export async function submitBooking(
 	draftId?: string // Optional draft ID for updating existing draft
 ) {
 	console.log('submitBooking called with:', { formData, status, draftId });
+	console.log('Form data date:', formData.date);
+	console.log('Form data times:', {
+		startHour: formData.startHour,
+		startMinute: formData.startMinute,
+		endHour: formData.endHour,
+		endMinute: formData.endMinute,
+	});
 
 	// Get current user
 	const {
@@ -28,6 +35,7 @@ export async function submitBooking(
 	}
 
 	const mappedFormData = mapBookingDataToApi(formData);
+	console.log('Mapped form data:', mappedFormData);
 	const now = new Date();
 
 	// Prepare reserve table data according to schema
@@ -46,6 +54,8 @@ export async function submitBooking(
 		is_submitted: status === 'pending', // true for submitted, false for draft
 		is_consented: status === 'pending', // true if submitted (consented), false for draft
 	};
+
+	console.log('Reserve data to insert/update:', reserveData);
 
 	let reserveId: string;
 
@@ -109,20 +119,25 @@ export async function submitBooking(
 		equipmentId = equipmentResult?.[0]?.id;
 	}
 
-	// Find course_id based on course code
+	// Find course_id based on course UUID (the form stores the UUID as the value)
 	let courseId: string | null = null;
 	if (mappedFormData.course) {
+		// The course field already contains the UUID from the form selection
+		courseId = mappedFormData.course;
+
+		// Optionally verify the course exists
 		const { data: courseData, error: courseError } = await supabase
 			.from('course')
-			.select('id')
-			.eq('char', mappedFormData.course)
+			.select('id, char, digit')
+			.eq('id', mappedFormData.course)
 			.single();
 
 		if (courseError) {
-			console.log('Course not found:', courseError);
-			// Continue without course_id if course not found
+			console.log('Course verification failed:', courseError);
+			console.log('Submitted course ID:', mappedFormData.course);
+			// Continue with the course ID anyway - it might be valid
 		} else {
-			courseId = courseData?.id;
+			console.log('Course verified:', courseData);
 		}
 	}
 

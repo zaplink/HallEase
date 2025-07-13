@@ -46,6 +46,9 @@ export async function submitReserveEvent(
 	};
 
 	console.log('Reserve data to insert/update:', reserveData);
+	console.log('Mapped form data:', mappedFormData);
+	console.log('Status:', status);
+	console.log('Draft ID:', draftId);
 
 	let reserveId: string;
 
@@ -88,9 +91,20 @@ export async function submitReserveEvent(
 
 		if (reserveDataError) {
 			console.log('Reserve data error:', reserveDataError);
+			console.error(
+				'Detailed error:',
+				JSON.stringify(reserveDataError, null, 2)
+			);
 			throw new Error(reserveDataError.message);
 		}
+
+		if (!reserveDataResult || reserveDataResult.length === 0) {
+			console.error('No reserve data returned after insert');
+			throw new Error('No reserve ID returned after insertion');
+		}
+
 		reserveId = reserveDataResult?.[0]?.id;
+		console.log('New reserve created with ID:', reserveId);
 	}
 
 	// Handle equipment - delete old equipment first if updating draft
@@ -169,9 +183,20 @@ export async function submitReserveEvent(
 
 		if (eventDataError) {
 			console.log('Event data error:', eventDataError);
+			console.error(
+				'Detailed event error:',
+				JSON.stringify(eventDataError, null, 2)
+			);
 			throw new Error(eventDataError.message);
 		}
+
+		if (!eventDataResult || eventDataResult.length === 0) {
+			console.error('No event data returned after insert');
+			throw new Error('No event ID returned after insertion');
+		}
+
 		eventId = eventDataResult?.[0]?.id;
+		console.log('New event created with ID:', eventId);
 	}
 
 	// Fetch requester email from profiles table
@@ -187,6 +212,30 @@ export async function submitReserveEvent(
 		throw new Error(profileError.message);
 	}
 	requesterEmail = profileData?.email ?? null;
+
+	console.log('Final result - Reserve ID:', reserveId, 'Event ID:', eventId);
+
+	// Verify the draft was saved by querying it back
+	if (status === 'draft') {
+		const { data: verifyData, error: verifyError } = await supabase
+			.from('reserve')
+			.select('id, is_submitted, type')
+			.eq('id', reserveId)
+			.single();
+
+		console.log('Draft verification result:', { verifyData, verifyError });
+
+		if (verifyError) {
+			console.error('Failed to verify draft was saved:', verifyError);
+		} else {
+			console.log(
+				'Draft verified - ID:',
+				verifyData.id,
+				'is_submitted:',
+				verifyData.is_submitted
+			);
+		}
+	}
 
 	return {
 		reserveId,

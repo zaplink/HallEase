@@ -41,17 +41,28 @@ export const eventTypeOptions = [
 ];
 
 export function mapBookingDataToApi(data: ReserveLectureFormData) {
-	// Create time strings in HH:MM format
-	const startTime = `${data.startHour.padStart(2, '0')}:${data.startMinute.padStart(2, '0')}`;
-	const endTime = `${data.endHour.padStart(2, '0')}:${data.endMinute.padStart(2, '0')}`;
+	// Create time strings in HH:MM format, handle empty values
+	const startTime =
+		data.startHour && data.startMinute
+			? `${data.startHour.padStart(2, '0')}:${data.startMinute.padStart(2, '0')}`
+			: null;
+	const endTime =
+		data.endHour && data.endMinute
+			? `${data.endHour.padStart(2, '0')}:${data.endMinute.padStart(2, '0')}`
+			: null;
 
 	// Convert equipment array to semicolon-separated string as per schema
 	const equipmentString = data.equipment?.join(';') || '';
 
+	// Format date properly for database, handle undefined dates
+	const formattedDate = data.date
+		? data.date.toISOString().split('T')[0]
+		: null;
+
 	return {
 		// Reserve table fields
 		course: data.course,
-		date: data.date,
+		date: formattedDate,
 		start_time: startTime,
 		end_time: endTime,
 		hall_option: data.hallOpt,
