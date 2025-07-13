@@ -49,6 +49,8 @@ import { eventTypeOptions, ReserveEventFormData } from './reserve.event.data';
 import { DatePickerDemo } from '@/components/ui/DatePicker';
 import { Textarea } from '@/components/ui/textarea';
 import { useBooking } from './useReserveEvent';
+import { useEffect } from 'react';
+import { createClient } from '@/lib/supabaseClient';
 
 // Form schema with all steps
 const formSchema = z.object({
@@ -528,10 +530,36 @@ function DateTimeStep({ form }: { form: UseFormReturn<FormData> }) {
 }
 
 function VenueStep({ form }: { form: UseFormReturn<FormData> }) {
-	const halls = [
-		{ value: 'LCH-AB-01', label: 'LCH-AB-01' },
-		{ value: 'LCH-AB-02', label: 'LCH-AB-02' },
-	];
+	const [halls, setHalls] = useState<{ value: string; label: string }[]>([]);
+	const [loadingHalls, setLoadingHalls] = useState(false);
+
+	useEffect(() => {
+		async function fetchHalls() {
+			setLoadingHalls(true);
+			try {
+				const supabase = createClient();
+				const { data, error } = await supabase
+					.from('hall')
+					.select('code')
+					.eq('is_available', true);
+				if (error) {
+					setHalls([]);
+				} else {
+					setHalls(
+						(data || []).map((hall: { code: string }) => ({
+							value: hall.code,
+							label: hall.code,
+						}))
+					);
+				}
+			} catch (err) {
+				setHalls([]);
+			} finally {
+				setLoadingHalls(false);
+			}
+		}
+		fetchHalls();
+	}, []);
 
 	const hallSelection = useWatch({
 		control: form.control,
@@ -630,7 +658,11 @@ function VenueStep({ form }: { form: UseFormReturn<FormData> }) {
 												onChange={(val) =>
 													field.onChange(val)
 												}
-												placeholder='Select Hall'
+												placeholder={
+													loadingHalls
+														? 'Loading halls...'
+														: 'Select Hall'
+												}
 											/>
 										</FormControl>
 										<FormMessage />
