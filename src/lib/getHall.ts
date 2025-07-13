@@ -5,7 +5,7 @@ export const getHall = async (id: string) => {
 		const supabase = createClient();
 
 		const { data, error } = await supabase
-			.from('halls-v1')
+			.from('hall')
 			.select('*')
 			.eq('id', id)
 			.single();
