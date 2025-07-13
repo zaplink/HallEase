@@ -53,6 +53,7 @@ interface TimetableSlot {
 	wednesday?: GeneralLecture;
 	thursday?: GeneralLecture;
 	friday?: GeneralLecture;
+	saturday?: GeneralLecture;
 }
 
 const timeSlots = [
@@ -77,7 +78,14 @@ const timeSlots = [
 	'17:00',
 ];
 
-const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
+const days = [
+	'MONDAY',
+	'TUESDAY',
+	'WEDNESDAY',
+	'THURSDAY',
+	'FRIDAY',
+	'SATURDAY',
+];
 
 export default function GeneralLecturesTimetable() {
 	const [lectures, setLectures] = useState<GeneralLecture[]>([]);
@@ -491,6 +499,10 @@ export default function GeneralLecturesTimetable() {
 					case 'friday':
 					case 'fri':
 						dayKey = 'friday';
+						break;
+					case 'saturday':
+					case 'sat':
+						dayKey = 'saturday';
 						break;
 					default:
 						return;
