@@ -80,92 +80,145 @@ export default function GeneralLecturesTimetable() {
 	const [error, setError] = useState<string | null>(null);
 	const [totalLecturesCount, setTotalLecturesCount] = useState<number>(0);
 
+	// Log state changes for selectedHall and searchQuery
+	useEffect(() => {
+		// console.log('[STATE] selectedHall changed:', selectedHall);
+		// console.log('STEP 1: Hall selection changed');
+		console.log('LOG: Hall changed:', selectedHall);
+	}, [selectedHall]);
+
+	useEffect(() => {
+		// console.log('[STATE] searchQuery changed:', searchQuery);
+		// console.log('STEP 2: Search query changed');
+		// ...existing code...
+	}, [searchQuery]);
+
+	useEffect(() => {
+		// console.log('[STATE] lectures updated:', lectures);
+		// console.log('STEP 3: Lectures updated');
+		// ...existing code...
+	}, [lectures]);
+
+	useEffect(() => {
+		// console.log('[STATE] halls updated:', halls);
+		// console.log('STEP 4: Halls updated');
+		// ...existing code...
+	}, [halls]);
+
+	useEffect(() => {
+		// console.log('[STATE] courses updated:', courses);
+		// console.log('STEP 5: Courses updated');
+		// ...existing code...
+	}, [courses]);
+
 	// Fetch initial data
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
 				setLoading(true);
-				console.log('🚀 Starting data fetch...');
+				console.log('#### 🚀 Starting data fetch...');
 
 				// Check database connectivity first
-				console.log('📡 Testing database connectivity...');
+				console.log('#### 📡 Testing database connectivity...');
 				const { data: testData, error: testError } = await supabase
 					.from('course')
 					.select('count')
 					.limit(1);
+				console.log('#### [FETCH] course connectivity test:', {
+					testData,
+					testError,
+				});
 
 				if (testError) {
 					console.error(
 						'❌ Database connectivity test failed:',
 						testError
 					);
-					throw new Error(
-						`Database connection failed: ${testError.message}`
-					);
+					throw testError;
 				}
-				console.log('✅ Database connectivity confirmed');
+				console.log('#### ✅ Database connectivity confirmed');
 
 				// Fetch halls
-				console.log('🏢 Fetching halls...');
+				console.log('#### 🏢 Fetching halls...');
 				const { data: hallsData, error: hallsError } = await supabase
 					.from('hall')
 					.select('id, code, description, is_available')
 					.order('code');
+				console.log('#### [FETCH] hallsData:', hallsData);
+				console.log('#### [FETCH] hallsError:', hallsError);
 
 				if (hallsError) {
 					console.error('❌ Halls fetch error:', hallsError);
 					throw hallsError;
 				}
 
-				console.log('📊 All halls found:', hallsData?.length || 0);
-				console.log('🏢 Sample halls:', hallsData?.slice(0, 3));
+				console.log('#### 📊 All halls found:', hallsData?.length || 0);
+				console.log('#### 🏢 Sample halls:', hallsData?.slice(0, 3));
 
 				const availableHalls =
 					hallsData?.filter((h) => h.is_available) || [];
-				console.log('✅ Available halls:', availableHalls.length);
+				console.log(
+					'#### ✅ Available halls:',
+					availableHalls.length,
+					availableHalls
+				);
 
 				// Fetch courses
-				console.log('📚 Fetching courses...');
+				console.log('#### 📚 Fetching courses...');
 				const { data: coursesData, error: coursesError } =
 					await supabase
 						.from('course')
 						.select('id, char, digit, name')
 						.order('char', { ascending: true })
 						.order('digit', { ascending: true });
+				console.log('#### [FETCH] coursesData:', coursesData);
+				console.log('#### [FETCH] coursesError:', coursesError);
 
 				if (coursesError) {
 					console.error('❌ Courses fetch error:', coursesError);
 					throw coursesError;
 				}
 
-				console.log('📊 Courses found:', coursesData?.length || 0);
-				console.log('📚 Sample courses:', coursesData?.slice(0, 3));
+				console.log('#### 📊 Courses found:', coursesData?.length || 0);
+				console.log(
+					'#### 📚 Sample courses:',
+					coursesData?.slice(0, 3)
+				);
 
 				setHalls(availableHalls);
 				setCourses(coursesData || []);
+				console.log('#### [STATE] setHalls:', availableHalls);
+				console.log('#### [STATE] setCourses:', coursesData || []);
 
 				// Check total lectures count for debugging
-				console.log('🎓 Checking general lectures...');
+				console.log('#### 🎓 Checking general lectures...');
 				const { count, error: countError } = await supabase
 					.from('general_lecture')
 					.select('*', { count: 'exact', head: true });
+				console.log('#### [FETCH] general_lecture count:', count);
+				console.log(
+					'#### [FETCH] general_lecture countError:',
+					countError
+				);
 
 				if (countError) {
 					console.error('❌ Lectures count error:', countError);
 				} else {
 					setTotalLecturesCount(count || 0);
-					console.log('📊 Total lectures in database:', count);
+					console.log('#### 📊 Total lectures in database:', count);
 				}
 
 				// Get a sample of all lectures to understand the data structure
 				const { data: sampleLectures, error: sampleError } =
 					await supabase.from('general_lecture').select('*').limit(5);
+				console.log('#### [FETCH] sampleLectures:', sampleLectures);
+				console.log('#### [FETCH] sampleError:', sampleError);
 
 				if (sampleError) {
 					console.error('❌ Sample lectures error:', sampleError);
 				} else {
 					console.log(
-						'🎓 Sample lectures structure:',
+						'#### 🎓 Sample lectures structure:',
 						sampleLectures
 					);
 				}
@@ -185,61 +238,83 @@ export default function GeneralLecturesTimetable() {
 		const fetchLectures = async () => {
 			if (!selectedHall) {
 				setLectures([]);
+				console.log('[FETCH] No hall selected, lectures cleared');
 				return;
 			}
 
 			try {
 				setError(null);
-				console.log('🎯 Fetching lectures for hall:', selectedHall);
-
-				// First, verify the hall exists and get its details
+				// console.log('STEP A: Checking hall table for selected hall...');
+				// console.log('DEBUG: selectedHall value:', selectedHall);
+				console.log('LOG: Fetching hall details for:', selectedHall);
 				const { data: hallInfo, error: hallError } = await supabase
 					.from('hall')
 					.select('*')
 					.eq('id', selectedHall)
 					.single();
-
 				if (hallError) {
-					console.error('❌ Hall verification failed:', hallError);
+					// console.log('STEP B: Hall not identified!');
+					// console.error('❌ Hall verification failed:', hallError);
 					throw new Error(`Hall not found: ${hallError.message}`);
 				}
-
-				console.log('✅ Hall verified:', hallInfo);
-
-				// Try the complex query with relationships first
-				console.log('🔗 Attempting query with relationships...');
+				console.log('LOG: Hall details:', hallInfo);
+				if (hallInfo && hallInfo.id) {
+					console.log('LOG: Hall ID:', hallInfo.id);
+				} else {
+					console.log('LOG: Hall ID not found in hall data!');
+				}
+				// Get all general_lecture rows for this hall_id
+				const { data: allLectures, error: allLecturesError } =
+					await supabase
+						.from('general_lecture')
+						.select('*')
+						.eq('hall_id', selectedHall);
+				if (allLecturesError) {
+					console.log(
+						'LOG: Error fetching general_lecture rows:',
+						allLecturesError
+					);
+				} else {
+					console.log(
+						'LOG: general_lecture rows for hall_id:',
+						selectedHall,
+						allLectures
+					);
+				}
+				// Fetch with relationships (original logic, needed for timetable rendering)
 				const { data, error } = await supabase
 					.from('general_lecture')
 					.select(
 						`
-						id,
-						day,
-						start_time,
-						end_time,
-						course_id,
-						hall_id,
-						course:course_id (
-							id,
-							char,
-							digit,
-							name
-						),
-						hall:hall_id (
-							id,
-							code,
-							description
-						)
-					`
+		id,
+		day,
+		start_time,
+		end_time,
+		course_id,
+		hall_id,
+		course:course_id (
+		  id,
+		  char,
+		  digit,
+		  name
+		),
+		hall:hall_id (
+		  id,
+		  code,
+		  description
+		)
+	  `
 					)
 					.eq('hall_id', selectedHall)
 					.order('start_time');
+				// ...existing code...
 
 				if (error) {
 					console.error('❌ Complex query failed:', error);
 
 					// Try simpler query without relationships
 					console.log(
-						'🔄 Trying simple query without relationships...'
+						'#### 🔄 Trying simple query without relationships...'
 					);
 					const { data: simpleData, error: simpleError } =
 						await supabase
@@ -247,6 +322,14 @@ export default function GeneralLecturesTimetable() {
 							.select('*')
 							.eq('hall_id', selectedHall)
 							.order('start_time');
+					console.log(
+						'#### [FETCH] general_lecture (simple):',
+						simpleData
+					);
+					console.log(
+						'#### [FETCH] general_lecture error (simple):',
+						simpleError
+					);
 
 					if (simpleError) {
 						console.error(
@@ -257,35 +340,49 @@ export default function GeneralLecturesTimetable() {
 					}
 
 					console.log(
-						'✅ Simple query succeeded:',
+						'#### ✅ Simple query succeeded:',
 						simpleData?.length || 0,
 						'lectures'
 					);
 					console.log(
-						'📊 Simple data sample:',
+						'#### 📊 Simple data sample:',
 						simpleData?.slice(0, 2)
 					);
 
 					// If simple query works, manually join the data
 					if (simpleData && simpleData.length > 0) {
 						console.log(
-							'🔧 Manually joining course and hall data...'
+							'#### 🔧 Manually joining course and hall data...'
 						);
 						const enrichedData = await Promise.all(
 							simpleData.map(async (lecture) => {
 								// Get course info
-								const { data: courseInfo } = await supabase
-									.from('course')
-									.select('*')
-									.eq('id', lecture.course_id)
-									.single();
+								const { data: courseInfo, error: courseError } =
+									await supabase
+										.from('course')
+										.select('*')
+										.eq('id', lecture.course_id)
+										.single();
+								console.log(
+									'#### [JOIN] courseInfo:',
+									courseInfo,
+									'courseError:',
+									courseError
+								);
 
 								// Get hall info
-								const { data: hallInfo } = await supabase
-									.from('hall')
-									.select('*')
-									.eq('id', lecture.hall_id)
-									.single();
+								const { data: hallInfo, error: hallJoinError } =
+									await supabase
+										.from('hall')
+										.select('*')
+										.eq('id', lecture.hall_id)
+										.single();
+								console.log(
+									'#### [JOIN] hallInfo:',
+									hallInfo,
+									'hallJoinError:',
+									hallJoinError
+								);
 
 								return {
 									...lecture,
@@ -296,10 +393,11 @@ export default function GeneralLecturesTimetable() {
 						);
 
 						console.log(
-							'✅ Data enrichment complete:',
+							'#### ✅ Data enrichment complete:',
 							enrichedData
 						);
 						setLectures(enrichedData);
+						console.log('#### [STATE] setLectures:', enrichedData);
 						return;
 					}
 
@@ -307,12 +405,13 @@ export default function GeneralLecturesTimetable() {
 				}
 
 				console.log(
-					'✅ Complex query succeeded:',
+					'#### ✅ Complex query succeeded:',
 					data?.length || 0,
 					'lectures'
 				);
-				console.log('📊 Complex data sample:', data?.slice(0, 2));
+				console.log('#### 📊 Complex data sample:', data?.slice(0, 2));
 				setLectures(data || []);
+				console.log('#### [STATE] setLectures:', data || []);
 			} catch (err) {
 				console.error('💥 Error fetching lectures:', err);
 				setError('Failed to load lectures: ' + (err as Error).message);
@@ -325,11 +424,14 @@ export default function GeneralLecturesTimetable() {
 	// Filter courses based on search query
 	const filteredCourses = courses.filter((course) => {
 		const searchLower = searchQuery.toLowerCase();
-		return (
+		const result =
 			course.char.toLowerCase().includes(searchLower) ||
 			course.digit.includes(searchLower) ||
-			course.name.toLowerCase().includes(searchLower)
-		);
+			course.name.toLowerCase().includes(searchLower);
+		if (searchQuery) {
+			console.log('[FILTER] course:', course, 'matches:', result);
+		}
+		return result;
 	});
 
 	// Create timetable data
@@ -337,22 +439,22 @@ export default function GeneralLecturesTimetable() {
 		const timetableData: TimetableSlot[] = timeSlots.map((time) => ({
 			time,
 		}));
-
-		console.log('Creating timetable data with lectures:', lectures);
-
-		lectures.forEach((lecture) => {
+		console.log(
+			'[TIMETABLE] Creating timetable data with lectures:',
+			lectures
+		);
+		lectures.forEach((lecture, idx) => {
 			const startTime = lecture.start_time.substring(0, 5); // Get HH:MM format
 			const slotIndex = timeSlots.findIndex((slot) => slot === startTime);
-
 			console.log(
-				`Processing lecture: ${lecture.day} at ${startTime}, slot index: ${slotIndex}`
+				`[TIMETABLE] [${idx}] Processing lecture:`,
+				lecture,
+				`at ${startTime}, slot index: ${slotIndex}`
 			);
-
 			if (slotIndex !== -1) {
 				// Normalize day name to match our keys
 				const dayLower = lecture.day.toLowerCase();
 				let dayKey: keyof Omit<TimetableSlot, 'time'>;
-
 				switch (dayLower) {
 					case 'monday':
 					case 'mon':
@@ -378,18 +480,16 @@ export default function GeneralLecturesTimetable() {
 						dayKey = 'friday';
 						break;
 					default:
-						console.warn(`Unknown day: ${lecture.day}`);
+						console.warn(`[TIMETABLE] Unknown day: ${lecture.day}`);
 						return;
 				}
-
 				timetableData[slotIndex][dayKey] = lecture;
 				console.log(
-					`Assigned lecture to ${dayKey} at slot ${slotIndex}`
+					`[TIMETABLE] Assigned lecture to ${dayKey} at slot ${slotIndex}`
 				);
 			}
 		});
-
-		console.log('Final timetable data:', timetableData);
+		console.log('[TIMETABLE] Final timetable data:', timetableData);
 		return timetableData;
 	};
 
@@ -398,17 +498,15 @@ export default function GeneralLecturesTimetable() {
 	// Render lecture cell
 	const renderLectureCell = (lecture?: GeneralLecture) => {
 		if (!lecture) {
+			console.log('[RENDER] Empty lecture cell');
 			return <div className='text-center text-gray-400 p-2'>-</div>;
 		}
-
-		console.log('Rendering lecture cell:', lecture);
-
+		console.log('[RENDER] Rendering lecture cell:', lecture);
 		const course = Array.isArray(lecture.course)
 			? lecture.course[0]
 			: lecture.course;
 		let courseCode = 'Unknown';
 		let courseName = 'Unknown Course';
-
 		if (course) {
 			courseCode = `${course.char || ''} ${course.digit || ''}`.trim();
 			courseName = course.name || 'Unknown Course';
@@ -420,11 +518,10 @@ export default function GeneralLecturesTimetable() {
 			if (fallbackCourse) {
 				courseCode = `${fallbackCourse.char} ${fallbackCourse.digit}`;
 				courseName = fallbackCourse.name;
+				console.log('[RENDER] Fallback course info:', fallbackCourse);
 			}
 		}
-
 		const timeRange = `${lecture.start_time.substring(0, 5)} - ${lecture.end_time.substring(0, 5)}`;
-
 		return (
 			<div className='p-2 bg-blue-50 border border-blue-200 rounded-md min-h-[60px]'>
 				<div className='font-semibold text-blue-900 text-sm'>
