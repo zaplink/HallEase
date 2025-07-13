@@ -1,12 +1,22 @@
-import { geminiModel } from '@/lib/gemini';
-import { supabase } from '@/lib/supabaseClient';
+// app/api/chatbot/route.ts
+
+import { createClient } from '@supabase/supabase-js';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+// --- Supabase Setup ---
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// --- Gemini Setup ---
+const geminiApiKey = process.env.GOOGLE_GEMINI_API_KEY!;
+const genAI = new GoogleGenerativeAI(geminiApiKey);
+const geminiModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 export async function POST(req: Request) {
 	try {
-		// Parse the incoming request body to get the user's message
 		const { message } = await req.json();
 
-		// Basic validation: Check if a message was provided
 		if (!message) {
 			return new Response(
 				JSON.stringify({ message: 'Missing message in request body' }),
@@ -18,7 +28,7 @@ export async function POST(req: Request) {
 		}
 
 		// Prepare the prompt for Gemini
-		const prompt = `You are a helpful assistant for a Hall Management System.
+		const initialPrompt = `You are a helpful assistant for a Hall Management System.
 The user is asking a question about the system's data.
 Your goal is to extract the user's intent and, if possible, formulate a PostgreSQL SELECT query to retrieve the relevant information from the database.
 If a direct SQL query is not feasible, provide a general answer in natural language.
@@ -104,21 +114,11 @@ IMPORTANT: If generating SQL, ensure it's a simple SELECT query. Do NOT generate
 
 Return the response as raw JSON, without Markdown code fences `;
 
-		// Send the prompt to Gemini
-		const result = await geminiModel.generateContent(prompt);
-		let responseText = result.response.text();
+		const result = await geminiModel.generateContent(initialPrompt);
+		const responseText = result.response.text();
 
-		console.log('Gemini Raw Response:', responseText);
+		console.log('Gemini Raw Response (Initial):', responseText);
 
-		// Clean the response by removing any Markdown code fences
-		responseText = responseText
-			.replace(/^```json\n/, '') // Remove opening ```json
-			.replace(/\n```$/, '') // Remove closing ```
-			.trim();
-
-		console.log('Cleaned Response:', responseText);
-
-		// Parse Gemini's JSON response
 		let geminiResponse: {
 			sqlQuery?: string;
 			naturalLanguageResponse?: string;
@@ -127,14 +127,14 @@ Return the response as raw JSON, without Markdown code fences `;
 			geminiResponse = JSON.parse(responseText);
 		} catch (e) {
 			console.error(
-				'Gemini response was not valid JSON:',
+				'Gemini initial response was not valid JSON:',
 				responseText,
 				e
 			);
 			return new Response(
 				JSON.stringify({
 					message:
-						'Could not understand the AI response format. Please try again.',
+						'Could not understand the AI response format for query generation. Please try again.',
 				}),
 				{
 					status: 500,
@@ -143,9 +143,7 @@ Return the response as raw JSON, without Markdown code fences `;
 			);
 		}
 
-		// Act based on Gemini's response
 		if (geminiResponse.sqlQuery) {
-			// Execute the SQL query using Supabase RPC
 			const { data, error } = await supabase.rpc('execute_sql_query', {
 				query_string: geminiResponse.sqlQuery,
 			});
@@ -164,25 +162,39 @@ Return the response as raw JSON, without Markdown code fences `;
 				);
 			}
 
-			// Format the response
-			let formattedResponse;
+			let finalBotResponse;
 			if (data && Array.isArray(data) && data.length > 0) {
-				formattedResponse = `Here's what I found:\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``;
+				// --- NEW STEP: Send retrieved data back to Gemini for summarization ---
+				const summarizationPrompt = `The user asked: "${message}"
+            I retrieved the following data from the database:
+            ${JSON.stringify(data, null, 2)}
+
+            Please summarize this information in a concise, user-friendly natural language format.
+            If the data represents a list of items (like events or halls), list them clearly.
+            If it's details about a single item, provide a clear description.
+            Focus on providing the key details relevant to the user's original query.
+            Avoid technical terms like JSON or database schema.
+
+            Example for events: "Here are the upcoming events: 'BC' by EVV on July 19th at 8:30 AM, 'hello' by mooo on July 20th at 8:30 AM, and 'Sandahana' by Rotaract on July 23rd at 8:30 AM. There are also several events on August 11th."
+
+            Example for a single event detail: "ODS25 is a workshop organized by FOSS Community, scheduled for August 11th, 2025, from 8:30 AM to 10:30 AM. It's expected to have 60 attendees."
+            `;
+
+				const summaryResult =
+					await geminiModel.generateContent(summarizationPrompt);
+				finalBotResponse = summaryResult.response.text();
+				console.log('Gemini Raw Response (Summary):', finalBotResponse);
 			} else {
-				formattedResponse =
+				finalBotResponse =
 					"I couldn't find any data matching your request.";
 			}
 
-			console.log(formattedResponse);
-
-			return new Response(
-				JSON.stringify({ message: formattedResponse }),
-				{
-					status: 200,
-					headers: { 'Content-Type': 'application/json' },
-				}
-			);
+			return new Response(JSON.stringify({ message: finalBotResponse }), {
+				status: 200,
+				headers: { 'Content-Type': 'application/json' },
+			});
 		} else if (geminiResponse.naturalLanguageResponse) {
+			// If Gemini initially decided not to generate SQL, just return its natural language response
 			return new Response(
 				JSON.stringify({
 					message: geminiResponse.naturalLanguageResponse,
@@ -193,10 +205,11 @@ Return the response as raw JSON, without Markdown code fences `;
 				}
 			);
 		} else {
+			// Fallback for unexpected initial Gemini output structure
 			return new Response(
 				JSON.stringify({
 					message:
-						"I couldn't understand the AI's response. Please try rephrasing your question.",
+						"I couldn't understand the AI's initial response structure. Please try rephrasing your question.",
 				}),
 				{
 					status: 500,

@@ -23,148 +23,96 @@ export default async function handler(
 	try {
 		// Step 1: Use Gemini to understand the user's intent and
 		// potentially generate a SQL query or identify data needs.
+
+
+		// Prepare the prompt for Gemini
 		const prompt = `You are a helpful assistant for a Hall Management System.
-    The user is asking a question about the system's data.
-    Your goal is to extract the user's intent and, if possible, formulate a PostgreSQL query to retrieve the relevant information from the database.
-    If a direct SQL query is not feasible, describe what information is needed and from which tables.
+The user is asking a question about the system's data.
+Your goal is to extract the user's intent and, if possible, formulate a PostgreSQL SELECT query to retrieve the relevant information from the database.
+If a direct SQL query is not feasible, provide a general answer in natural language.
 
-    Here is the database schema:
+Here is the database schema (simplified, showing table names and their column names/types):
 
-    ${JSON.stringify(
-		{
-			bookings: {
-				id: 'uuid',
-				name: 'text',
-				type: 'text',
-				description: 'text',
-				attendee_count: 'integer',
-				date: 'date',
-				start_hour: 'text',
-				start_minute: 'text',
-				hall_option: 'text',
-				organizer: 'text',
-				end_hour: 'text',
-				end_minute: 'text',
-				additional_notes: 'text',
-				status: 'text',
-			},
-			course: {
-				id: 'uuid',
-				char: 'text',
-				digit: 'text',
-				name: 'text',
-				capacity: 'smallint',
-				lecturer_id: 'uuid',
-			},
-			equipment: {
-				id: 'uuid',
-				reserve_id: 'uuid',
-				description: 'text',
-			},
-			event: {
-				id: 'uuid',
-				name: 'text',
-				attendee_count: 'integer',
-				type: 'text',
-				organizer: 'text',
-				reserve_id: 'uuid',
-				additional_notes: 'text',
-				description: 'text',
-				additional_file: 'text',
-				equipment: 'uuid',
-			},
-			extra_lecture: {
-				id: 'uuid',
-				reserve_id: 'uuid',
-				course_id: 'uuid',
-				type: 'text',
-				additional_notes: 'text',
-				attendee_count: 'integer',
-				additional_file: 'text',
-				attendee_file: 'text',
-				description: 'text',
-				equipment: 'uuid',
-			},
-			general_lecture: {
-				day: 'text',
-				id: 'uuid',
-				start_time: 'time',
-				end_time: 'time',
-				course_id: 'uuid',
-			},
-			hall: {
-				id: 'uuid',
-				code: 'text',
-				capacity: 'integer',
-				building: 'text',
-				description: 'text',
-				floor: 'smallint',
-				type: 'text',
-				is_available: 'boolean',
-				energy_consumption: 'smallint',
-			},
-			hall_assign: {
-				id: 'uuid',
-				reserve_id: 'uuid',
-				hall_id: 'uuid',
-			},
-			lecturer: {
-				id: 'uuid',
-				name: 'text',
-				position: 'text',
-			},
-			reserve: {
-				id: 'uuid',
-				date: 'date',
-				hall_option: 'text',
-				status: 'text',
-				type: 'text',
-				profile_id: 'uuid',
-				start_time: 'time',
-				end_time: 'time',
-				modified_date: 'date',
-				modified_time: 'time',
-				is_submitted: 'boolean',
-				is_consented: 'boolean',
-				created_date: 'date',
-				created_time: 'time',
-			},
-			profiles: {
-				id: 'uuid',
-				full_name: 'text',
-				role: 'text',
-				created_at: 'timestamp',
-				pro_pic: 'text',
-				last_sign_in_at: 'timestamp with time zone',
-				email: 'text',
-				position: 'text',
-			},
-			// ... include other relevant tables from your schema if needed
+${JSON.stringify(
+	{
+		hall: {
+			id: 'uuid',
+			code: 'text',
+			capacity: 'integer',
+			building: 'text',
+			description: 'text',
+			floor: 'smallint',
+			type: 'text',
+			is_available: 'boolean',
+			energy_consumption: 'smallint',
 		},
-		null,
-		2
-	)}
+		reserve: {
+			id: 'uuid',
+			date: 'date',
+			hall_option: 'text',
+			status: 'text',
+			type: 'text',
+			profile_id: 'uuid',
+			start_time: 'time',
+			end_time: 'time',
+			is_submitted: 'boolean',
+		},
+		event: {
+			id: 'uuid',
+			name: 'text',
+			attendee_count: 'integer',
+			type: 'text',
+			organizer: 'text',
+			reserve_id: 'uuid',
+			description: 'text',
+		},
+		extra_lecture: {
+			id: 'uuid',
+			reserve_id: 'uuid',
+			course_id: 'uuid',
+			type: 'text',
+			attendee_count: 'integer',
+			description: 'text',
+		},
+		course: {
+			id: 'uuid',
+			char: 'text',
+			digit: 'text',
+			name: 'text',
+			capacity: 'smallint',
+			lecturer_id: 'uuid',
+		},
+		lecturer: {
+			id: 'uuid',
+			name: 'text',
+			position: 'text',
+		},
+		profiles: {
+			id: 'uuid',
+			full_name: 'text',
+			role: 'text',
+			email: 'text',
+			position: 'text',
+		},
+	},
+	null,
+	2
+)}
 
-    User query: "${message}"
+User query: "${message}"
 
-    Provide a JSON response with either:
-    1. A 'sqlQuery' key containing a valid PostgreSQL SELECT query to answer the user's question.
-    2. A 'naturalLanguageResponse' key if you cannot form a direct SQL query, explaining what information you need or providing a general answer.
+Provide a JSON response with either:
+1. A 'sqlQuery' key containing a valid PostgreSQL SELECT query to answer the user's question. Use the correct table and column names as provided in the schema. Always include 'public.' prefix for table names.
+   Example: To get available halls: {"sqlQuery": "SELECT code, capacity, building FROM public.hall WHERE is_available = TRUE;"}
+   Example: To get events for a specific date: {"sqlQuery": "SELECT name, organizer, description FROM public.event JOIN public.reserve ON public.event.reserve_id = public.reserve.id WHERE public.reserve.date = 'YYYY-MM-DD';"}
+2. A 'naturalLanguageResponse' key if you cannot form a direct SQL query or if the query is beyond the scope of database lookup (e.g., general knowledge questions).
+   Example: {"naturalLanguageResponse": "I am a Hall Management System assistant and can only provide information related to halls, bookings, courses, and events based on the available database."}
 
-    Example SQL Query for "What halls are available?":
-    \`\`\`json
-    {
-      "sqlQuery": "SELECT code, capacity, building, type, is_available FROM public.hall WHERE is_available = TRUE;"
-    }
-    \`\`\`
+IMPORTANT: If generating SQL, ensure it's a simple SELECT query. Do NOT generate INSERT, UPDATE, DELETE, or complex DDL statements. Only provide a query if you are certain it will return relevant information from the schema provided. For "What halls are available?", use the 'is_available' column from the 'hall' table.
 
-    Example Natural Language Response for "Tell me a joke":
-    \`\`\`json
-    {
-      "naturalLanguageResponse": "I'm a Hall Management System assistant, so I can only help with information related to halls, bookings, courses, and events."
-    }
-    \`\`\`
-    `;
+Return the response as raw JSON, without Markdown code fences `;
+
+------
 
 		const result = await geminiModel.generateContent(prompt);
 		const responseText = result.response.text();
