@@ -452,6 +452,13 @@ export default function GeneralLecturesTimetable() {
 	});
 
 	// Create timetable data
+	// Type for timetableData with slotMap
+	type TimetableWithSlotMap = TimetableSlot[] & {
+		slotMap: Record<
+			string,
+			Record<number, { lecture: GeneralLecture; span: number }>
+		>;
+	};
 	const createTimetableData = (): TimetableSlot[] => {
 		const timetableData: TimetableSlot[] = timeSlots.map((time) => ({
 			time,
@@ -461,7 +468,7 @@ export default function GeneralLecturesTimetable() {
 			string,
 			Record<number, { lecture: GeneralLecture; span: number }>
 		> = {};
-		lectures.forEach((lecture, idx) => {
+		lectures.forEach((lecture) => {
 			const startTime = lecture.start_time.substring(0, 5);
 			const endTime = lecture.end_time.substring(0, 5);
 			const startIdx = timeSlots.findIndex((slot) => slot === startTime);
@@ -518,8 +525,9 @@ export default function GeneralLecturesTimetable() {
 			}
 		});
 		// Attach slotMap for rendering
-		(timetableData as any).slotMap = slotMap;
-		return timetableData;
+		// Use intersection type to add slotMap property
+		(timetableData as TimetableWithSlotMap).slotMap = slotMap;
+		return timetableData as TimetableWithSlotMap;
 	};
 
 	const timetableData = createTimetableData();
@@ -737,9 +745,16 @@ export default function GeneralLecturesTimetable() {
 										</TableCell>
 										{days.map((day) => {
 											const dayKey = day.toLowerCase();
-											const slotMap =
-												(timetableData as any)
-													.slotMap?.[dayKey] || {};
+											const slotMap: Record<
+												number,
+												{
+													lecture: GeneralLecture;
+													span: number;
+												}
+											> =
+												(
+													timetableData as TimetableWithSlotMap
+												).slotMap?.[dayKey] || {};
 											// Is this the start of a merged cell?
 											if (slotMap[rowIdx]) {
 												const { lecture, span } =
