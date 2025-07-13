@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import ChatbotWidget from '../chatbot/chatbotWidget';
 
 // Loading components
 function DashboardSkeleton() {
@@ -268,10 +269,13 @@ export default async function Dashboard() {
 	}
 
 	return (
-		<SidebarLayout>
-			<Suspense fallback={<DashboardSkeleton />}>
-				<DashboardContent />
-			</Suspense>
-		</SidebarLayout>
+		<>
+			<SidebarLayout>
+				<Suspense fallback={<DashboardSkeleton />}>
+					<DashboardContent />
+				</Suspense>
+			</SidebarLayout>
+			<ChatbotWidget />
+		</>
 	);
 }
