@@ -1,17 +1,7 @@
 // app/api/chatbot/route.ts
 
-import { createClient } from '@supabase/supabase-js';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-// --- Supabase Setup ---
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-// --- Gemini Setup ---
-const geminiApiKey = process.env.GOOGLE_GEMINI_API_KEY!;
-const genAI = new GoogleGenerativeAI(geminiApiKey);
-const geminiModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+import { supabase } from '@/lib/supabaseClient';
+import { geminiModel } from '@/lib/gemini';
 
 export async function POST(req: Request) {
 	try {
