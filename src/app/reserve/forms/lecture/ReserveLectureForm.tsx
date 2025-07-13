@@ -104,10 +104,37 @@ export default function ReserveLectureForm({
 		defaultValue: 'availability' as 'availability' | 'manual' | '',
 	});
 
-	const halls = [
-		{ value: 'LCH-AB-01', label: 'LCH-AB-01' },
-		{ value: 'LCH-AB-02', label: 'LCH-AB-02' },
-	];
+	const [halls, setHalls] = useState<{ value: string; label: string }[]>([]);
+	const [loadingHalls, setLoadingHalls] = useState(false);
+
+	useEffect(() => {
+		async function fetchHalls() {
+			setLoadingHalls(true);
+			try {
+				const { createClient } = await import('@/lib/supabaseClient');
+				const supabase = createClient();
+				const { data, error } = await supabase
+					.from('hall')
+					.select('code')
+					.eq('is_available', true);
+				if (error) {
+					setHalls([]);
+				} else {
+					setHalls(
+						(data || []).map((hall: { code: string }) => ({
+							value: hall.code,
+							label: hall.code,
+						}))
+					);
+				}
+			} catch {
+				setHalls([]);
+			} finally {
+				setLoadingHalls(false);
+			}
+		}
+		fetchHalls();
+	}, []);
 
 	// const courseCodeOptions = [
 	// 	{ label: 'CSCI 22012 - Advanced Operating System', value: 'csci22012' },
@@ -460,7 +487,11 @@ export default function ReserveLectureForm({
 											onChange={(val) =>
 												field.onChange(val)
 											}
-											placeholder='Select Hall'
+											placeholder={
+												loadingHalls
+													? 'Loading halls...'
+													: 'Select Hall'
+											}
 										/>
 									</FormControl>
 									<FormMessage />

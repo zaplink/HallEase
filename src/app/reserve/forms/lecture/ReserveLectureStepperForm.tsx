@@ -259,10 +259,37 @@ export default function ReserveLectureStepperForm({
 		{ value: 'manual', label: 'Manually' },
 	];
 
-	const halls = [
-		{ value: 'LCH-AB-01', label: 'LCH-AB-01' },
-		{ value: 'LCH-AB-02', label: 'LCH-AB-02' },
-	];
+	const [halls, setHalls] = useState<{ value: string; label: string }[]>([]);
+	const [loadingHalls, setLoadingHalls] = useState(false);
+
+	useEffect(() => {
+		async function fetchHalls() {
+			setLoadingHalls(true);
+			try {
+				const { createClient } = await import('@/lib/supabaseClient');
+				const supabase = createClient();
+				const { data, error } = await supabase
+					.from('hall')
+					.select('code')
+					.eq('is_available', true);
+				if (error) {
+					setHalls([]);
+				} else {
+					setHalls(
+						(data || []).map((hall: { code: string }) => ({
+							value: hall.code,
+							label: hall.code,
+						}))
+					);
+				}
+			} catch {
+				setHalls([]);
+			} finally {
+				setLoadingHalls(false);
+			}
+		}
+		fetchHalls();
+	}, []);
 
 	const validateCurrentStep = async () => {
 		const fieldsToValidate = getFieldsForStep(currentStep);
@@ -391,6 +418,7 @@ export default function ReserveLectureStepperForm({
 											hallOptions={hallOptions}
 											halls={halls}
 											hallSelection={hallSelection}
+											loadingHalls={loadingHalls}
 										/>
 									)}
 
@@ -849,11 +877,13 @@ function VenueStep({
 	// hallOptions,
 	halls,
 	hallSelection,
+	loadingHalls,
 }: {
 	form: UseFormReturn<StepperFormData>;
 	hallOptions: { value: string; label: string }[];
 	halls: { value: string; label: string }[];
 	hallSelection: string;
+	loadingHalls: boolean;
 }) {
 	// Fixed attendee count for lectures - can be determined from course
 	const attendeeCount = 35; // Typical lecture hall capacity for a course
@@ -950,7 +980,11 @@ function VenueStep({
 												onChange={(val) =>
 													field.onChange(val)
 												}
-												placeholder='Select Hall'
+												placeholder={
+													loadingHalls
+														? 'Loading halls...'
+														: 'Select Hall'
+												}
 											/>
 										</FormControl>
 										<FormMessage />
