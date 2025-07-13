@@ -19,6 +19,7 @@ import {
 	Library,
 	SquareLibrary,
 	Newspaper,
+	Bug,
 } from 'lucide-react';
 
 export interface SubMenuItem {
@@ -140,6 +141,13 @@ const sidebarMenu = [
 				itemUrl: '/reports',
 				itemIcon: FileChartColumn,
 				roleSlugs: [],
+				subMenu: [
+					{
+						subTitle: 'Debug Mode',
+						subUrl: '/reports/debug',
+						subIcon: Bug,
+					},
+				],
 			},
 			{
 				itemTitle: 'Analytics',

@@ -121,7 +121,12 @@ export class IssueReportsService {
 		id: string,
 		updates: UpdateIssueReportData
 	): Promise<IssueReport> {
-		const updateData: any = {
+		const updateData: UpdateIssueReportData & {
+			updated_date: string;
+			updated_time: string;
+			resolved_date?: string;
+			resolved_time?: string;
+		} = {
 			...updates,
 			updated_date: new Date().toISOString().split('T')[0],
 			updated_time: new Date().toTimeString().split(' ')[0],

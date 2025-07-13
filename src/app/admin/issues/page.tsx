@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import SidebarLayout from '@/layouts/Sidebar/Layout';
 import { createClient } from '@/lib/supabaseClient';
 import {
@@ -32,8 +32,11 @@ import {
 	Filter,
 	RefreshCw,
 	Search,
+	ArrowLeft,
+	BarChart3,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 const supabase = createClient();
 
@@ -51,6 +54,7 @@ const getIssueIcon = (type: string) => {
 };
 
 export default function IssueManagementPage() {
+	const router = useRouter();
 	const [issues, setIssues] = useState<IssueReport[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [filters, setFilters] = useState({
@@ -60,11 +64,7 @@ export default function IssueManagementPage() {
 		search: '',
 	});
 
-	useEffect(() => {
-		fetchIssues();
-	}, []);
-
-	const fetchIssues = async () => {
+	const fetchIssues = useCallback(async () => {
 		try {
 			setLoading(true);
 
@@ -121,7 +121,11 @@ export default function IssueManagementPage() {
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [filters]);
+
+	useEffect(() => {
+		fetchIssues();
+	}, [fetchIssues]);
 
 	const updateIssueStatus = async (issueId: string, newStatus: string) => {
 		try {
@@ -158,7 +162,7 @@ export default function IssueManagementPage() {
 		}, 300);
 
 		return () => clearTimeout(timeoutId);
-	}, [filters]);
+	}, [fetchIssues]);
 
 	const getStats = () => {
 		const total = issues.length;
@@ -179,6 +183,24 @@ export default function IssueManagementPage() {
 				<div className='max-w-7xl mx-auto'>
 					<div className='flex justify-between items-center mb-6'>
 						<div>
+							<div className='flex items-center gap-3 mb-2'>
+								<Button
+									onClick={() => router.push('/reports')}
+									variant='outline'
+									size='sm'
+								>
+									<ArrowLeft className='w-4 h-4 mr-2' />
+									Back to Reports
+								</Button>
+								<Button
+									onClick={() => router.push('/reports')}
+									variant='outline'
+									size='sm'
+								>
+									<BarChart3 className='w-4 h-4 mr-2' />
+									View Reports Center
+								</Button>
+							</div>
 							<h1 className='text-2xl font-bold text-gray-900'>
 								Issue Management
 							</h1>

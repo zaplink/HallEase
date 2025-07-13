@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { Loader2, CheckCircle } from 'lucide-react';
+import { Loader2, CheckCircle, ArrowLeft, BarChart3 } from 'lucide-react';
 
 function ReportIssuePage() {
 	const router = useRouter();
@@ -109,6 +109,26 @@ function ReportIssuePage() {
 		<SidebarLayout>
 			<div className='flex justify-center py-10 px-6 bg-gray-50'>
 				<div className='w-full max-w-3xl'>
+					{/* Navigation */}
+					<div className='flex gap-3 mb-6'>
+						<Button
+							onClick={() => router.push('/reports')}
+							variant='outline'
+							size='sm'
+						>
+							<ArrowLeft className='w-4 h-4 mr-2' />
+							Back to Reports
+						</Button>
+						<Button
+							onClick={() => router.push('/reports')}
+							variant='outline'
+							size='sm'
+						>
+							<BarChart3 className='w-4 h-4 mr-2' />
+							View Reports Center
+						</Button>
+					</div>
+
 					{isSubmitted ? (
 						<div className='text-center'>
 							<CheckCircle className='w-16 h-16 text-green-600 mx-auto mb-4' />

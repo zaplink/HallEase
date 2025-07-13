@@ -8,13 +8,6 @@ const mailjetClient = mailjet.apiConnect(
 	process.env.MAILJET_API_SECRET!
 );
 
-interface IssueReportData {
-	issueType: 'booking' | 'technical' | 'other';
-	title?: string;
-	description: string;
-	screenshotFile?: File;
-}
-
 export async function POST(req: NextRequest) {
 	try {
 		console.log('API: Starting issue submission process');

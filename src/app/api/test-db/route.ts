@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabaseServer';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
 	try {
 		console.log('Testing database connection...');
 		const supabase = await createClient();
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
 		}
 
 		// Test if issue_reports table exists
-		const { data: tableCheck, error: tableError } = await supabase
+		const { error: tableError } = await supabase
 			.from('issue_reports')
 			.select('count')
 			.limit(1);
