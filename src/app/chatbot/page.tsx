@@ -57,9 +57,15 @@ export default function ChatbotPage() {
 					botResponseText = data.message;
 				}
 			} else {
-				botResponseText =
-					data.message || 'An error occurred with the chatbot.';
-				console.error('API Error:', data);
+				try {
+					botResponseText =
+						data.message || 'An error occurred with the chatbot.';
+					// console.error('API Error:', data);
+				} catch (err) {
+					console.error('Error parsing error response:', err);
+					botResponseText =
+						'An unknown error occurred with the chatbot.';
+				}
 			}
 
 			const newBotMessage: Message = {
@@ -137,7 +143,7 @@ export default function ChatbotPage() {
 								value={input}
 								onChange={(e) => setInput(e.target.value)}
 								onKeyPress={handleKeyPress}
-								placeholder="e.g., 'What halls are available?' or 'Find events upcoming events'"
+								placeholder="e.g: 'What halls are available?' or 'Find upcoming events'"
 								disabled={loading}
 								className='flex-1'
 							/>
