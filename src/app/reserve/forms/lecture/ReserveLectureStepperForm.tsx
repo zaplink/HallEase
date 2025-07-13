@@ -885,8 +885,37 @@ function VenueStep({
 	hallSelection: string;
 	loadingHalls: boolean;
 }) {
-	// Fixed attendee count for lectures - can be determined from course
-	const attendeeCount = 35; // Typical lecture hall capacity for a course
+	// Dynamically fetch attendee count from course capacity
+	const selectedCourseId = useWatch({
+		control: form.control,
+		name: 'course',
+	});
+
+	const [attendeeCount, setAttendeeCount] = useState<number | null>(null);
+
+	useEffect(() => {
+		async function fetchCourseCapacity(courseId: string) {
+			if (!courseId) {
+				setAttendeeCount(null);
+				return;
+			}
+			try {
+				const { data, error } = await supabase
+					.from('course')
+					.select('capacity')
+					.eq('id', courseId)
+					.single();
+				if (error || !data) {
+					setAttendeeCount(null);
+				} else {
+					setAttendeeCount(data.capacity ?? null);
+				}
+			} catch {
+				setAttendeeCount(null);
+			}
+		}
+		fetchCourseCapacity(selectedCourseId);
+	}, [selectedCourseId]);
 
 	return (
 		<div className='space-y-6'>
@@ -1004,7 +1033,7 @@ function VenueStep({
 						<FormLabel>Number of Attendees</FormLabel>
 						<div className='mt-2 p-3 bg-muted/50 rounded-md border border-dashed border-muted-foreground/25'>
 							<div className='text-2xl font-semibold text-foreground mb-1'>
-								{attendeeCount}
+								{attendeeCount !== null ? attendeeCount : '—'}
 							</div>
 							<div className='text-xs text-muted-foreground'>
 								Typical course capacity

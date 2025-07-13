@@ -148,6 +148,38 @@ export default function ReserveLectureForm({
 		{ label: string; value: string }[]
 	>([]);
 
+	const [attendeeCount, setAttendeeCount] = useState<number | null>(null);
+
+	// Watch selected course
+	const selectedCourseId = useWatch({
+		control: form.control,
+		name: 'course',
+	});
+
+	useEffect(() => {
+		async function fetchCourseCapacity(courseId: string) {
+			if (!courseId) {
+				setAttendeeCount(null);
+				return;
+			}
+			try {
+				const { data, error } = await supabase
+					.from('course')
+					.select('capacity')
+					.eq('id', courseId)
+					.single();
+				if (error || !data) {
+					setAttendeeCount(null);
+				} else {
+					setAttendeeCount(data.capacity ?? null);
+				}
+			} catch {
+				setAttendeeCount(null);
+			}
+		}
+		fetchCourseCapacity(selectedCourseId);
+	}, [selectedCourseId]);
+
 	useEffect(() => {
 		const fetchCourses = async () => {
 			const { data, error } = await supabase
@@ -468,6 +500,18 @@ export default function ReserveLectureForm({
 							<p>Hall needs to be manually selected!</p>
 						</div>
 					)}
+					{/* Attendee Count Display */}
+					<div className='px-2'>
+						<FormLabel>Number of Attendees:</FormLabel>
+						<div className='mt-2 p-2 bg-muted/50 rounded border border-dashed border-muted-foreground/25 min-w-[100px]'>
+							<span className='text-lg font-semibold text-foreground'>
+								{attendeeCount !== null ? attendeeCount : '—'}
+							</span>
+							<span className='block text-xs text-muted-foreground'>
+								Course capacity
+							</span>
+						</div>
+					</div>
 				</div>
 				{hallSelection === 'manual' && (
 					<div className='px-2'>
