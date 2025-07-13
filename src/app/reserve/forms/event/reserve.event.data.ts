@@ -61,9 +61,15 @@ export const defaultReserveEventFormData: ReserveEventFormData = {
 
 // Mapper function to convert form data from camelCase to snake_case
 export function mapBookingDataToApi(data: ReserveEventFormData) {
-	// Create time strings in HH:MM format
-	const startTime = `${data.startHour.padStart(2, '0')}:${data.startMinute.padStart(2, '0')}`;
-	const endTime = `${data.endHour.padStart(2, '0')}:${data.endMinute.padStart(2, '0')}`;
+	// Create time strings in HH:MM format, handle empty values
+	const startTime =
+		data.startHour && data.startMinute
+			? `${data.startHour.padStart(2, '0')}:${data.startMinute.padStart(2, '0')}`
+			: null;
+	const endTime =
+		data.endHour && data.endMinute
+			? `${data.endHour.padStart(2, '0')}:${data.endMinute.padStart(2, '0')}`
+			: null;
 
 	// Convert equipment array to semicolon-separated string as per schema
 	const equipmentString =
@@ -79,15 +85,15 @@ export function mapBookingDataToApi(data: ReserveEventFormData) {
 		date: formattedDate,
 		start_time: startTime,
 		end_time: endTime,
-		hall_option: data.hallOpt,
+		hall_option: data.hallOpt || 'availability',
 
 		// Event table fields
-		name: data.name,
-		description: data.description,
-		type: data.type,
-		organizer: data.organizer,
-		attendee_count: data.attendeeCount,
-		additional_notes: data.additionalNotes,
+		name: data.name || '',
+		description: data.description || '',
+		type: data.type || '',
+		organizer: data.organizer || '',
+		attendee_count: data.attendeeCount || 0,
+		additional_notes: data.additionalNotes || '',
 		equipment: equipmentString,
 	};
 }

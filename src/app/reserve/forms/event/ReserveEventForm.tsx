@@ -1354,11 +1354,23 @@ export default function ReserveEventForm({
 					})) || [],
 			};
 
-			await handleSubmit(formData, 'draft');
+			const result = await handleSubmit(formData, 'draft');
 			// Success handled by the hook
-			toast.success('Draft saved successfully!', {
-				description: 'Your event reservation draft has been saved.',
-			});
+			if (result) {
+				toast.success('Draft saved successfully!', {
+					description: `Your event reservation draft has been saved with ID: ${result.reserveId}`,
+				});
+				console.log('Draft saved with result:', result);
+
+				// Trigger draft refresh across the app
+				if (typeof window !== 'undefined') {
+					window.dispatchEvent(new CustomEvent('refreshDrafts'));
+				}
+			} else {
+				toast.error('Failed to save draft', {
+					description: 'An error occurred while saving your draft.',
+				});
+			}
 		} catch (error) {
 			console.error('Error saving draft:', error);
 			toast.error('Error saving draft', {

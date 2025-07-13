@@ -47,6 +47,12 @@ export async function getRecentDrafts(
 			.order('created_time', { ascending: false })
 			.limit(limit);
 
+		console.log('getRecentDrafts - User ID:', user.id);
+		console.log('getRecentDrafts - Reserve query result:', {
+			reserves,
+			reserveError,
+		});
+
 		if (reserveError) {
 			console.error(
 				'Error fetching recent draft reserves:',
@@ -76,6 +82,12 @@ export async function getRecentDrafts(
 						.select('name, reserve_id, organizer')
 						.in('reserve_id', eventReserveIds)
 				: { data: [], error: null };
+
+		console.log('getRecentDrafts - Event query result:', {
+			events,
+			eventError,
+		});
+		console.log('getRecentDrafts - Event reserve IDs:', eventReserveIds);
 
 		// Fetch extra lecture details with course information
 		const { data: lectures, error: lectureError } =
@@ -154,6 +166,7 @@ export async function getRecentDrafts(
 			};
 		});
 
+		console.log('getRecentDrafts - Final draft summaries:', draftSummaries);
 		return draftSummaries;
 	} catch (error) {
 		console.error('Unexpected error fetching recent drafts:', error);

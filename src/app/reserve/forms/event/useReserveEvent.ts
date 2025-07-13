@@ -38,51 +38,57 @@ export function useBooking() {
 
 		try {
 			console.log('Submitting booking...');
+			console.log('Form data being submitted:', formData);
+			console.log('Status:', status);
+			console.log('Draft ID:', draftId);
+
 			const result = await submitReserveEvent(
 				formData,
 				status,
 				draftId || undefined
 			);
 			console.log('Booking submitted successfully, result:', result);
+			console.log('Reserve ID returned:', result?.reserveId);
 
 			// If this was a draft save, store the draft ID for future updates
 			if (status === 'draft') {
 				setDraftId(result.reserveId);
 				setIsSubmitted(false); // Still allow future submission
+				setSuccess(true); // Mark as successful without sending email
 			} else {
 				// If submitted successfully, mark as submitted and keep the ID
 				setDraftId(result.reserveId);
 				setIsSubmitted(true); // Prevent further submissions
+
+				console.log('Booking submitted, sending email...');
+
+				const toEmail = result.requesterEmail;
+
+				// Format date and time for email
+				const eventDateTime = formatEventDateTime(formData);
+				console.log('Formatted DateTime:', eventDateTime);
+				console.log('Form Data:', formData);
+
+				const emailRes = await fetch('/api/send-test-mail', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						toEmail,
+						eventName: formData.name,
+						reservationType: formData.hallOpt || 'availability',
+						hall: formData.hall || '',
+						eventDateTime,
+						reservationId: result.reserveId,
+						reservationLink: `${window.location.origin}/reservation/${result.reserveId}`,
+					}),
+				});
+
+				if (!emailRes.ok) {
+					const errText = await emailRes.text();
+					throw new Error('Failed to send email: ' + errText);
+				}
+				setSuccess(true);
 			}
-
-			console.log('Booking submitted, sending email...');
-
-			const toEmail = result.requesterEmail;
-
-			// Format date and time for email
-			const eventDateTime = formatEventDateTime(formData);
-			console.log('Formatted DateTime:', eventDateTime);
-			console.log('Form Data:', formData);
-
-			const emailRes = await fetch('/api/send-test-mail', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					toEmail,
-					eventName: formData.name,
-					reservationType: formData.hallOpt || 'availability',
-					hall: formData.hall || '',
-					eventDateTime,
-					reservationId: result.reserveId,
-					reservationLink: `${window.location.origin}/reservation/${result.reserveId}`,
-				}),
-			});
-
-			if (!emailRes.ok) {
-				const errText = await emailRes.text();
-				throw new Error('Failed to send email: ' + errText);
-			}
-			setSuccess(true);
 			return result;
 		} catch (err: unknown) {
 			console.log('Error in handleSubmit:', err);
