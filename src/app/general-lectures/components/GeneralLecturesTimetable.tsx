@@ -57,14 +57,23 @@ interface TimetableSlot {
 
 const timeSlots = [
 	'08:00',
+	'08:30',
 	'09:00',
+	'09:30',
 	'10:00',
+	'10:30',
 	'11:00',
+	'11:30',
 	'12:00',
+	'12:30',
 	'13:00',
+	'13:30',
 	'14:00',
+	'14:30',
 	'15:00',
+	'15:30',
 	'16:00',
+	'16:30',
 	'17:00',
 ];
 
@@ -448,7 +457,14 @@ export default function GeneralLecturesTimetable() {
 			const startTime = lecture.start_time.substring(0, 5);
 			const endTime = lecture.end_time.substring(0, 5);
 			const startIdx = timeSlots.findIndex((slot) => slot === startTime);
-			const endIdx = timeSlots.findIndex((slot) => slot === endTime);
+			// For endIdx, if the event ends at a slot boundary, we want to span up to but not including that slot
+			// e.g., 08:00-09:00 should span 08:00 and 08:30 only, not 09:00
+			let endIdx = timeSlots.findIndex((slot) => slot === endTime);
+			// If endTime is not a slot, find the next slot after endTime
+			if (endIdx === -1) {
+				endIdx = timeSlots.findIndex((slot) => slot > endTime);
+				if (endIdx === -1) endIdx = timeSlots.length; // span to end
+			}
 			if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
 				const dayLower = lecture.day.toLowerCase();
 				let dayKey: keyof Omit<TimetableSlot, 'time'>;
@@ -479,13 +495,11 @@ export default function GeneralLecturesTimetable() {
 					default:
 						return;
 				}
-				// Mark the start slot with the lecture and span
 				if (!slotMap[dayKey]) slotMap[dayKey] = {};
 				slotMap[dayKey][startIdx] = {
 					lecture,
 					span: endIdx - startIdx,
 				};
-				// Mark all covered slots so we can skip them in rendering
 				for (let i = startIdx; i < endIdx; i++) {
 					timetableData[i][dayKey] = lecture;
 				}
@@ -764,7 +778,7 @@ export default function GeneralLecturesTimetable() {
 											return (
 												<TableCell
 													key={day}
-													className='p-2 h-[60px]'
+													className='p-2 h-[30px]'
 												>
 													{renderLectureCell(
 														slot[
