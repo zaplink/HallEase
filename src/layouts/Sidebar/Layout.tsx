@@ -23,6 +23,7 @@ import { Toaster } from '@/components/ui/sonner';
 import ProfileWidget from './Menu/ProfileWidget';
 import PageHeader from './Header/PageHeader';
 import MenuContent from './Menu/MenuContent';
+import ChatbotWidget from '@/app/chatbot/chatbotWidget';
 
 type SidebarLayoutProps = Readonly<{
 	children: React.ReactNode;
@@ -34,61 +35,64 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
 	return (
 		// Sidebar placeholder
-		<SidebarProvider className='h-full'>
-			{/* Sideabar */}
-			<Sidebar side='left'>
-				<SidebarHeader className='p-1'>
-					<SidebarMenu>
-						<SidebarMenuItem>
-							<Link
-								href={baseUrl + '/profile'}
-								className='flex flex-row justify-left'
-							>
-								<SidebarMenuButton className='h-auto p-0 my-2 mx-1'>
-									{<ProfileWidget />}
-									{/* {getAvatar()} */}
+		<>
+			<SidebarProvider className='h-full'>
+				{/* Sideabar */}
+				<Sidebar side='left'>
+					<SidebarHeader className='p-1'>
+						<SidebarMenu>
+							<SidebarMenuItem>
+								<Link
+									href={baseUrl + '/profile'}
+									className='flex flex-row justify-left'
+								>
+									<SidebarMenuButton className='h-auto p-0 my-2 mx-1'>
+										{<ProfileWidget />}
+										{/* {getAvatar()} */}
+									</SidebarMenuButton>
+								</Link>
+							</SidebarMenuItem>
+						</SidebarMenu>
+					</SidebarHeader>
+
+					<Separator />
+
+					<SidebarContent>
+						{/* Menu content */}
+						<MenuContent />
+					</SidebarContent>
+
+					<Separator />
+
+					<SidebarFooter>
+						<SidebarMenu>
+							<SidebarMenuItem>
+								<SidebarMenuButton asChild>
+									{/* logout button  */}
+									<LogoutButton />
 								</SidebarMenuButton>
-							</Link>
-						</SidebarMenuItem>
-					</SidebarMenu>
-				</SidebarHeader>
+							</SidebarMenuItem>
+						</SidebarMenu>
+					</SidebarFooter>
+				</Sidebar>
 
-				<Separator />
+				{/* Page */}
+				<div className='w-full h-screen flex flex-col'>
+					{/* Header navigation bar - Fixed height */}
+					<div className='flex-shrink-0'>
+						<PageHeader />
+					</div>
 
-				<SidebarContent>
-					{/* Menu content */}
-					<MenuContent />
-				</SidebarContent>
+					{/* Put page content here - Takes remaining height */}
+					<main className='px-4 pt-2 flex flex-col flex-1 overflow-auto overscroll-none'>
+						{children}
+					</main>
 
-				<Separator />
-
-				<SidebarFooter>
-					<SidebarMenu>
-						<SidebarMenuItem>
-							<SidebarMenuButton asChild>
-								{/* logout button  */}
-								<LogoutButton />
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-					</SidebarMenu>
-				</SidebarFooter>
-			</Sidebar>
-
-			{/* Page */}
-			<div className='w-full h-screen flex flex-col'>
-				{/* Header navigation bar - Fixed height */}
-				<div className='flex-shrink-0'>
-					<PageHeader />
+					{/* Toast message holder */}
+					<Toaster />
 				</div>
-
-				{/* Put page content here - Takes remaining height */}
-				<main className='px-4 pt-2 flex flex-col flex-1 overflow-auto overscroll-none'>
-					{children}
-				</main>
-
-				{/* Toast message holder */}
-				<Toaster />
-			</div>
-		</SidebarProvider>
+			</SidebarProvider>
+			<ChatbotWidget />
+		</>
 	);
 }
