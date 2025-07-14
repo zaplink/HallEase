@@ -1,6 +1,6 @@
 import {
 	LayoutDashboard,
-	CalendarClock,
+	// CalendarClock,
 	Building2,
 	FilePlus2,
 	Airplay,
@@ -52,9 +52,9 @@ const sidebarMenu = [
 				roleSlugs: [],
 			},
 			{
-				itemTitle: 'Timeline',
-				itemUrl: '/timeline',
-				itemIcon: CalendarClock,
+				itemTitle: 'Analytics',
+				itemUrl: '/analytics',
+				itemIcon: ChartNoAxesCombined,
 				roleSlugs: [],
 			},
 		],
@@ -131,12 +131,6 @@ const sidebarMenu = [
 						subIcon: Bug,
 					},
 				],
-			},
-			{
-				itemTitle: 'Analytics',
-				itemUrl: '/analytics',
-				itemIcon: ChartNoAxesCombined,
-				roleSlugs: [],
 			},
 		],
 	},
