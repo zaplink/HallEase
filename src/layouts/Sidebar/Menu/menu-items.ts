@@ -20,6 +20,7 @@ import {
 	SquareLibrary,
 	Newspaper,
 	Bug,
+	FileSpreadsheet,
 } from 'lucide-react';
 
 export interface SubMenuItem {
@@ -142,6 +143,11 @@ const sidebarMenu = [
 				itemIcon: FileChartColumn,
 				roleSlugs: [],
 				subMenu: [
+					{
+						subTitle: 'Generate Hall Report',
+						subUrl: '/reports/generate',
+						subIcon: FileSpreadsheet,
+					},
 					{
 						subTitle: 'Debug Mode',
 						subUrl: '/reports/debug',
