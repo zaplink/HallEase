@@ -9,9 +9,13 @@ import {
 	getHallUtilization,
 	getCurrentlyOccupiedHalls,
 } from '@/lib/dashboard-data';
-import { fetchProfileServer } from '@/lib/fetchProfileServer';
-import { AdminDashboard } from '@/components/custom/AdminDashboard';
-import { UserDashboard } from '@/components/custom/UserDashboard';
+import { RecentBookings } from '@/components/custom/RecentBookings';
+import { RecentActivity } from '@/components/custom/RecentActivity';
+import { BookingTrendsLineChart } from '@/components/custom/BookingTrendsLineChart';
+import { BookingStatusPieChart } from '@/components/custom/BookingStatusPieChart';
+import { HallUtilizationChart } from '@/components/custom/HallUtilizationChart';
+import { HallOccupancyDonut } from '@/components/custom/HallOccupancyDonut';
+import { HallStatus } from '@/components/custom/HallStatus';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -92,13 +96,6 @@ function DashboardSkeleton() {
 }
 
 async function DashboardContent() {
-	// Fetch user profile to get role
-	const userProfile = await fetchProfileServer();
-
-	if (!userProfile) {
-		return <div>Error loading user profile</div>;
-	}
-
 	// Fetch all dashboard data
 	const [
 		dashboardStats,
@@ -114,29 +111,43 @@ async function DashboardContent() {
 		getCurrentlyOccupiedHalls(),
 	]);
 
-	// Render dashboard based on user role
-	if (userProfile.role === 'ADMIN') {
-		return (
-			<AdminDashboard
-				dashboardStats={dashboardStats}
-				recentBookings={recentBookings}
-				bookingTrends={bookingTrends}
-				hallUtilization={hallUtilization}
-				occupiedHalls={occupiedHalls}
-			/>
-		);
-	} else {
-		// USER role or any other role gets the simplified dashboard
-		return (
-			<UserDashboard
-				dashboardStats={dashboardStats}
-				recentBookings={recentBookings}
-				bookingTrends={bookingTrends}
-				hallUtilization={hallUtilization}
-				occupiedHalls={occupiedHalls}
-			/>
-		);
-	}
+	return (
+		<div className='space-y-6'>
+			{/* KPI Cards */}
+
+			{/* Charts Row 1 */}
+			<div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+				{/* Booking Trends Line Chart */}
+				<BookingTrendsLineChart data={bookingTrends} />
+
+				{/* Booking Status Pie Chart */}
+				<BookingStatusPieChart stats={dashboardStats} />
+			</div>
+
+			{/* Charts Row 2 */}
+			<div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+				{/* Hall Occupancy Donut */}
+				<HallOccupancyDonut hallUtilization={hallUtilization} />
+
+				{/* Hall Utilization */}
+				<HallUtilizationChart data={hallUtilization} />
+
+				{/* Recent Activity */}
+				<RecentActivity bookings={recentBookings} />
+			</div>
+
+			{/* Bottom Row */}
+			<div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+				{/* Recent Bookings */}
+				<RecentBookings bookings={recentBookings} />
+
+				{/* Hall Status */}
+				<HallStatus occupiedHalls={occupiedHalls} />
+			</div>
+
+			{/* Additional Stats */}
+		</div>
+	);
 }
 
 export default async function Dashboard() {

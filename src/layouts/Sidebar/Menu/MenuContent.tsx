@@ -18,6 +18,8 @@ import {
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
 // import { subscribeToNewBookings } from '@/app/reserve/forms/event/reserve.event.service';
 
 // import { useEffect } from 'react';
@@ -26,12 +28,42 @@ export default function MenuContent() {
 	// Current path of URL
 	const currentPath = usePathname();
 
+	// Get user data from Redux store
+	const { user } = useSelector((state: RootState) => state.auth);
+	const userRole = user?.role || '';
+
 	// State to track the currently open submenu
 	const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
 
 	// Toggle submenu state
 	const toggleSubMenu = (menuTitle: string) => {
 		setOpenSubMenu((prev) => (prev === menuTitle ? null : menuTitle));
+	};
+
+	// Function to check if user can access a menu item
+	const canAccessMenuItem = (itemTitle: string, roleSlugs: string[]) => {
+		// Special case for ADMIN-only items
+		if (
+			itemTitle === 'Manage Reservations' ||
+			itemTitle === 'Public Reservations' ||
+			itemTitle === 'Access Control' ||
+			itemTitle === 'Roles & Permissions'
+		) {
+			return userRole === 'ADMIN';
+		}
+
+		// If roleSlugs is empty, item is accessible to all users
+		if (roleSlugs.length === 0) return true;
+
+		// Check if user's role is in the allowed roles
+		return roleSlugs.includes(userRole);
+	};
+
+	// Function to filter menu items based on role
+	const filterMenuItems = (items: (typeof sidebarMenu)[0]['sectionMenu']) => {
+		return items.filter((item) =>
+			canAccessMenuItem(item.itemTitle, item.roleSlugs)
+		);
 	};
 
 	// const [notification, setNotification] = useState<string | null>(null);
@@ -67,37 +99,130 @@ export default function MenuContent() {
 
 	return (
 		<>
-			{sidebarMenu.map((section) => (
-				<SidebarGroup key={section.sectionTitle}>
-					<SidebarGroupLabel>
-						{section.sectionTitle}
-					</SidebarGroupLabel>
-					<SidebarGroupContent>
-						<SidebarMenu>
-							{section.sectionMenu.map((item) => {
-								if (hasSubMenu(item)) {
-									const isOpen =
-										openSubMenu === item.itemTitle;
-									return (
-										<Collapsible
-											className='group/collapsible'
-											key={item.itemTitle}
-											open={isOpen}
-										>
+			{sidebarMenu.map((section) => {
+				// Filter menu items for this section based on user permissions
+				const filteredMenuItems = filterMenuItems(section.sectionMenu);
+
+				// Don't render section if no accessible items
+				if (filteredMenuItems.length === 0) return null;
+
+				return (
+					<SidebarGroup key={section.sectionTitle}>
+						<SidebarGroupLabel>
+							{section.sectionTitle}
+						</SidebarGroupLabel>
+						<SidebarGroupContent>
+							<SidebarMenu>
+								{filteredMenuItems.map((item) => {
+									if (hasSubMenu(item)) {
+										const isOpen =
+											openSubMenu === item.itemTitle;
+										return (
+											<Collapsible
+												className='group/collapsible'
+												key={item.itemTitle}
+												open={isOpen}
+											>
+												<SidebarMenuItem
+													key={item.itemTitle}
+												>
+													<CollapsibleTrigger asChild>
+														<SidebarMenuButton
+															isActive={
+																currentPath ==
+																item.itemUrl
+															}
+															onClick={() =>
+																toggleSubMenu(
+																	item.itemTitle
+																)
+															} // Toggle between open/close
+														>
+															<item.itemIcon
+																size={20}
+																className='mr-1'
+															/>
+															<span>
+																{item.itemTitle}
+															</span>
+															{/* {notification && (
+															<Asterisk />
+														)} */}
+
+															{isOpen ? (
+																<ChevronDown
+																	className='ml-auto'
+																	size={16}
+																/>
+															) : (
+																<ChevronRight
+																	className='ml-auto'
+																	size={16}
+																/>
+															)}
+														</SidebarMenuButton>
+													</CollapsibleTrigger>
+													<CollapsibleContent>
+														<SidebarMenuSub>
+															{hasSubMenu(item) &&
+																item.subMenu.map(
+																	(
+																		subItem: import('./menu-items').SubMenuItem
+																	) => (
+																		<SidebarMenuSubItem
+																			key={
+																				subItem.subTitle
+																			}
+																		>
+																			<SidebarMenuButton
+																				asChild
+																				isActive={
+																					currentPath ==
+																					subItem.subUrl
+																				}
+																			>
+																				<Link
+																					href={
+																						subItem.subUrl
+																					}
+																					className='flex flex-row justify-left'
+																				>
+																					<subItem.subIcon
+																						size={
+																							20
+																						}
+																						className='mr-1'
+																					/>
+																					<span>
+																						{
+																							subItem.subTitle
+																						}
+																					</span>
+																				</Link>
+																			</SidebarMenuButton>
+																		</SidebarMenuSubItem>
+																	)
+																)}
+														</SidebarMenuSub>
+													</CollapsibleContent>
+												</SidebarMenuItem>
+											</Collapsible>
+										);
+									} else {
+										return (
 											<SidebarMenuItem
 												key={item.itemTitle}
 											>
-												<CollapsibleTrigger asChild>
-													<SidebarMenuButton
-														isActive={
-															currentPath ==
-															item.itemUrl
-														}
-														onClick={() =>
-															toggleSubMenu(
-																item.itemTitle
-															)
-														} // Toggle between open/close
+												<SidebarMenuButton
+													asChild
+													isActive={
+														currentPath ==
+														item.itemUrl
+													}
+												>
+													<Link
+														href={item.itemUrl}
+														className='flex flex-row justify-left'
 													>
 														<item.itemIcon
 															size={20}
@@ -106,99 +231,17 @@ export default function MenuContent() {
 														<span>
 															{item.itemTitle}
 														</span>
-														{/* {notification && (
-															<Asterisk />
-														)} */}
-
-														{isOpen ? (
-															<ChevronDown
-																className='ml-auto'
-																size={16}
-															/>
-														) : (
-															<ChevronRight
-																className='ml-auto'
-																size={16}
-															/>
-														)}
-													</SidebarMenuButton>
-												</CollapsibleTrigger>
-												<CollapsibleContent>
-													<SidebarMenuSub>
-														{hasSubMenu(item) &&
-															item.subMenu.map(
-																(
-																	subItem: import('./menu-items').SubMenuItem
-																) => (
-																	<SidebarMenuSubItem
-																		key={
-																			subItem.subTitle
-																		}
-																	>
-																		<SidebarMenuButton
-																			asChild
-																			isActive={
-																				currentPath ==
-																				subItem.subUrl
-																			}
-																		>
-																			<Link
-																				href={
-																					subItem.subUrl
-																				}
-																				className='flex flex-row justify-left'
-																			>
-																				<subItem.subIcon
-																					size={
-																						20
-																					}
-																					className='mr-1'
-																				/>
-																				<span>
-																					{
-																						subItem.subTitle
-																					}
-																				</span>
-																			</Link>
-																		</SidebarMenuButton>
-																	</SidebarMenuSubItem>
-																)
-															)}
-													</SidebarMenuSub>
-												</CollapsibleContent>
+													</Link>
+												</SidebarMenuButton>
 											</SidebarMenuItem>
-										</Collapsible>
-									);
-								} else {
-									return (
-										<SidebarMenuItem key={item.itemTitle}>
-											<SidebarMenuButton
-												asChild
-												isActive={
-													currentPath == item.itemUrl
-												}
-											>
-												<Link
-													href={item.itemUrl}
-													className='flex flex-row justify-left'
-												>
-													<item.itemIcon
-														size={20}
-														className='mr-1'
-													/>
-													<span>
-														{item.itemTitle}
-													</span>
-												</Link>
-											</SidebarMenuButton>
-										</SidebarMenuItem>
-									);
-								}
-							})}
-						</SidebarMenu>
-					</SidebarGroupContent>
-				</SidebarGroup>
-			))}
+										);
+									}
+								})}
+							</SidebarMenu>
+						</SidebarGroupContent>
+					</SidebarGroup>
+				);
+			})}
 		</>
 	);
 }
