@@ -8,8 +8,11 @@ import { useRouter } from 'next/navigation';
 import { DraftSummary, getRecentDrafts } from './getRecentDrafts';
 import Loading from '@/components/custom/Loading';
 import { useDraftRefreshListener } from './refreshDrafts';
+import ProtectedPage from '@/layouts/ProtectedPage';
 
 export default function ReservePage() {
+
+
 	const router = useRouter();
 	const [drafts, setDrafts] = useState<DraftSummary[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -103,6 +106,8 @@ export default function ReservePage() {
 	};
 
 	return (
+		<ProtectedPage>
+
 		<SidebarLayout>
 			<PageHeader
 				title='Reserve a Space'
@@ -236,5 +241,6 @@ export default function ReservePage() {
 				</div>
 			</div>
 		</SidebarLayout>
+		</ProtectedPage>
 	);
 }

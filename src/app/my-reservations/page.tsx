@@ -8,6 +8,7 @@ import { UnifiedReservationRow } from './reservation';
 import { reservationColumns } from './reservationColumns';
 import { DataTable } from './data-table';
 import { getUnifiedReservations } from './getUnifiedReservations';
+import ProtectedPage from '@/layouts/ProtectedPage';
 
 function Page() {
 	const [data, setData] = useState<UnifiedReservationRow[] | null>(null);
@@ -34,6 +35,7 @@ function Page() {
 	}, []);
 
 	return (
+		<ProtectedPage>
 		<SidebarLayout>
 			<PageHeader title='Reservation History' />
 			<div className='container mx-auto'>
@@ -56,6 +58,8 @@ function Page() {
 				)}
 			</div>
 		</SidebarLayout>
+		</ProtectedPage>
+
 	);
 }
 

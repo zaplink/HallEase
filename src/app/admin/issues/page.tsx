@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import ProtectedPage from '@/layouts/ProtectedPage';
 
 const supabase = createClient();
 
@@ -178,6 +179,7 @@ export default function IssueManagementPage() {
 	const stats = getStats();
 
 	return (
+		<ProtectedPage>
 		<SidebarLayout>
 			<div className='p-6 bg-gray-50 min-h-screen'>
 				<div className='max-w-7xl mx-auto'>
@@ -581,5 +583,7 @@ export default function IssueManagementPage() {
 				</div>
 			</div>
 		</SidebarLayout>
+		</ProtectedPage>
+
 	);
 }

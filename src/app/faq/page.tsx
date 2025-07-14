@@ -8,6 +8,7 @@ import {
 	AccordionTrigger,
 	AccordionContent,
 } from '@/components/ui/accordion';
+import ProtectedPage from '@/layouts/ProtectedPage';
 
 const faqs = [
 	{
@@ -55,6 +56,8 @@ export default function FAQPage() {
 	);
 
 	return (
+		<ProtectedPage>
+
 		<SidebarLayout>
 			<div className='flex flex-col items-center justify-center py-10 px-4'>
 				<h1 className='text-xl font-bold mb-4'>
@@ -86,5 +89,6 @@ export default function FAQPage() {
 				</div>
 			</div>
 		</SidebarLayout>
+		</ProtectedPage>
 	);
 }

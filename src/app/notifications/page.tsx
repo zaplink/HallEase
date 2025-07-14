@@ -1,9 +1,11 @@
 import { AlertCircleIcon, CheckCircle2Icon, PopcornIcon } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import SidebarLayout from '@/layouts/Sidebar/Layout';
+import ProtectedPage from '@/layouts/ProtectedPage';
 
 export default function NotificationsPage() {
 	return (
+		<ProtectedPage>
 		<SidebarLayout>
 			<div className='grid w-full items-start gap-2'>
 				<Alert className='flex flex-row gap-x-2'>
@@ -50,5 +52,6 @@ export default function NotificationsPage() {
 				</Alert>
 			</div>
 		</SidebarLayout>
+		</ProtectedPage>
 	);
 }

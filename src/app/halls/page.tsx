@@ -8,6 +8,7 @@ import { getHalls } from './getHalls';
 import { useEffect, useState } from 'react';
 import Loading from '@/components/custom/Loading';
 import PageHeader from '@/components/custom/PageHeader';
+import ProtectedPage from '@/layouts/ProtectedPage';
 
 export default function Hall() {
 	const [halls, setHalls] = useState<HallType[] | null>(null);
@@ -31,6 +32,8 @@ export default function Hall() {
 	}, []);
 
 	return (
+		<ProtectedPage>
+
 		<SidebarLayout>
 			<PageHeader
 				title='Halls'
@@ -44,5 +47,6 @@ export default function Hall() {
 				)}
 			</div>
 		</SidebarLayout>
+		</ProtectedPage>
 	);
 }

@@ -36,6 +36,7 @@ import { getHall } from '@/lib/getHall';
 import { updateHall, UpdateHallData } from '@/lib/updateHall';
 import { Hall as HallType } from '@/app/halls/hall';
 import { toast } from 'sonner';
+import ProtectedPage from '@/layouts/ProtectedPage';
 
 // Hall type options
 const hallTypeOptions = [
@@ -168,9 +169,12 @@ export default function EditHallPage() {
 
 	if (loading) {
 		return (
+			<ProtectedPage>
+
 			<SidebarLayout>
 				<Loading className='mt-10 mx-auto' />
 			</SidebarLayout>
+			</ProtectedPage>
 		);
 	}
 

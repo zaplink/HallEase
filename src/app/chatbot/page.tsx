@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import ProtectedPage from '@/layouts/ProtectedPage';
 
 // Define the shape of a chat message
 interface Message {
@@ -95,6 +96,8 @@ export default function ChatbotPage() {
 	};
 
 	return (
+		<ProtectedPage>
+
 		<SidebarLayout>
 			<div className='flex flex-col h-screen w-2/3 mx-auto p-4'>
 				<Card className='w-full'>
@@ -159,5 +162,6 @@ export default function ChatbotPage() {
 				</Card>
 			</div>
 		</SidebarLayout>
+		</ProtectedPage>
 	);
 }
