@@ -17,8 +17,9 @@ export default function ProtectedPage({
 			const { data, error } = await supabase.auth.getUser();
 			if (error || !data?.user) {
 				router.replace('/login');
+			} else {
+				setIsAuthChecked(true);
 			}
-			setIsAuthChecked(true);
 		};
 		checkAuth();
 	}, [router]);

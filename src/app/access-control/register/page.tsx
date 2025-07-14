@@ -6,14 +6,12 @@ import ProtectedPage from '@/layouts/ProtectedPage';
 
 const Registration = () => {
 	return (
-		<>
-			<ProtectedPage>
+		<ProtectedPage>
 			<SidebarLayout>
 				<PageHeader title='Register a New User' />
 				<SignupForm />
 			</SidebarLayout>
-			</ProtectedPage>
-		</>
+		</ProtectedPage>
 	);
 };
 
