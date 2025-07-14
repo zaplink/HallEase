@@ -45,7 +45,9 @@ export default function MenuContent() {
 		// Special case for ADMIN-only items
 		if (
 			itemTitle === 'Manage Reservations' ||
-			itemTitle === 'Public Reservations'
+			itemTitle === 'Public Reservations' ||
+			itemTitle === 'Access Control' ||
+			itemTitle === 'Roles & Permissions'
 		) {
 			return userRole === 'ADMIN';
 		}
