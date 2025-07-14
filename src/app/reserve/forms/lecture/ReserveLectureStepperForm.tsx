@@ -259,10 +259,37 @@ export default function ReserveLectureStepperForm({
 		{ value: 'manual', label: 'Manually' },
 	];
 
-	const halls = [
-		{ value: 'LCH-AB-01', label: 'LCH-AB-01' },
-		{ value: 'LCH-AB-02', label: 'LCH-AB-02' },
-	];
+	const [halls, setHalls] = useState<{ value: string; label: string }[]>([]);
+	const [loadingHalls, setLoadingHalls] = useState(false);
+
+	useEffect(() => {
+		async function fetchHalls() {
+			setLoadingHalls(true);
+			try {
+				const { createClient } = await import('@/lib/supabaseClient');
+				const supabase = createClient();
+				const { data, error } = await supabase
+					.from('hall')
+					.select('code')
+					.eq('is_available', true);
+				if (error) {
+					setHalls([]);
+				} else {
+					setHalls(
+						(data || []).map((hall: { code: string }) => ({
+							value: hall.code,
+							label: hall.code,
+						}))
+					);
+				}
+			} catch {
+				setHalls([]);
+			} finally {
+				setLoadingHalls(false);
+			}
+		}
+		fetchHalls();
+	}, []);
 
 	const validateCurrentStep = async () => {
 		const fieldsToValidate = getFieldsForStep(currentStep);
@@ -391,6 +418,7 @@ export default function ReserveLectureStepperForm({
 											hallOptions={hallOptions}
 											halls={halls}
 											hallSelection={hallSelection}
+											loadingHalls={loadingHalls}
 										/>
 									)}
 
@@ -849,14 +877,45 @@ function VenueStep({
 	// hallOptions,
 	halls,
 	hallSelection,
+	loadingHalls,
 }: {
 	form: UseFormReturn<StepperFormData>;
 	hallOptions: { value: string; label: string }[];
 	halls: { value: string; label: string }[];
 	hallSelection: string;
+	loadingHalls: boolean;
 }) {
-	// Fixed attendee count for lectures - can be determined from course
-	const attendeeCount = 35; // Typical lecture hall capacity for a course
+	// Dynamically fetch attendee count from course capacity
+	const selectedCourseId = useWatch({
+		control: form.control,
+		name: 'course',
+	});
+
+	const [attendeeCount, setAttendeeCount] = useState<number | null>(null);
+
+	useEffect(() => {
+		async function fetchCourseCapacity(courseId: string) {
+			if (!courseId) {
+				setAttendeeCount(null);
+				return;
+			}
+			try {
+				const { data, error } = await supabase
+					.from('course')
+					.select('capacity')
+					.eq('id', courseId)
+					.single();
+				if (error || !data) {
+					setAttendeeCount(null);
+				} else {
+					setAttendeeCount(data.capacity ?? null);
+				}
+			} catch {
+				setAttendeeCount(null);
+			}
+		}
+		fetchCourseCapacity(selectedCourseId);
+	}, [selectedCourseId]);
 
 	return (
 		<div className='space-y-6'>
@@ -950,7 +1009,11 @@ function VenueStep({
 												onChange={(val) =>
 													field.onChange(val)
 												}
-												placeholder='Select Hall'
+												placeholder={
+													loadingHalls
+														? 'Loading halls...'
+														: 'Select Hall'
+												}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -970,7 +1033,7 @@ function VenueStep({
 						<FormLabel>Number of Attendees</FormLabel>
 						<div className='mt-2 p-3 bg-muted/50 rounded-md border border-dashed border-muted-foreground/25'>
 							<div className='text-2xl font-semibold text-foreground mb-1'>
-								{attendeeCount}
+								{attendeeCount !== null ? attendeeCount : '—'}
 							</div>
 							<div className='text-xs text-muted-foreground'>
 								Typical course capacity
@@ -1178,6 +1241,43 @@ function ExtrasStep({ form }: { form: UseFormReturn<StepperFormData> }) {
 	);
 }
 
+// Dynamically fetch attendee count for review step
+function AttendeeCountReview({ courseId }: { courseId?: string }) {
+	const [attendeeCount, setAttendeeCount] = React.useState<number | null>(
+		null
+	);
+	React.useEffect(() => {
+		async function fetchCourseCapacity(id: string | undefined) {
+			if (!id) {
+				setAttendeeCount(null);
+				return;
+			}
+			try {
+				const { data, error } = await supabase
+					.from('course')
+					.select('capacity')
+					.eq('id', id)
+					.single();
+				if (error || !data) {
+					setAttendeeCount(null);
+				} else {
+					setAttendeeCount(data.capacity ?? null);
+				}
+			} catch {
+				setAttendeeCount(null);
+			}
+		}
+		fetchCourseCapacity(courseId);
+	}, [courseId]);
+	return (
+		<p className='text-sm text-muted-foreground mt-1'>
+			{attendeeCount !== null
+				? `${attendeeCount} people (Course capacity)`
+				: '—'}
+		</p>
+	);
+}
+
 function ReviewStep({
 	form,
 	watchedValues,
@@ -1296,9 +1396,9 @@ function ReviewStep({
 							<Label className='text-sm font-medium'>
 								Attendee Count
 							</Label>
-							<p className='text-sm text-muted-foreground mt-1'>
-								35 people (Course capacity)
-							</p>
+							<AttendeeCountReview
+								courseId={watchedValues.course}
+							/>
 						</div>
 
 						<div>

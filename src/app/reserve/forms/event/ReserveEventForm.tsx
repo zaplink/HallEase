@@ -49,6 +49,8 @@ import { eventTypeOptions, ReserveEventFormData } from './reserve.event.data';
 import { DatePickerDemo } from '@/components/ui/DatePicker';
 import { Textarea } from '@/components/ui/textarea';
 import { useBooking } from './useReserveEvent';
+import { useEffect } from 'react';
+import { createClient } from '@/lib/supabaseClient';
 
 // Form schema with all steps
 const formSchema = z.object({
@@ -528,10 +530,36 @@ function DateTimeStep({ form }: { form: UseFormReturn<FormData> }) {
 }
 
 function VenueStep({ form }: { form: UseFormReturn<FormData> }) {
-	const halls = [
-		{ value: 'LCH-AB-01', label: 'LCH-AB-01' },
-		{ value: 'LCH-AB-02', label: 'LCH-AB-02' },
-	];
+	const [halls, setHalls] = useState<{ value: string; label: string }[]>([]);
+	const [loadingHalls, setLoadingHalls] = useState(false);
+
+	useEffect(() => {
+		async function fetchHalls() {
+			setLoadingHalls(true);
+			try {
+				const supabase = createClient();
+				const { data, error } = await supabase
+					.from('hall')
+					.select('code')
+					.eq('is_available', true);
+				if (error) {
+					setHalls([]);
+				} else {
+					setHalls(
+						(data || []).map((hall: { code: string }) => ({
+							value: hall.code,
+							label: hall.code,
+						}))
+					);
+				}
+			} catch {
+				setHalls([]);
+			} finally {
+				setLoadingHalls(false);
+			}
+		}
+		fetchHalls();
+	}, []);
 
 	const hallSelection = useWatch({
 		control: form.control,
@@ -630,7 +658,11 @@ function VenueStep({ form }: { form: UseFormReturn<FormData> }) {
 												onChange={(val) =>
 													field.onChange(val)
 												}
-												placeholder='Select Hall'
+												placeholder={
+													loadingHalls
+														? 'Loading halls...'
+														: 'Select Hall'
+												}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -1227,6 +1259,9 @@ export default function ReserveEventForm({
 	const { handleSubmit, isLoading, isSubmitted, error } = useBooking();
 	const router = useRouter();
 
+	// --- DRAFT LOADING LOGIC ---
+	// Get draftId from URL
+	const [draftLoaded, setDraftLoaded] = useState(false);
 	const form = useForm<FormData>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -1249,6 +1284,66 @@ export default function ReserveEventForm({
 			acceptTerms: false,
 		},
 	});
+
+	React.useEffect(() => {
+		// Only run on client
+		if (typeof window === 'undefined' || draftLoaded) return;
+		const params = new URLSearchParams(window.location.search);
+		const draftId = params.get('draftId');
+		if (!draftId) return;
+
+		// Fetch draft data from backend
+		async function fetchDraft() {
+			try {
+				const service = await import('./reserve.event.service');
+				if (
+					service.getReserveDraftById &&
+					typeof draftId === 'string'
+				) {
+					const draft = await service.getReserveDraftById(draftId);
+					if (draft) {
+						form.setValue('name', draft.name || '');
+						form.setValue('description', draft.description || '');
+						form.setValue('type', draft.type || '');
+						if (draft.date) {
+							form.setValue('date', new Date(draft.date));
+						}
+						if (draft.start_time) {
+							const [startHour, startMinute] =
+								draft.start_time.split(':');
+							form.setValue('startHour', startHour);
+							form.setValue('startMinute', startMinute);
+						}
+						if (draft.end_time) {
+							const [endHour, endMinute] =
+								draft.end_time.split(':');
+							form.setValue('endHour', endHour);
+							form.setValue('endMinute', endMinute);
+						}
+						form.setValue('organizer', draft.organizer || '');
+						form.setValue(
+							'attendeeCount',
+							draft.attendee_count || 60
+						);
+						form.setValue(
+							'hallOpt',
+							draft.hall_option || 'availability'
+						);
+						form.setValue('equipment', draft.equipment || []);
+						form.setValue(
+							'additionalNotes',
+							draft.additional_notes || ''
+						);
+						// additionalDocuments, attendeeList, acceptTerms can be handled as needed
+						setDraftLoaded(true);
+					}
+				}
+			} catch (err) {
+				console.error('Failed to load draft:', err);
+			}
+		}
+		fetchDraft();
+	}, [draftLoaded, form]);
 
 	const validateCurrentStep = async () => {
 		const fieldsToValidate = getFieldsForStep(currentStep);
@@ -1330,7 +1425,6 @@ export default function ReserveEventForm({
 	const onSaveDraft = async () => {
 		try {
 			const currentData = form.getValues();
-
 			// Check if event name is provided (minimum requirement)
 			if (!currentData.name || currentData.name.trim().length < 2) {
 				toast.error('Event name is required to save draft', {
@@ -1339,7 +1433,6 @@ export default function ReserveEventForm({
 				});
 				return;
 			}
-
 			// Convert FormData to ReserveEventFormData for draft
 			const { equipment, ...eventData } = currentData;
 			const formData: ReserveEventFormData = {
@@ -1353,7 +1446,8 @@ export default function ReserveEventForm({
 						count: 1,
 					})) || [],
 			};
-
+			// Pass draftId if present
+			// Removed unused draftId assignment
 			const result = await handleSubmit(formData, 'draft');
 			// Success handled by the hook
 			if (result) {
@@ -1361,7 +1455,6 @@ export default function ReserveEventForm({
 					description: `Your event reservation draft has been saved with ID: ${result.reserveId}`,
 				});
 				console.log('Draft saved with result:', result);
-
 				// Trigger draft refresh across the app
 				if (typeof window !== 'undefined') {
 					window.dispatchEvent(new CustomEvent('refreshDrafts'));

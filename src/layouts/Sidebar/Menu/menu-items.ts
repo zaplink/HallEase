@@ -1,12 +1,12 @@
 import {
 	LayoutDashboard,
-	CalendarClock,
+	// CalendarClock,
 	Building2,
 	FilePlus2,
 	Airplay,
 	BookOpen,
-	Megaphone,
-	Mails,
+	// Megaphone,
+	// Mails,
 	Settings,
 	UserCog,
 	CircleHelp,
@@ -53,9 +53,9 @@ const sidebarMenu = [
 				roleSlugs: [],
 			},
 			{
-				itemTitle: 'Timeline',
-				itemUrl: '/timeline',
-				itemIcon: CalendarClock,
+				itemTitle: 'Analytics',
+				itemUrl: '/analytics',
+				itemIcon: ChartNoAxesCombined,
 				roleSlugs: [],
 			},
 		],
@@ -75,7 +75,7 @@ const sidebarMenu = [
 		sectionTitle: 'Reservations',
 		sectionMenu: [
 			{
-				itemTitle: 'All Reservations',
+				itemTitle: 'Manage Reservations',
 				itemUrl: '/all-reservations',
 				itemIcon: Library,
 				roleSlugs: [],
@@ -118,23 +118,6 @@ const sidebarMenu = [
 		],
 	},
 	{
-		sectionTitle: 'Notifications',
-		sectionMenu: [
-			{
-				itemTitle: 'Announcements',
-				itemUrl: '/announcments',
-				itemIcon: Megaphone,
-				roleSlugs: [],
-			},
-			{
-				itemTitle: 'Email & SMS Reminders',
-				itemUrl: '/remainders',
-				itemIcon: Mails,
-				roleSlugs: [],
-			},
-		],
-	},
-	{
 		sectionTitle: 'Insights',
 		sectionMenu: [
 			{
@@ -154,12 +137,6 @@ const sidebarMenu = [
 						subIcon: Bug,
 					},
 				],
-			},
-			{
-				itemTitle: 'Analytics',
-				itemUrl: '/analytics',
-				itemIcon: ChartNoAxesCombined,
-				roleSlugs: [],
 			},
 		],
 	},
