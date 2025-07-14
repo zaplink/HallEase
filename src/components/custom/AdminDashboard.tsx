@@ -1,6 +1,5 @@
 'use client';
 
-import { Suspense } from 'react';
 import { KPICard } from '@/components/custom/KPICard';
 import { AdvancedKPICard } from '@/components/custom/AdvancedKPICard';
 import { RecentBookings } from '@/components/custom/RecentBookings';
@@ -18,15 +17,28 @@ import {
 	Clock,
 	XCircle,
 } from 'lucide-react';
-
 import { RoleIndicator } from './RoleIndicator';
+import type {
+	DashboardStats,
+	RecentBooking,
+	BookingTrend,
+	HallUtilization,
+} from '@/lib/dashboard-data';
+
+interface OccupiedHall {
+	hallCode: string;
+	building: string;
+	eventName: string;
+	bookedBy: string;
+	endTime: string;
+}
 
 interface AdminDashboardProps {
-	dashboardStats: any;
-	recentBookings: any[];
-	bookingTrends: any[];
-	hallUtilization: any[];
-	occupiedHalls: any[];
+	dashboardStats: DashboardStats;
+	recentBookings: RecentBooking[];
+	bookingTrends: BookingTrend[];
+	hallUtilization: HallUtilization[];
+	occupiedHalls: OccupiedHall[];
 }
 
 export function AdminDashboard({

@@ -1,6 +1,5 @@
 'use client';
 
-import { Suspense } from 'react';
 import { RecentBookings } from '@/components/custom/RecentBookings';
 import { RecentActivity } from '@/components/custom/RecentActivity';
 import { BookingTrendsLineChart } from '@/components/custom/BookingTrendsLineChart';
@@ -8,15 +7,28 @@ import { BookingStatusPieChart } from '@/components/custom/BookingStatusPieChart
 import { HallUtilizationChart } from '@/components/custom/HallUtilizationChart';
 import { HallOccupancyDonut } from '@/components/custom/HallOccupancyDonut';
 import { HallStatus } from '@/components/custom/HallStatus';
-
 import { RoleIndicator } from './RoleIndicator';
+import type {
+	DashboardStats,
+	RecentBooking,
+	BookingTrend,
+	HallUtilization,
+} from '@/lib/dashboard-data';
+
+interface OccupiedHall {
+	hallCode: string;
+	building: string;
+	eventName: string;
+	bookedBy: string;
+	endTime: string;
+}
 
 interface UserDashboardProps {
-	dashboardStats: any;
-	recentBookings: any[];
-	bookingTrends: any[];
-	hallUtilization: any[];
-	occupiedHalls: any[];
+	dashboardStats: DashboardStats;
+	recentBookings: RecentBooking[];
+	bookingTrends: BookingTrend[];
+	hallUtilization: HallUtilization[];
+	occupiedHalls: OccupiedHall[];
 }
 
 export function UserDashboard({

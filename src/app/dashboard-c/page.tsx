@@ -9,8 +9,6 @@ import {
 	getHallUtilization,
 	getCurrentlyOccupiedHalls,
 } from '@/lib/dashboard-data';
-import { KPICard } from '@/components/custom/KPICard';
-import { AdvancedKPICard } from '@/components/custom/AdvancedKPICard';
 import { RecentBookings } from '@/components/custom/RecentBookings';
 import { RecentActivity } from '@/components/custom/RecentActivity';
 import { BookingTrendsLineChart } from '@/components/custom/BookingTrendsLineChart';
@@ -18,14 +16,6 @@ import { BookingStatusPieChart } from '@/components/custom/BookingStatusPieChart
 import { HallUtilizationChart } from '@/components/custom/HallUtilizationChart';
 import { HallOccupancyDonut } from '@/components/custom/HallOccupancyDonut';
 import { HallStatus } from '@/components/custom/HallStatus';
-import {
-	Calendar,
-	Users,
-	Building,
-	TrendingUp,
-	Clock,
-	XCircle,
-} from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
