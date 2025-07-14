@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 
 import { useRolePermissions } from './useRolePermissions';
 import Loading from '@/components/custom/Loading';
+import ProtectedPage from '@/layouts/ProtectedPage';
 
 function RolesPermissions() {
 	const { rolePermissions, loading, error } = useRolePermissions();
@@ -50,6 +51,8 @@ function RolesPermissions() {
 		);
 
 	return (
+		<ProtectedPage>
+
 		<SidebarLayout>
 			<PageHeader
 				title='Roles & Permissions'
@@ -101,6 +104,7 @@ function RolesPermissions() {
 				</TableBody>
 			</Table>
 		</SidebarLayout>
+		</ProtectedPage>
 	);
 }
 

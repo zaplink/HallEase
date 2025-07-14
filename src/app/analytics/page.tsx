@@ -1,5 +1,6 @@
 'use client';
 
+import ProtectedPage from '@/layouts/ProtectedPage';
 import SidebarLayout from '@/layouts/Sidebar/Layout';
 import { supabase } from '@/lib/supabaseClient';
 import { useEffect, useState } from 'react';
@@ -544,6 +545,8 @@ export default function AnalyticsPage() {
 	};
 
 	return (
+		<ProtectedPage>
+
 		<SidebarLayout>
 			<div className='flex-1 space-y-4 p-4 pt-6'>
 				{/* Header Section */}
@@ -948,5 +951,6 @@ export default function AnalyticsPage() {
 				</div>
 			</div>
 		</SidebarLayout>
+		</ProtectedPage>
 	);
 }

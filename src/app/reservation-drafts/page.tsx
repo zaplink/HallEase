@@ -8,6 +8,7 @@ import { UnifiedReservationRow } from '../my-reservations/reservation';
 import { draftReservationColumns } from './reservationColumns';
 import { DataTable } from '../my-reservations/data-table';
 import { getDraftReservations } from '../reservation-drafts/getDraftReservations';
+import ProtectedPage from '@/layouts/ProtectedPage';
 
 function Page() {
 	const [data, setData] = useState<UnifiedReservationRow[] | null>(null);
@@ -28,6 +29,8 @@ function Page() {
 	}, []);
 
 	return (
+		<ProtectedPage>
+
 		<SidebarLayout>
 			<PageHeader title='Saved Drafts' />
 			<div className='container mx-auto'>
@@ -38,6 +41,7 @@ function Page() {
 				)}
 			</div>
 		</SidebarLayout>
+		</ProtectedPage>
 	);
 }
 

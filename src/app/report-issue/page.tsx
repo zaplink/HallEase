@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { Loader2, CheckCircle, ArrowLeft, BarChart3 } from 'lucide-react';
+import ProtectedPage from '@/layouts/ProtectedPage';
 
 function ReportIssuePage() {
 	const router = useRouter();
@@ -106,6 +107,8 @@ function ReportIssuePage() {
 	};
 
 	return (
+		<ProtectedPage>
+
 		<SidebarLayout>
 			<div className='flex justify-center py-10 px-6 bg-gray-50'>
 				<div className='w-full max-w-3xl'>
@@ -274,6 +277,7 @@ function ReportIssuePage() {
 				</div>
 			</div>
 		</SidebarLayout>
+		</ProtectedPage>
 	);
 }
 

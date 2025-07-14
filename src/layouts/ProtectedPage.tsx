@@ -12,14 +12,16 @@ export default function ProtectedPage({
 	const [isAuthChecked, setIsAuthChecked] = useState(false);
 
 	useEffect(() => {
-		const supabase = createClient();
-
-		supabase.auth.getUser().then(({ data, error }) => {
+		const checkAuth = async () => {
+			const supabase = await createClient();
+			const { data, error } = await supabase.auth.getUser();
 			if (error || !data?.user) {
 				router.replace('/login');
+			} else {
+				setIsAuthChecked(true);
 			}
-			setIsAuthChecked(true);
-		});
+		};
+		checkAuth();
 	}, [router]);
 
 	// Don't show anything while checking auth
