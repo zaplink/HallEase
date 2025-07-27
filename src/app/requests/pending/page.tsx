@@ -1,9 +1,9 @@
-import RequestDetails from './RequestDetails';
+import UnderConstruction from '@/components/custom/UnderConstruction';
 import SidebarLayout from '@/layouts/Sidebar/Layout';
 import { createClient } from '@/lib/supabaseServer';
 import { redirect } from 'next/navigation';
 
-export default async function pending() {
+export default async function PendingRequestsPage() {
 	const supabase = await createClient();
 	const { data, error } = await supabase.auth.getUser();
 	if (error || !data?.user) {
@@ -12,7 +12,7 @@ export default async function pending() {
 
 	return (
 		<SidebarLayout>
-			<RequestDetails />
+			<UnderConstruction />
 		</SidebarLayout>
 	);
 }

@@ -125,7 +125,7 @@ export default function LoginForm() {
 						>
 							{isLoading ? (
 								<>
-									<Loading /> {/* Spinning loader */}
+									<Loading inline /> {/* Spinning loader */}
 									<span>Logging In...</span>
 								</>
 							) : (
@@ -144,7 +144,7 @@ export default function LoginForm() {
 				<div className='flex items-center space-x-2'>
 					<BsFillQuestionCircleFill />
 
-					<a href='#' className='hover:underline'>
+					<a href='/lost-password' className='hover:underline'>
 						Lost Password?
 					</a>
 				</div>

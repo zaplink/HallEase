@@ -22,7 +22,7 @@ export default function CallbackPage() {
 		if (user) router.push('/dashboard');
 	}, [user, router]);
 
-	return <Loading reason='Saving Things' pageView={true} />;
+	return <Loading text='Saving Things' pageView={true} />;
 
 	// return <p>Processing login...</p>;
 }

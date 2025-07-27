@@ -1,0 +1,671 @@
+'use client';
+
+import { useForm } from 'react-hook-form';
+import { useBooking } from './useReserveLecture';
+import { Combobox } from '@/components/combobox';
+import { DatePickerDemo } from '@/components/ui/DatePicker';
+import {
+	Form,
+	FormItem,
+	FormLabel,
+	FormControl,
+	FormMessage,
+	FormField,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { useRouter } from 'next/navigation';
+import { useWatch } from 'react-hook-form';
+import { useRef } from 'react';
+import {
+	ReserveLectureFormData,
+	defaultReserveLectureFormData,
+} from './reserve.lecture.data';
+import { eventTypeOptions, SubmissionType } from './reserve.lecture.data';
+import EquipmentSelector from '@/app/reserve/components/EquipmentSelector';
+
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
+
+interface ReserveLectureFormProps {
+	onBackToSelection?: () => void;
+}
+
+export default function ReserveLectureForm({
+	onBackToSelection,
+}: ReserveLectureFormProps) {
+	const { handleSubmit, isLoading, error, success } = useBooking();
+	const router = useRouter();
+	const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+	const [isSubmitted, setIsSubmitted] = useState(false);
+
+	const form = useForm<ReserveLectureFormData>({
+		defaultValues: defaultReserveLectureFormData,
+	});
+
+	const onSubmit = (formData: ReserveLectureFormData) => {
+		const status = submissionType.current === 'draft' ? 'draft' : 'pending';
+
+		// Enhanced validation for drafts
+		if (status === 'draft') {
+			if (!formData.course?.trim()) {
+				alert('Course code is required to save a draft.');
+				return;
+			}
+
+			if (!formData.date) {
+				alert('Date must be selected to save a draft.');
+				return;
+			}
+
+			// If time fields are incomplete, warn but allow saving
+			if (
+				!formData.startHour ||
+				!formData.startMinute ||
+				!formData.endHour ||
+				!formData.endMinute
+			) {
+				console.log('Saving draft with incomplete time fields');
+			}
+		}
+
+		handleSubmit(formData, status)
+			.then(() => {
+				if (submissionType.current === 'pending') {
+					setShowSuccessDialog(true);
+					setIsSubmitted(true);
+				}
+			})
+			.catch(() => {
+				// Error is handled by useBooking hook
+			});
+	};
+
+	const submissionType = useRef<SubmissionType>('pending');
+
+	const hallOptions = [
+		{ value: 'availability', label: 'Availability' },
+		{ value: 'manual', label: 'Manually' },
+	];
+
+	const hallSelection = useWatch({
+		control: form.control,
+		name: 'hallOpt',
+		defaultValue: 'availability' as 'availability' | 'manual' | '',
+	});
+
+	const [halls, setHalls] = useState<{ value: string; label: string }[]>([]);
+	const [loadingHalls, setLoadingHalls] = useState(false);
+
+	useEffect(() => {
+		async function fetchHalls() {
+			setLoadingHalls(true);
+			try {
+				const { createClient } = await import('@/lib/supabaseClient');
+				const supabase = createClient();
+				const { data, error } = await supabase
+					.from('hall')
+					.select('code')
+					.eq('is_available', true);
+				if (error) {
+					setHalls([]);
+				} else {
+					setHalls(
+						(data || []).map((hall: { code: string }) => ({
+							value: hall.code,
+							label: hall.code,
+						}))
+					);
+				}
+			} catch {
+				setHalls([]);
+			} finally {
+				setLoadingHalls(false);
+			}
+		}
+		fetchHalls();
+	}, []);
+
+	// const courseCodeOptions = [
+	// 	{ label: 'CSCI 22012 - Advanced Operating System', value: 'csci22012' },
+	// 	{
+	// 		label: 'CSCI 22022 - Object Oriented Programming',
+	// 		value: 'csci22022',
+	// 	},
+	// ];
+
+	const [courseCodeOptions, setCourseCodeOptions] = useState<
+		{ label: string; value: string }[]
+	>([]);
+
+	const [attendeeCount, setAttendeeCount] = useState<number | null>(null);
+
+	// Watch selected course
+	const selectedCourseId = useWatch({
+		control: form.control,
+		name: 'course',
+	});
+
+	useEffect(() => {
+		async function fetchCourseCapacity(courseId: string) {
+			if (!courseId) {
+				setAttendeeCount(null);
+				return;
+			}
+			try {
+				const { data, error } = await supabase
+					.from('course')
+					.select('capacity')
+					.eq('id', courseId)
+					.single();
+				if (error || !data) {
+					setAttendeeCount(null);
+				} else {
+					setAttendeeCount(data.capacity ?? null);
+				}
+			} catch {
+				setAttendeeCount(null);
+			}
+		}
+		fetchCourseCapacity(selectedCourseId);
+	}, [selectedCourseId]);
+
+	useEffect(() => {
+		const fetchCourses = async () => {
+			const { data, error } = await supabase
+				.from('course')
+				.select('id, char, digit, name');
+
+			if (error) {
+				console.error('Error fetching courses:', error);
+				return;
+			}
+
+			if (data) {
+				const options = data.map((course) => ({
+					label: `${course.char} ${course.digit} - ${course.name}`,
+					value: course.id, // Use `id` as value for submission
+				}));
+				setCourseCodeOptions(options);
+				console.log('Fetched course options:', options);
+			}
+		};
+
+		fetchCourses();
+	}, []);
+
+	return (
+		<Form {...form}>
+			<form
+				onSubmit={(e) => {
+					submissionType.current = 'pending'; // default
+					form.handleSubmit(onSubmit)(e);
+				}}
+			>
+				<div className='flex flex-row flex-wrap'>
+					<div className='flex flex-row items-start'>
+						<div className='w-1/2 px-2'>
+							<FormField
+								control={form.control}
+								name='course'
+								rules={{
+									required: 'Please select course code',
+								}}
+								render={({ field }) => (
+									<FormItem className='mb-6 flex flex-col'>
+										<FormLabel>Course Code:</FormLabel>
+										<FormControl>
+											<Combobox
+												options={courseCodeOptions}
+												value={field.value ?? ''}
+												onChange={(val) =>
+													field.onChange(val)
+												}
+												// placeholder='Select Course Code'
+												placeholder={
+													courseCodeOptions.length ===
+													0
+														? 'Loading courses...'
+														: 'Select Course Code'
+												}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
+					</div>
+
+					<div className='w-1/2 px-2'>
+						<FormField
+							control={form.control}
+							name='description'
+							render={({ field }) => (
+								<FormItem className='mb-6 flex flex-col'>
+									<FormLabel>
+										Lecture Description (Opt):
+									</FormLabel>
+									<FormControl>
+										<Input
+											value={field.value ?? ''}
+											onChange={(description) =>
+												field.onChange(description)
+											}
+											placeholder='A short description'
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</div>
+				</div>
+
+				<div className='flex flex-row items-start'>
+					{/* Event Type */}
+					<div className='w-1/2 px-2'>
+						<FormField
+							control={form.control}
+							name='type'
+							rules={{ required: 'Please select lecture type' }}
+							render={({ field }) => (
+								<FormItem className='mb-6 flex flex-col'>
+									<FormLabel>Lecture Type:</FormLabel>
+									<FormControl>
+										<Combobox
+											options={eventTypeOptions}
+											value={field.value ?? ''}
+											onChange={(val) =>
+												field.onChange(val)
+											}
+											placeholder='Select Event Type'
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</div>
+				</div>
+
+				<div className='px-2 mb-4'>
+					<Separator />
+				</div>
+
+				<div className='px-2'>
+					{/* Date */}
+					<FormField
+						control={form.control}
+						name='date'
+						rules={{ required: 'Please select date' }}
+						render={({ field }) => (
+							<FormItem className='mb-6 flex flex-col'>
+								<FormLabel>Date:</FormLabel>
+								<FormControl>
+									<DatePickerDemo
+										value={field.value}
+										onChange={(date) =>
+											field.onChange(date)
+										}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</div>
+
+				<div className='flex flex-row gap-4 px-2 mb-6'>
+					<div className='w-1/2'>
+						<FormLabel>Start Time:</FormLabel>
+						<div className='flex flex-col gap-2 w-1/2'>
+							<FormField
+								control={form.control}
+								name='startHour'
+								rules={{ required: 'Start hour is required' }}
+								render={({ field }) => (
+									<FormItem className='w-1/3'>
+										<FormControl>
+											<Combobox
+												options={Array.from(
+													{ length: 24 },
+													(_, i) => ({
+														label: `${i < 10 ? '0' + String(i) : String(i)}`,
+														value: String(i),
+													})
+												)}
+												value={field.value}
+												onChange={field.onChange}
+												placeholder='Hour'
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name='startMinute'
+								rules={{ required: 'Start minute is required' }}
+								render={({ field }) => (
+									<FormItem className='w-1/3'>
+										<FormControl>
+											<Combobox
+												options={[
+													'00',
+													'05',
+													'10',
+													'15',
+													'20',
+													'25',
+													'30',
+													'35',
+													'40',
+													'45',
+													'50',
+													'55',
+												].map((val) => ({
+													label: val,
+													value: val,
+												}))}
+												value={field.value}
+												onChange={field.onChange}
+												placeholder='Min'
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
+					</div>
+
+					<div className='w-1/2'>
+						<FormLabel>End Time:</FormLabel>
+						<div className='flex flex-col gap-2'>
+							<FormField
+								control={form.control}
+								name='endHour'
+								rules={{ required: 'End hour is required' }}
+								render={({ field }) => (
+									<FormItem className='w-1/3'>
+										<FormControl>
+											<Combobox
+												options={Array.from(
+													{ length: 24 },
+													(_, i) => ({
+														label: `${i < 10 ? '0' + String(i) : String(i)}`,
+														value: String(i),
+													})
+												)}
+												value={field.value}
+												onChange={field.onChange}
+												placeholder='Hour'
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name='endMinute'
+								rules={{ required: 'End minute is required' }}
+								render={({ field }) => (
+									<FormItem className='w-1/3'>
+										<FormControl>
+											<Combobox
+												options={[
+													'00',
+													'05',
+													'10',
+													'15',
+													'20',
+													'25',
+													'30',
+													'35',
+													'40',
+													'45',
+													'50',
+													'55',
+												].map((val) => ({
+													label: val,
+													value: val,
+												}))}
+												value={field.value}
+												onChange={field.onChange}
+												placeholder='Min'
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
+					</div>
+				</div>
+
+				<div className='px-2 mb-4'>
+					<Separator />
+				</div>
+
+				<div className='flex flex-row items-center'>
+					{/* Request Hall */}
+					<div className='px-2'>
+						<FormField
+							control={form.control}
+							name='hallOpt'
+							rules={{
+								required: 'Select a hall requesting option!',
+							}}
+							render={({ field }) => (
+								<FormItem className='mb-6 flex flex-col'>
+									<FormLabel>Request Hall By:</FormLabel>
+									<FormControl>
+										<Combobox
+											options={hallOptions}
+											value={field.value}
+											onChange={(val) =>
+												field.onChange(val)
+											}
+											placeholder='Select Requesting Method'
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</div>
+					{hallSelection === 'availability' && (
+						<div className='px-2'>
+							<p>
+								Most suitable hall will be selected based on
+								availability!
+							</p>
+						</div>
+					)}
+					{hallSelection === 'manual' && (
+						<div className='px-2'>
+							<p>Hall needs to be manually selected!</p>
+						</div>
+					)}
+					{/* Attendee Count Display */}
+					<div className='px-2'>
+						<FormLabel>Number of Attendees:</FormLabel>
+						<div className='mt-2 p-2 bg-muted/50 rounded border border-dashed border-muted-foreground/25 min-w-[100px]'>
+							<span className='text-lg font-semibold text-foreground'>
+								{attendeeCount !== null ? attendeeCount : '—'}
+							</span>
+							<span className='block text-xs text-muted-foreground'>
+								Course capacity
+							</span>
+						</div>
+					</div>
+				</div>
+				{hallSelection === 'manual' && (
+					<div className='px-2'>
+						<FormField
+							control={form.control}
+							name='hall'
+							rules={{
+								required: 'Select a hall!',
+							}}
+							render={({ field }) => (
+								<FormItem className='mb-6 flex flex-col'>
+									<FormLabel>Hall:</FormLabel>
+									<FormControl>
+										<Combobox
+											options={halls}
+											value={field.value || ''}
+											onChange={(val) =>
+												field.onChange(val)
+											}
+											placeholder={
+												loadingHalls
+													? 'Loading halls...'
+													: 'Select Hall'
+											}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</div>
+				)}
+
+				<div className='px-2 mb-4'>
+					<Separator />
+				</div>
+
+				<FormLabel className='px-2'>
+					Request Equipments (Opt):
+				</FormLabel>
+				<EquipmentSelector />
+
+				<div className='px-2 my-4'>
+					<Separator />
+				</div>
+
+				<div className='px-2'>
+					<FormField
+						control={form.control}
+						name='additionalNotes'
+						render={({ field }) => (
+							<FormItem className='mb-6 flex flex-col'>
+								<FormLabel>Additional Notes (Opt):</FormLabel>
+								<FormControl>
+									<Input
+										{...field}
+										value={field.value ?? ''}
+										placeholder='Any additional information or requests'
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</div>
+
+				<div className='px-2 my-4'>
+					<Separator />
+				</div>
+
+				{error && (
+					<p className='text-red-600 font-medium mb-4'>
+						{submissionType.current === 'draft'
+							? 'Failed to save draft. Please try again.'
+							: 'Failed to submit booking. Please fix the errors.'}
+					</p>
+				)}
+
+				{success && (
+					<p className='text-green-600 font-medium mt-4'>
+						{submissionType.current === 'draft'
+							? 'Draft saved successfully!'
+							: 'Booking submitted successfully!'}
+					</p>
+				)}
+
+				<div className='flex gap-4 px-2 py-4 mt-6'>
+					{onBackToSelection && (
+						<Button
+							type='button'
+							variant='outline'
+							onClick={onBackToSelection}
+							disabled={isSubmitted}
+						>
+							← Back to Selection
+						</Button>
+					)}
+					<Button
+						type='submit'
+						disabled={isLoading || isSubmitted}
+						onClick={() => {
+							submissionType.current = 'pending';
+						}}
+					>
+						{isLoading ? 'Submitting...' : 'Submit Booking'}
+					</Button>
+					<Button
+						type='button'
+						variant='secondary'
+						disabled={isSubmitted}
+					>
+						Reset Form
+					</Button>
+					<Button
+						type='submit'
+						variant='secondary'
+						disabled={isLoading || isSubmitted}
+						onClick={() => {
+							submissionType.current = 'draft';
+							onSubmit(form.getValues()); // This bypasses validation
+						}}
+					>
+						{isLoading ? 'Saving...' : 'Save Draft'}
+					</Button>
+				</div>
+			</form>
+
+			<AlertDialog
+				open={showSuccessDialog}
+				onOpenChange={setShowSuccessDialog}
+			>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle className='flex items-center gap-2 text-green-600'>
+							✓ Booking Submitted Successfully!
+						</AlertDialogTitle>
+						<AlertDialogDescription>
+							Your lecture reservation has been submitted
+							successfully. You will receive a confirmation email
+							shortly.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogAction
+							onClick={() => {
+								setShowSuccessDialog(false);
+								router.push('/reserve');
+							}}
+						>
+							OK
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+		</Form>
+	);
+}

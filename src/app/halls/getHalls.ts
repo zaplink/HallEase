@@ -1,15 +1,42 @@
 import { createClient } from '@/lib/supabaseClient';
-import { Hall as HallType } from './hall';
 
-export async function getHalls(): Promise<HallType[]> {
-	const supabase = createClient();
+export const getHalls = async () => {
+	try {
+		const supabase = createClient();
 
-	const { data, error } = await supabase.from('halls-v1').select('*');
+		console.log('Fetching halls from database...');
+		const { data, error } = await supabase
+			.from('hall')
+			.select('*')
+			.order('code', { ascending: true });
 
-	if (error) {
-		console.error('Error fetching halls:', error.message);
+		console.log('Database response:', { data, error });
+
+		if (error) throw new Error(error.message);
+
+		console.log('Successfully fetched halls:', data?.length || 0, 'halls');
+		return data;
+	} catch (error) {
+		console.error('Error fetching halls data:', error);
 		return [];
 	}
+};
 
-	return (data ?? []) as HallType[];
-}
+export const getHall = async (code: string) => {
+	try {
+		const supabase = createClient();
+
+		const { data, error } = await supabase
+			.from('hall')
+			.select('*')
+			.eq('code', code)
+			.single();
+
+		if (error) throw new Error(error.message);
+
+		return data;
+	} catch (error) {
+		console.error('Error fetching hall data:', error);
+		return null;
+	}
+};

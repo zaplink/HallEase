@@ -16,11 +16,21 @@ export async function login(formData: FormData) {
 		password: formData.get('password') as string,
 	};
 
-	const { error } = await supabase.auth.signInWithPassword(data);
+	const { data: authData, error } =
+		await supabase.auth.signInWithPassword(data);
 
 	if (error) {
 		const errorMessage = encodeURIComponent(error.message);
 		redirect(`/login/error?message=${errorMessage}`);
+	}
+
+	// Update last_sign_in_at
+	const userId = authData?.user?.id;
+	if (userId) {
+		await supabase
+			.from('profiles')
+			.update({ last_sign_in_at: new Date().toISOString() })
+			.eq('id', userId);
 	}
 
 	revalidatePath('/', 'layout');
